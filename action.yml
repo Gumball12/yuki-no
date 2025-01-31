@@ -11,16 +11,16 @@ inputs:
   email:
     description: 'Email for authenticated user'
     required: true
+  head-repo:
+    description: 'Repository where issues will be created. e.g. https://github.com/vitejs/docs-ko.git'
+    required: true
   upstream-repo:
-    description: 'Repository that tracks the head repo. e.g. git@github.com:vuejs-jp/vite-docs-ja.git'
+    description: 'Source repository to track changes from. e.g. https://github.com/vitejs/vite.git'
     required: true
   upstream-repo-branch:
-    description: 'Branch name for upstream repo. Defaults to `main`'
+    description: 'Source repository's branch. Defaults to `main`'
     required: false
     default: 'main'
-  head-repo:
-    description: 'Repository to track. e.g. https://github.com/vitejs/vite'
-    required: true
   path-starts-with:
     description: 'File path to track. e.g `docs/`'
     required: false

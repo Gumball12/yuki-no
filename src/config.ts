@@ -17,25 +17,25 @@ export interface UserConfig {
   accessToken: string
 
   /**
-   * The url for the upstream repo.
+   * Repository where issues will be created.
    *
-   * @example 'git@github.com:vuejs/vuejs.org'
+   * @example 'https://github.com/vitejs/docs-ko.git'
+   */
+  headRepo: string
+
+  /**
+   * Source repository to track changes from.
+   *
+   * @example 'https://github.com/vitejs/vite.git'
    */
   upstreamRepo: string
 
   /**
-   * The branch to track on the upstream repo.
+   * Source repository's branch.
    *
    * @default 'main'
    */
   upstreamRepoBranch?: string
-
-  /**
-   * The url for the head repo.
-   *
-   * @example 'https://github.com/vuejs/vuejs.org'
-   */
-  headRepo: string
 
   /**
    * File path to track. If this option is set, commit not containing the

@@ -39,7 +39,16 @@ jobs:
     name: Yuki-no
     runs-on: ubuntu-latest
     steps:
-      - uses: Gumball12/yuki-no@v1
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: pnpm/action-setup@v4.0.0
+        with:
+          version: 9.15.3
+
+      - uses: Gumball12/yuki-no@v1.0.0
         with:
           # GitHub token for authentication (uses repository's token)
           access-token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,11 +66,11 @@ jobs:
           # Optional: Source repository's branch (defaults to 'main')
           upstream-repo-branch: main
 
-          # Required: Initial commit to start tracking from
-          initial-commit: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
-
           # Optional: Only track changes in specific paths (defaults to project root)
           path-starts-with: docs/
+
+          # Required: Initial commit to start tracking from
+          initial-commit: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
 ```
 
 ## How It Works
@@ -81,8 +90,8 @@ jobs:
 | `head-repo`            | Yes      | Your repository URL (where issues will be created)         |
 | `upstream-repo`        | Yes      | Source repository URL to track changes from                |
 | `upstream-repo-branch` | No       | Source repository branch (default: main)                   |
-| `initial-commit`       | Yes      | Starting commit hash for tracking in the source repository |
 | `path-starts-with`     | No       | Only track changes in specific path                        |
+| `initial-commit`       | Yes      | Starting commit hash for tracking in the source repository |
 
 ## Contributing
 
