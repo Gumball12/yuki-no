@@ -1,5 +1,7 @@
 # Yuki-no
 
+[![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
+
 Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that tracks changes from a source repository and creates issues in your repository for each relevant change. This is particularly useful for tracking upstream changes in documentation translation projects.
 
 ## Project History
