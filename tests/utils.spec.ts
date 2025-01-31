@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import {
   log,
   assert,
@@ -10,28 +10,75 @@ import {
 
 describe('utils', () => {
   describe('log', () => {
-    it('should log info message', () => {
+    let originalGithubActions: string | undefined
+
+    beforeEach(() => {
+      originalGithubActions = process.env.GITHUB_ACTIONS
+    })
+
+    afterEach(() => {
+      process.env.GITHUB_ACTIONS = originalGithubActions
+      vi.clearAllMocks()
+    })
+
+    it('should log info message in development', () => {
+      process.env.GITHUB_ACTIONS = undefined
       const consoleSpy = vi.spyOn(console, 'info')
       log('I', 'test message')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
 
-    it('should log success message', () => {
+    it('should log success message in development', () => {
+      process.env.GITHUB_ACTIONS = undefined
       const consoleSpy = vi.spyOn(console, 'info')
       log('S', 'test message')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
 
-    it('should log warning message', () => {
+    it('should log warning message in development', () => {
+      process.env.GITHUB_ACTIONS = undefined
       const consoleSpy = vi.spyOn(console, 'warn')
       log('W', 'test message')
       expect(consoleSpy).toHaveBeenCalled()
       consoleSpy.mockRestore()
     })
 
-    it('should log error message', () => {
+    it('should log error message in development', () => {
+      process.env.GITHUB_ACTIONS = undefined
+      const consoleSpy = vi.spyOn(console, 'error')
+      log('E', 'test message')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should not log info message in GitHub Actions', () => {
+      process.env.GITHUB_ACTIONS = 'true'
+      const consoleSpy = vi.spyOn(console, 'info')
+      log('I', 'test message')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should not log success message in GitHub Actions', () => {
+      process.env.GITHUB_ACTIONS = 'true'
+      const consoleSpy = vi.spyOn(console, 'info')
+      log('S', 'test message')
+      expect(consoleSpy).not.toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should log warning message in GitHub Actions', () => {
+      process.env.GITHUB_ACTIONS = 'true'
+      const consoleSpy = vi.spyOn(console, 'warn')
+      log('W', 'test message')
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
+    })
+
+    it('should log error message in GitHub Actions', () => {
+      process.env.GITHUB_ACTIONS = 'true'
       const consoleSpy = vi.spyOn(console, 'error')
       log('E', 'test message')
       expect(consoleSpy).toHaveBeenCalled()
