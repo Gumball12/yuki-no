@@ -21,10 +21,10 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: pnpm install
+        run: yarn install
 
       - name: Run lint and tests
-        run: pnpm test
+        run: yarn test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

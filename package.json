@@ -5,14 +5,11 @@
     "url": "https://github.com/Gumball12/yuki-no.git",
     "type": "git"
   },
-  "packageManager": "pnpm@9.15.3",
-  "engines": {
-    "node": ">=22.0.0"
-  },
+  "packageManager": "yarn@1.22.22",
   "scripts": {
     "start": "tsx src/index.ts",
     "lint": "prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "pnpm lint && vitest --coverage --run"
+    "test": "yarn lint && vitest --coverage --run"
   },
   "dependencies": {
     "@octokit/rest": "^21.0.2",

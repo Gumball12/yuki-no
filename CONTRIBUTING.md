@@ -7,7 +7,7 @@ Thank you for your interest in contributing to Yuki-no! This document provides g
 ### Prerequisites
 
 - **Node.js**: Version 22.0.0 or higher is required. You can install it from [nodejs.org](https://nodejs.org/).
-- **pnpm**: This project uses [pnpm](https://pnpm.io/) as its package manager. It's automatically available through [Node.js corepack](https://github.com/nodejs/corepack):
+- **yarn**: This project uses [yarn classic](https://classic.yarnpkg.com/lang/en/) as its package manager. It's automatically available through [Node.js corepack](https://github.com/nodejs/corepack):
   ```bash
   corepack enable
   ```
@@ -24,7 +24,7 @@ cd yuki-no
 2. Install dependencies:
 
 ```bash
-pnpm install
+yarn install
 ```
 
 ## Development Workflow
@@ -38,13 +38,13 @@ git checkout -b feature/your-feature
 2. Make your changes and ensure tests pass:
 
 ```bash
-pnpm test
+yarn test
 ```
 
 3. Format your code:
 
 ```bash
-pnpm lint
+yarn lint
 ```
 
 4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
@@ -72,7 +72,7 @@ tests/
 To run unit tests with coverage report:
 
 ```bash
-pnpm test
+yarn test
 ```
 
 ### Writing Tests

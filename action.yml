@@ -46,6 +46,6 @@ runs:
         INITIAL_COMMIT: ${{ inputs.initial-commit }}
       run: |
         cd yuki-no
-        pnpm install
-        pnpm start
+        yarn install
+        yarn start
       shell: bash
