@@ -119,6 +119,7 @@ export class YukiNo {
       log('S', `Issue created: ${issue.data.html_url}`)
     } catch (error) {
       log('E', `Failed to create issue for commit: ${commit.hash}`)
+      log('E', (error as Error).message)
     }
   }
 }
