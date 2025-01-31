@@ -18,7 +18,7 @@ inputs:
     description: 'Source repository to track changes from. e.g. https://github.com/vitejs/vite.git'
     required: true
   upstream-repo-branch:
-    description: 'Source repository's branch. Defaults to `main`'
+    description: 'Branch of the Source repository. Defaults to `main`'
     required: false
     default: 'main'
   path-starts-with:
