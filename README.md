@@ -50,8 +50,6 @@ jobs:
     name: Yuki-no
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
       - uses: Gumball12/yuki-no@v1
         with:
           # GitHub token for authentication (uses repository's token)
