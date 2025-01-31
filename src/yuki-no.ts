@@ -96,7 +96,7 @@ export class YukiNo {
         `is:issue label:sync ${commit.hash}`
       )
       if (existing.data.total_count > 0) {
-        log('W', 'Issue already exists')
+        log('I', 'Issue already exists')
         return
       }
 
