@@ -31,6 +31,7 @@ The name "Yuki-no" was chosen to represent the project's goal of maintaining a c
    ![Workflow Permissions Settings](docs/settings.png)
 
    This step is mandatory as Yuki-no needs write permissions to create issues in your repository. Without this configuration, the action will fail.
+   If you're seeing 403 (Forbidden) errors, this permission setting is usually the solution.
 
 2. The action uses GitHub token for authentication. By default, you can use `secrets.GITHUB_TOKEN` which is automatically provided by GitHub Actions. This token has the necessary permissions to create issues in your repository.
 
