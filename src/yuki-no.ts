@@ -73,7 +73,7 @@ export class YukiNo {
         files: commit.files?.map((f) => f.filename) || []
       }))
     } catch (error) {
-      log('E', 'Failed to get new commits')
+      log('W', 'Failed to get new commits')
       return []
     }
   }
@@ -119,7 +119,7 @@ export class YukiNo {
       log('S', `Issue created: ${issue.data.html_url}`)
     } catch (error) {
       log('E', `Failed to create issue for commit: ${commit.hash}`)
-      log('E', (error as Error).message)
+      throw error
     }
   }
 }
