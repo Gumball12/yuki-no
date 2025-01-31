@@ -22,9 +22,19 @@ The name "Yuki-no" was chosen to represent the project's goal of maintaining a c
 
 ## Usage
 
-1. The action uses GitHub token for authentication. By default, you can use `secrets.GITHUB_TOKEN` which is automatically provided by GitHub Actions. This token has the necessary permissions to create issues in your repository.
+1. **Required**: Configure workflow permissions in your repository settings:
 
-2. Create `.github/workflows/yuki-no.yml` in your repository:
+   - Go to Settings > Actions > General > Workflow permissions
+   - Select "Read and write permissions"
+   - Save the changes
+
+   ![Workflow Permissions Settings](docs/settings.png)
+
+   This step is mandatory as Yuki-no needs write permissions to create issues in your repository. Without this configuration, the action will fail.
+
+2. The action uses GitHub token for authentication. By default, you can use `secrets.GITHUB_TOKEN` which is automatically provided by GitHub Actions. This token has the necessary permissions to create issues in your repository.
+
+3. Create `.github/workflows/yuki-no.yml` in your repository:
 
 ```yml
 name: yuki-no
