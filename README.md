@@ -1,65 +1,98 @@
-# Ryu-Cho
+# Yuki-no
 
-Ryu-Cho (means "fluent" in Japanese) is a GitHub Action that creates issues and PRs from the head repo based on its commit. Very useful for tracking diffs between translating docs, for example.
+Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that tracks changes from a source repository and creates issues in your repository for each relevant change. This is particularly useful for tracking upstream changes in documentation translation projects.
 
-Ryu-Cho is a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi). It works almost identical, while Che-Tsumi works as a stand-alone service while Ryu-Cho works with GitHub Action.
+## Project History
+
+Yuki-no is a fork of [Ryu-Cho](https://github.com/vuejs-translations/ryu-cho), which itself was a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi). While maintaining the core functionality, Yuki-no takes a different approach:
+
+- Uses pure GitHub API instead of Git operations
+- Simplifies configuration
+
+The name "Yuki-no" was chosen to represent the project's goal of maintaining a clean and pure tracking system, like freshly fallen snow.
+
+## Features
+
+- Automatically tracks commits from a source repository
+- Creates issues for new changes
+- Filters changes based on file paths (defaults to project root if not specified)
+- Simple configuration and setup
 
 ## Usage
 
-Ryu-Cho requires GitHub authentication to create issues and PRs to the repository. At first, create [Encrypted secret](https://docs.github.com/en/actions/reference/encrypted-secrets) that has access to the repository which you want to set up Ryu-Cho. Here we assume you've created a secret called `ACCESS_TOKEN`.
+1. The action uses GitHub token for authentication. By default, you can use `secrets.GITHUB_TOKEN` which is automatically provided by GitHub Actions. This token has the necessary permissions to create issues in your repository.
 
-Next, create `.github/workflows/ryu-cho.yml` file in your repository. Then configure the yaml file.
+2. Create `.github/workflows/yuki-no.yml` in your repository:
 
 ```yml
-name: ryu-cho
+name: yuki-no
 
 on:
-  # Schedule the interval of the checks.
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/5 * * * *' # Runs every 5 minutes
+  workflow_dispatch: # Allows manual trigger
 
 jobs:
-  ryu-cho:
-    name: Ryu Cho
+  yuki-no:
+    name: Yuki-no
     runs-on: ubuntu-latest
     steps:
-      - uses: vuejs-translations/ryu-cho@v1
+      - uses: Gumball12/yuki-no@v1
         with:
-          # GitHub access token. Required.
-          access-token: ${{ secrets.ACCESS_TOKEN }}
+          # GitHub token for authentication (uses repository's token)
+          access-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Git user name to use when making issues and PRs. Required.
+          # Required: Git user info
           username: johndoe
+          email: 'john.doe@example.com'
 
-          # Git email address to use when making issues and PRs. Required.
-          email: "john.doe@example.com"
+          # Required: Repository where issues will be created
+          head-repo: https://github.com/your-org/your-repo.git
 
-          # The url for the upstream repo. This is the repository that you
-          # set up Ryu-Cho. Required.
-          upstream-repo: https://github.com/vuejs-translations/docs-ja.git
+          # Required: Source repository to track changes from
+          upstream-repo: https://github.com/original/repo.git
 
-          # The branch for the upstream repo. Optional. Defaults to `main`.
+          # Optional: Source repository's branch (defaults to 'main')
           upstream-repo-branch: main
 
-          # The head repo to track. This is the repository you want to
-          # take a diff. Required.
-          head-repo: https://github.com/vuejs/docs.git
+          # Required: Initial commit to start tracking from
+          initial-commit: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
 
-          # The branch for the head repo. Optional. Defaults to `main`.
-          head-repo-branch: main
-
-          # The git commit sha of head repo to start tracking. Ryu-Cho will
-          # only track commit from this hash. Required.
-          track-from: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
-
-          # File path to track. In this example, Ryu-Cho will only track
-          # commits that modified files under `docs` folder. Optional.
+          # Optional: Only track changes in specific paths (defaults to project root)
           path-starts-with: docs/
-
-          # GitHub workflow name that runs Ryu-Cho. This is required since
-          # Ryu-Cho determines the last run by looking into last workflow
-          # run timestamp. Optional. Defaults to `ryu-cho`.
-          workflow-name: ryu-cho
 ```
 
-The important part to note is that you must match the GitHub workflow name to `workflow-name` option.
+## How It Works
+
+1. When run, it fetches new commits from the upstream repository (source repository) since the last processed commit.
+2. For each new commit:
+   - If `path-starts-with` is set, checks if the commit modifies files in that path
+   - Creates an issue in your repository (head repository) with details about the change
+
+## Configuration
+
+| Option                 | Required | Description                                                |
+| ---------------------- | -------- | ---------------------------------------------------------- |
+| `access-token`         | Yes      | GitHub token for authentication                            |
+| `username`             | Yes      | Git username for creating issues                           |
+| `email`                | Yes      | Git email for creating issues                              |
+| `head-repo`            | Yes      | Your repository URL (where issues will be created)         |
+| `upstream-repo`        | Yes      | Source repository URL to track changes from                |
+| `upstream-repo-branch` | No       | Source repository branch (default: main)                   |
+| `initial-commit`       | Yes      | Starting commit hash for tracking in the source repository |
+| `path-starts-with`     | No       | Only track changes in specific path                        |
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
+
+## License
+
+This project is licensed under the MIT License. The original work was created by [Vue.js Japan User Group](https://github.com/vuejs-jp), and additional modifications were made by [shj](https://github.com/Gumball12/). See [LICENSE](LICENSE) for the complete license text.
+
+The copyright notice reflects both the original work and subsequent modifications:
+
+- Original work: Copyright (c) 2021 Vue.js Japan User Group
+- Modified work: Copyright (c) 2024 shj
+
+This approach to licensing maintains the spirit of open source collaboration while properly attributing both the original creators and subsequent contributors.

@@ -1,5 +1,5 @@
-name: 'Ryu-Cho'
-description: 'Automatic git commit tracking service.'
+name: 'Yuki-no'
+description: 'GitHub Action for tracking upstream documentation changes'
 
 inputs:
   access-token:
@@ -21,28 +21,20 @@ inputs:
   head-repo:
     description: 'Repository to track. e.g. https://github.com/vitejs/vite'
     required: true
-  head-repo-branch:
-    description: 'Branch name for head repo. Defaults to `main`'
-    required: false
-    default: 'main'
-  track-from:
-    description: 'The git commit to track from. e.g. 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5'
-    required: true
   path-starts-with:
     description: 'File path to track. e.g `docs/`'
     required: false
-  workflow-name:
-    description: 'GitHub workflow name that executes Ryu Cho action. Defaults to `ryu-cho`'
-    required: false
-    default: 'ryu-cho'
+  initial-commit:
+    description: 'The commit hash to start syncing from. Required to prevent syncing all historical commits.'
+    required: true
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
-    - name: Checkout Ryu-Cho
+    - name: Checkout Yuki-no
       run: ${{ github.action_path }}/scripts/checkout.sh
       shell: bash
-    - name: Run Ryu-Cho
+    - name: Run Yuki-no
       env:
         ACCESS_TOKEN: ${{ inputs.access-token }}
         USER_NAME: ${{ inputs.username }}
@@ -50,12 +42,10 @@ runs:
         UPSTREAM_REPO: ${{ inputs.upstream-repo }}
         UPSTREAM_REPO_BRANCH: ${{ inputs.upstream-repo-branch }}
         HEAD_REPO: ${{ inputs.head-repo }}
-        HEAD_REPO_BRANCH: ${{ inputs.head-repo-branch }}
-        TRACK_FROM: ${{ inputs.track-from }}
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
-        WORKFLOW_NAME: ${{ inputs.workflow-name }}
+        INITIAL_COMMIT: ${{ inputs.initial-commit }}
       run: |
-        cd ryu-cho
-        yarn install
-        yarn start
+        cd yuki-no
+        pnpm install
+        pnpm start
       shell: bash

@@ -1,15 +1,14 @@
 import { Octokit } from '@octokit/rest'
-import { Remote } from './config'
+import { type Remote } from './config'
 
 export interface CreateIssueOptions {
   title: string
   body: string
+  labels?: string[]
 }
 
-export interface CreatePullRequestOptions {
-  title: string
+export interface UpdateIssueOptions {
   body: string
-  branch: string
 }
 
 export class GitHub {
@@ -19,9 +18,9 @@ export class GitHub {
     this.api = new Octokit({ auth })
   }
 
-  searchIssue(remote: Remote, hash: string) {
+  searchIssue(remote: Remote, query: string) {
     return this.api.search.issuesAndPullRequests({
-      q: `${hash} repo:${remote.owner}/${remote.name} type:issue`
+      q: `${query} repo:${remote.owner}/${remote.name} type:issue`
     })
   }
 
@@ -33,23 +32,34 @@ export class GitHub {
     })
   }
 
+  getCommits(remote: Remote, since: string) {
+    return this.api.repos.listCommits({
+      owner: remote.owner,
+      repo: remote.name,
+      since: since
+    })
+  }
+
   createIssue(remote: Remote, options: CreateIssueOptions) {
     return this.api.issues.create({
       owner: remote.owner,
       repo: remote.name,
       title: options.title,
-      body: options.body
+      body: options.body,
+      labels: options.labels
     })
   }
 
-  createPullRequest(remote: Remote, options: CreatePullRequestOptions) {
-    return this.api.pulls.create({
+  updateIssue(
+    remote: Remote,
+    issueNumber: number,
+    options: UpdateIssueOptions
+  ) {
+    return this.api.issues.update({
       owner: remote.owner,
       repo: remote.name,
-      title: options.title,
-      body: options.body,
-      head: `${remote.owner}:${options.branch}`,
-      base: remote.branch
+      issue_number: issueNumber,
+      body: options.body
     })
   }
 

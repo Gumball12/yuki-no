@@ -1,1 +1,1 @@
-git clone https://github.com/vuejs-translations/ryu-cho.git
+git clone https://github.com/Gumball12/yuki-no.git

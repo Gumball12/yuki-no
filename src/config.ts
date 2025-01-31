@@ -2,30 +2,22 @@ import { extractRepoOwner, extractRepoName } from './utils'
 
 export interface UserConfig {
   /**
-   * Git user name to use when making PR.
-   *
-   * Uses `process.env.USER_NAME` if it exists.
+   * Git user name to use when making changes.
    */
   userName: string
 
   /**
-   * Git email address to use when making PR.
-   *
-   * Uses `process.env.EMAIL` if it exists.
+   * Git email address to use when making changes.
    */
   email: string
 
   /**
    * GitHub access token.
-   *
-   * Uses `process.env.ACCESS_TOKEN` if it exists.
    */
   accessToken: string
 
   /**
    * The url for the upstream repo.
-   *
-   * Uses `process.env.UPSTREAM_REPO` if it exists.
    *
    * @example 'git@github.com:vuejs/vuejs.org'
    */
@@ -34,8 +26,6 @@ export interface UserConfig {
   /**
    * The branch to track on the upstream repo.
    *
-   * Uses `process.env.UPSTREAM_REPO_BRANCH` if it exists.
-   *
    * @default 'main'
    */
   upstreamRepoBranch?: string
@@ -43,39 +33,9 @@ export interface UserConfig {
   /**
    * The url for the head repo.
    *
-   * Uses `process.env.HEAD_REPO` if it exists.
-   *
    * @example 'https://github.com/vuejs/vuejs.org'
    */
   headRepo: string
-
-  /**
-   * The branch to track on head repo.
-   *
-   * Uses `process.env.HEAD_REPO_BRANCH` if it exists.
-   *
-   * @default 'main'
-   */
-  headRepoBranch?: string
-
-  /**
-   * The name of the GitHub workflow. This value is used to determine the last
-   * run of the Che Tsumi.
-   *
-   * Uses `process.env.WORKFLOW_NAME` if it exists.
-   *
-   * @default 'ryu-cho'
-   */
-  workflowName?: string
-
-  /**
-   * The git commit sha to start tracking.
-   *
-   * Uses `process.env.TRACK_FROM` if it exists.
-   *
-   * @example '889d985125558731c14278c3c5764bdcfb2389fd'
-   */
-  trackFrom: string
 
   /**
    * File path to track. If this option is set, commit not containing the
@@ -84,15 +44,20 @@ export interface UserConfig {
    * @example 'docs/'
    */
   pathStartsWith?: string
+
+  /**
+   * The initial commit hash to start syncing from.
+   * This is required to prevent syncing all historical commits.
+   */
+  initialCommit: string
 }
 
 export interface Config {
   userName: string
   email: string
   accessToken: string
-  workflowName: string
-  trackFrom: string
   pathStartsWith?: string
+  initialCommit: string
 
   remote: {
     upstream: Remote
@@ -112,9 +77,8 @@ export function createConfig(config: UserConfig): Config {
     userName: config.userName,
     email: config.email,
     accessToken: config.accessToken,
-    workflowName: config.workflowName ?? 'ryu-cho',
-    trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
+    initialCommit: config.initialCommit,
 
     remote: {
       upstream: {
@@ -127,7 +91,7 @@ export function createConfig(config: UserConfig): Config {
         url: config.headRepo,
         owner: extractRepoOwner(config.headRepo),
         name: extractRepoName(config.headRepo),
-        branch: config.headRepoBranch ?? 'main'
+        branch: 'main'
       }
     }
   }

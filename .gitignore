@@ -3,6 +3,5 @@
 .env
 node_modules/
 repo/*
-npm-debug.log
-yarn-error.log
 !.gitkeep
+coverage/
