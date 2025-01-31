@@ -48,7 +48,7 @@ jobs:
         with:
           version: 9.15.3
 
-      - uses: Gumball12/yuki-no@v1.0.0
+      - uses: Gumball12/yuki-no@v1.0.1
         with:
           # GitHub token for authentication (uses repository's token)
           access-token: ${{ secrets.GITHUB_TOKEN }}
