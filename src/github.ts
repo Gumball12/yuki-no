@@ -1,5 +1,6 @@
 import { Octokit } from '@octokit/rest'
 import { type Remote } from './config'
+import { log } from './utils'
 
 export interface CreateIssueOptions {
   title: string
@@ -32,11 +33,26 @@ export class GitHub {
     })
   }
 
-  getCommits(remote: Remote, since: string) {
+  async getCommitDate(remote: Remote, hash: string): Promise<string> {
+    try {
+      const { data } = await this.getCommit(remote, hash)
+      return data.commit.author?.date || data.commit.committer?.date || ''
+    } catch (error) {
+      log('E', `Failed to get commit date for ${hash}`)
+      throw error
+    }
+  }
+
+  async getCommits(remote: Remote, since: string) {
+    // If since is a commit hash, get its date first
+    if (/^[a-f0-9]{40}$/.test(since)) {
+      since = await this.getCommitDate(remote, since)
+    }
+
     return this.api.repos.listCommits({
       owner: remote.owner,
       repo: remote.name,
-      since: since
+      since
     })
   }
 

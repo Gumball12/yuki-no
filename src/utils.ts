@@ -13,7 +13,7 @@ export type LogType = 'I' | 'S' | 'W' | 'E'
 export function log(type: LogType, message: string): void {
   // In GitHub Actions, only show warnings and errors
   if (process.env.GITHUB_ACTIONS === 'true' && (type === 'I' || type === 'S')) {
-    // return
+    return
   }
 
   switch (type) {

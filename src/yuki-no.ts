@@ -51,6 +51,7 @@ export class YukiNo {
       if (issues.data.total_count > 0) {
         const body = issues.data.items[0].body || ''
         const match = body.match(/Commit: ([a-f0-9]+)/)
+
         if (match) {
           return match[1]
         }
@@ -58,6 +59,7 @@ export class YukiNo {
     } catch (error) {
       log('W', 'Failed to get last sync state, using initial commit')
     }
+
     return this.config.initialCommit
   }
 
@@ -73,9 +75,13 @@ export class YukiNo {
         files: commit.files?.map((f) => f.filename) || []
       }))
     } catch (error) {
-      log('W', 'Failed to get new commits')
-      return []
+      log(
+        'W',
+        `Failed to get new commits: ${error instanceof Error ? error.message : String(error)}`
+      )
     }
+
+    return []
   }
 
   async shouldProcessCommit(commit: Commit): Promise<boolean> {
