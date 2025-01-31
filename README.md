@@ -64,8 +64,11 @@ jobs:
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
           # Required: Git user info
-          username: johndoe
-          email: 'john.doe@example.com'
+          # Tip: Using github-actions bot credentials is recommended
+          # as it clearly indicates that the issues are created by
+          # an automated process
+          username: github-actions
+          email: 'action@github.com'
 
           # Required: Repository where issues will be created
           head-repo: https://github.com/your-org/your-repo.git
