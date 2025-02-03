@@ -71,6 +71,11 @@ jobs:
           # only track commit from this hash. Required.
           track-from: head-commit-hash
 
+          # File path to track. If specified, Yuki-no will only track commits
+          # that modified files under this path. If not specified, it will
+          # track all files in the project root. Optional.
+          path-starts-with: docs/
+
           # Labels to add to the issues. You can specify multiple labels.
           # Each label must be separated by a newline. Optional.
           # If empty string('') is provided, no labels will be added.
