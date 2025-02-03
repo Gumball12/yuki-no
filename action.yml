@@ -37,7 +37,7 @@ inputs:
     default: 'ryu-cho'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Checkout Ryu-Cho
       run: ${{ github.action_path }}/scripts/checkout.sh

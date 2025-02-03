@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "strict": true,
-    "noUnusedLocals": true,
-    "esModuleInterop": true,
     "lib": ["ESNext"],
-    "types": ["node", "jest"],
+    "module": "ESNext",
+
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "noEmit": true,
+
+    "strict": true,
+    "skipLibCheck": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+
+    "baseUrl": ".",
     "paths": {
       "src/*": ["src/*"]
     }
   },
-  "include": [
-    "src",
-    "tests"
-  ]
+  "include": ["src", "tests"]
 }

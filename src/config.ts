@@ -1,4 +1,4 @@
-import { extractRepoOwner, extractRepoName } from './utils'
+import { extractRepoOwner, extractRepoName } from './utils';
 
 export interface UserConfig {
   /**
@@ -6,21 +6,21 @@ export interface UserConfig {
    *
    * Uses `process.env.USER_NAME` if it exists.
    */
-  userName: string
+  userName: string;
 
   /**
    * Git email address to use when making PR.
    *
    * Uses `process.env.EMAIL` if it exists.
    */
-  email: string
+  email: string;
 
   /**
    * GitHub access token.
    *
    * Uses `process.env.ACCESS_TOKEN` if it exists.
    */
-  accessToken: string
+  accessToken: string;
 
   /**
    * The url for the upstream repo.
@@ -29,7 +29,7 @@ export interface UserConfig {
    *
    * @example 'git@github.com:vuejs/vuejs.org'
    */
-  upstreamRepo: string
+  upstreamRepo: string;
 
   /**
    * The branch to track on the upstream repo.
@@ -38,7 +38,7 @@ export interface UserConfig {
    *
    * @default 'main'
    */
-  upstreamRepoBranch?: string
+  upstreamRepoBranch?: string;
 
   /**
    * The url for the head repo.
@@ -47,7 +47,7 @@ export interface UserConfig {
    *
    * @example 'https://github.com/vuejs/vuejs.org'
    */
-  headRepo: string
+  headRepo: string;
 
   /**
    * The branch to track on head repo.
@@ -56,7 +56,7 @@ export interface UserConfig {
    *
    * @default 'main'
    */
-  headRepoBranch?: string
+  headRepoBranch?: string;
 
   /**
    * The name of the GitHub workflow. This value is used to determine the last
@@ -66,7 +66,7 @@ export interface UserConfig {
    *
    * @default 'ryu-cho'
    */
-  workflowName?: string
+  workflowName?: string;
 
   /**
    * The git commit sha to start tracking.
@@ -75,7 +75,7 @@ export interface UserConfig {
    *
    * @example '889d985125558731c14278c3c5764bdcfb2389fd'
    */
-  trackFrom: string
+  trackFrom: string;
 
   /**
    * File path to track. If this option is set, commit not containing the
@@ -83,28 +83,28 @@ export interface UserConfig {
    *
    * @example 'docs/'
    */
-  pathStartsWith?: string
+  pathStartsWith?: string;
 }
 
 export interface Config {
-  userName: string
-  email: string
-  accessToken: string
-  workflowName: string
-  trackFrom: string
-  pathStartsWith?: string
+  userName: string;
+  email: string;
+  accessToken: string;
+  workflowName: string;
+  trackFrom: string;
+  pathStartsWith?: string;
 
   remote: {
-    upstream: Remote
-    head: Remote
-  }
+    upstream: Remote;
+    head: Remote;
+  };
 }
 
 export interface Remote {
-  url: string
-  owner: string
-  name: string
-  branch: string
+  url: string;
+  owner: string;
+  name: string;
+  branch: string;
 }
 
 export function createConfig(config: UserConfig): Config {
@@ -121,14 +121,14 @@ export function createConfig(config: UserConfig): Config {
         url: config.upstreamRepo,
         owner: extractRepoOwner(config.upstreamRepo),
         name: extractRepoName(config.upstreamRepo),
-        branch: config.upstreamRepoBranch ?? 'main'
+        branch: config.upstreamRepoBranch ?? 'main',
       },
       head: {
         url: config.headRepo,
         owner: extractRepoOwner(config.headRepo),
         name: extractRepoName(config.headRepo),
-        branch: config.headRepoBranch ?? 'main'
-      }
-    }
-  }
+        branch: config.headRepoBranch ?? 'main',
+      },
+    },
+  };
 }

@@ -32,7 +32,7 @@ jobs:
           username: johndoe
 
           # Git email address to use when making issues and PRs. Required.
-          email: "john.doe@example.com"
+          email: 'john.doe@example.com'
 
           # The url for the upstream repo. This is the repository that you
           # set up Ryu-Cho. Required.
