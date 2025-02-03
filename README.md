@@ -57,25 +57,13 @@ jobs:
           # GitHub access token. Required.
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Git user name to use when making issues. Optional.
-          # Defaults to 'github-actions'.
-          # Note: Using only one of username or email might cause
-          # GitHub Actions bot to work incorrectly.
-          username: github-actions
-
-          # Git email address to use when making issues. Optional.
-          # Defaults to 'action@github.com'.
-          # Note: Using only one of username or email might cause
-          # GitHub Actions bot to work incorrectly.
-          email: 'action@github.com'
-
           # The url for the upstream repo. This is the repository that you
           # set up Yuki-no. Required.
-          upstream-repo: https://github.com/vitejs/docs-ko.git
+          upstream-repo: https://github.com/upstream-user/upstream-repo.git
 
           # The head repo to track. This is the repository you want to
           # take a diff. Required.
-          head-repo: https://github.com/vitejs/vite.git
+          head-repo: https://github.com/head-user/head-repo.git
 
           # The branch for the head repo. Optional.
           # Defaults to 'main'.
@@ -83,12 +71,7 @@ jobs:
 
           # The git commit sha of head repo to start tracking. Yuki-no will
           # only track commit from this hash. Required.
-          track-from: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
-
-          # File path to track. If specified, Yuki-no will only track commits
-          # that modified files under this path. If not specified, it will
-          # track all files in the project root. Optional.
-          path-starts-with: docs/
+          track-from: head-commit-hash
 
           # Labels to add to the issues. You can specify multiple labels.
           # Each label must be separated by a newline. Optional.
@@ -96,8 +79,6 @@ jobs:
           # Defaults to 'sync'.
           labels: |
             sync
-            needs review
-            my-label
 
           # Whether to enable release tracking.
           # When enabled, Yuki-no will track releases for each issue
@@ -114,19 +95,19 @@ jobs:
 
 ### Configuration
 
-| Option             | Required | Default             | Description                           |
-| ------------------ | -------- | ------------------- | ------------------------------------- |
-| `access-token`     | Yes      | -                   | GitHub access token                   |
-| `username`         | No       | `github-actions`    | Git username for commits              |
-| `email`            | No       | `action@github.com` | Git email for commits                 |
-| `upstream-repo`    | Yes      | -                   | URL of your repository                |
-| `head-repo`        | Yes      | -                   | URL of repository to track            |
-| `head-repo-branch` | No       | `main`              | Branch to track in head repo          |
-| `track-from`       | Yes      | -                   | Starting commit hash                  |
-| `path-starts-with` | No       | -                   | Path filter for changes               |
-| `labels`           | No       | `sync`              | Labels for issues (newline separated) |
-| `release-tracking` | No       | `false`             | Enable release status tracking        |
-| `verbose`          | No       | `false`             | Enable verbose logging                |
+| Option             | Required | Default             | Description                                                                             |
+| ------------------ | -------- | ------------------- | --------------------------------------------------------------------------------------- |
+| `access-token`     | Yes      | -                   | GitHub access token                                                                     |
+| `username`         | No       | `github-actions`    | Git username for commits                                                                |
+| `email`            | No       | `action@github.com` | Git email for commits                                                                   |
+| `upstream-repo`    | Yes      | -                   | URL of your repository                                                                  |
+| `head-repo`        | Yes      | -                   | URL of repository to track                                                              |
+| `head-repo-branch` | No       | `main`              | Branch to track in head repo                                                            |
+| `track-from`       | Yes      | -                   | Starting commit hash                                                                    |
+| `path-starts-with` | No       | -                   | Path filter for changes (If not specified, it will track all files in the project root) |
+| `labels`           | No       | `sync`              | Labels for issues (newline separated)                                                   |
+| `release-tracking` | No       | `false`             | Enable release status tracking                                                          |
+| `verbose`          | No       | `false`             | Enable verbose logging                                                                  |
 
 ## How It Works
 
