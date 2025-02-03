@@ -2,6 +2,7 @@ import shell from 'shelljs';
 import { type Remote } from './config';
 import { Git } from './git';
 import type { ReleaseInfo, ReleaseTag } from './types';
+import { getUrlWithoutDotGit } from './utils';
 
 shell.config.silent = true;
 
@@ -73,7 +74,7 @@ export class Repository {
   }
 
   private getTagInfo(tag: string): ReleaseTag {
-    const repoUrl = this.head.url.replace(/\.git$/, '');
+    const repoUrl = getUrlWithoutDotGit(this.head.url);
     return {
       tag: tag.trim(),
       url: `${repoUrl}/releases/tag/${tag.trim()}`,

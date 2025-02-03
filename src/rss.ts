@@ -1,5 +1,5 @@
 import RssParser from 'rss-parser';
-import { extractBasename } from './utils';
+import { extractBasename, getUrlWithoutDotGit } from './utils';
 import { type Remote } from './config';
 
 export class Rss {
@@ -10,7 +10,7 @@ export class Rss {
   }
 
   async get(remote: Remote, from: string) {
-    const url = remote.url;
+    const url = getUrlWithoutDotGit(remote.url);
     const branch = remote.branch;
 
     const feed = await this.api.parseURL(`${url}/commits/${branch}.atom`);

@@ -67,3 +67,8 @@ export function splitByNewline(text?: string): string[] {
 
   return text.split('\n').filter(line => line.trim() !== '');
 }
+
+export function getUrlWithoutDotGit(url: string): string {
+  const repoUrl = url.replace(/\.git$/, '');
+  return repoUrl;
+}
