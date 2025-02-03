@@ -6,28 +6,78 @@ Thank you for your interest in contributing to Yuki-no! This document provides g
 
 ### Prerequisites
 
-- **Node.js**: Version 22.0.0 or higher is recommended
-- **yarn**: This project uses [yarn classic](https://classic.yarnpkg.com/lang/en/) as its package manager. It's automatically available through [Node.js Corepack](https://nodejs.org/api/corepack.html):
+- Node.js v22.0.0 or higher
+- [Yarn Classic](https://classic.yarnpkg.com/lang/en/) (available through [Node Corepack](https://nodejs.org/api/corepack.html))
   ```bash
   corepack enable
   ```
+- GitHub account
+- An upstream repository
+- GitHub Personal Access Token (Fine-grained)
 
-### Getting Started
+### Setting up GitHub Fine-grained PAT
 
-1. Fork and clone the repository:
+> [!WARNING]
+>
+> **Important Notes**
+>
+> - Never share your PAT with anyone
+> - Use Fine-grained PAT instead of Classic PAT for better permission control
 
-```bash
-git clone https://github.com/Gumball12/yuki-no.git
-cd yuki-no
-```
+1. [Create a new Fine-grained PAT](https://github.com/settings/personal-access-tokens/new)
+2. Repository access settings:
+   - Select "Only select repositories"
+   - Choose your upstream repository
+3. Repository Permissions:
+   - Contents: Read and write
+   - Issues: Read and write (required for release tracking)
+   - Metadata: Read (automatically set)
 
-2. Install dependencies:
+For more PAT details, see [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
-```bash
-yarn install
-```
+### Local Environment Setup
 
-## Development Workflow
+> [!WARNING]
+>
+> **Important Notes**
+>
+> - The `.env` file is included in .gitignore by default
+> - Never commit the `.env` file to git
+
+1. [Fork](https://github.com/Gumball12/yuki-no/fork) and clone the repository
+
+   ```bash
+   git clone https://github.com/Gumball12/yuki-no.git
+   cd yuki-no
+
+   # Install dependencies
+   yarn install
+   ```
+
+2. Create `.env` file in the project root
+
+   ```.env
+   ACCESS_TOKEN=your_pat_here
+   USER_NAME=your_github_username
+   EMAIL=your_github_email
+   HEAD_REPO=https://github.com/head_username/head_repo.git
+   UPSTREAM_REPO=https://github.com/your_username/your_repo.git
+   TRACK_FROM=head_commit_hash
+
+   # ...
+   ```
+
+For detailed environment variable settings, see [action.yml](./action.yml).
+
+#### How It Works
+
+1. Detects new commits in `HEAD_REPO` repository
+   - Commits after `TRACK_FROM`
+   - Changes in `PATH_STARTS_WITH` directory (if not set, entire project)
+2. Creates issues for detected commits
+3. Adds release information as issue comments when `release-tracking` is enabled
+
+### Development Workflow
 
 1. Create a new branch for your changes:
 
@@ -35,10 +85,11 @@ yarn install
 git checkout -b feat/your-feature
 ```
 
-2. Make your changes and ensure tests pass:
+2. Running and ensure tests pass:
 
 ```bash
-yarn test
+yarn test # unit tests
+yarn start:dev # run script
 ```
 
 3. Format your code:
@@ -55,6 +106,22 @@ git commit -m "fix: resolve issue #123"
 ```
 
 5. Push your changes and create a pull request!
+
+### Troubleshooting
+
+#### Common Issues
+
+1. **PAT-related Notes**
+
+   - `USER_NAME` and `EMAIL` must match the PAT creator's account
+   - When using PAT, release tracking only works for commits by the configured `USER_NAME` (see [`isYukiNoIssue`](https://github.com/Gumball12/yuki-no/blob/c39060e1c0d0e96c58699af22509277f601bc484/src/yuki-no.ts#L164))
+   - Release tracking will not work if they don't match
+
+2. **GitHub API 403 Errors**
+
+   - Check PAT permissions
+
+If you encounter any bugs not covered in this troubleshooting guide, please [open an issue](https://github.com/Gumball12/yuki-no/issues).
 
 ## Project Structure
 
