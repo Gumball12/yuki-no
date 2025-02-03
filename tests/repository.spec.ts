@@ -5,10 +5,15 @@ import type { Options } from '../src/repository';
 
 vi.mock('../src/git', () => ({
   Git: vi.fn(() => ({
-    cherryPick: vi.fn(),
     clone: vi.fn(),
     addRemote: vi.fn(),
     config: vi.fn(),
+    fetch: vi.fn(),
+    exec: vi.fn(),
+    cherryPick: vi.fn(),
+    checkout: vi.fn(),
+    push: vi.fn(),
+    reset: vi.fn(),
   })),
 }));
 
@@ -44,8 +49,8 @@ describe('Repository', () => {
   };
 
   beforeEach(() => {
-    repository = new Repository(mockOptions);
     vi.clearAllMocks();
+    repository = new Repository(mockOptions);
   });
 
   describe('setup', () => {
@@ -98,6 +103,110 @@ describe('Repository', () => {
 
       expect(hasConflicts).toBe(false);
       expect(repository.git.cherryPick).toHaveBeenCalledWith('abc123');
+    });
+  });
+
+  describe('getReleaseInfo', () => {
+    it('should return empty when no tags found', () => {
+      vi.mocked(repository.git.exec).mockReturnValue({
+        stdout: '',
+        code: 0,
+      } as ShellString);
+
+      const result = repository.getReleaseInfo('commit-hash');
+
+      expect(result).toEqual({});
+      expect(repository.git.fetch).toHaveBeenCalledWith('head', '--tags');
+    });
+
+    it('should identify pre-release and release tags', () => {
+      vi.mocked(repository.git.exec).mockReturnValue({
+        stdout: 'v1.0.0-beta.1\nv1.0.0\n',
+        code: 0,
+      } as ShellString);
+
+      const result = repository.getReleaseInfo('commit-hash');
+
+      expect(result).toEqual({
+        preRelease: {
+          tag: 'v1.0.0-beta.1',
+          url: 'https://github.com/test/head/releases/tag/v1.0.0-beta.1',
+        },
+        release: {
+          tag: 'v1.0.0',
+          url: 'https://github.com/test/head/releases/tag/v1.0.0',
+        },
+      });
+    });
+
+    it('should handle pre-release only', () => {
+      vi.mocked(repository.git.exec).mockReturnValue({
+        stdout: 'v1.0.0-beta.1\n',
+        code: 0,
+      } as ShellString);
+
+      const result = repository.getReleaseInfo('commit-hash');
+
+      expect(result).toEqual({
+        preRelease: {
+          tag: 'v1.0.0-beta.1',
+          url: 'https://github.com/test/head/releases/tag/v1.0.0-beta.1',
+        },
+      });
+    });
+
+    it('should handle release only', () => {
+      vi.mocked(repository.git.exec).mockReturnValue({
+        stdout: 'v1.0.0\n',
+        code: 0,
+      } as ShellString);
+
+      const result = repository.getReleaseInfo('commit-hash');
+
+      expect(result).toEqual({
+        release: {
+          tag: 'v1.0.0',
+          url: 'https://github.com/test/head/releases/tag/v1.0.0',
+        },
+      });
+    });
+
+    it('should handle repository URLs with and without .git extension', () => {
+      const repoWithGit = new Repository({
+        ...mockOptions,
+        head: {
+          ...mockOptions.head,
+          url: 'https://github.com/test/head.git',
+        },
+      });
+
+      const repoWithoutGit = new Repository({
+        ...mockOptions,
+        head: {
+          ...mockOptions.head,
+          url: 'https://github.com/test/head',
+        },
+      });
+
+      vi.mocked(repoWithGit.git.exec).mockReturnValue({
+        stdout: 'v1.0.0\n',
+        code: 0,
+      } as ShellString);
+
+      vi.mocked(repoWithoutGit.git.exec).mockReturnValue({
+        stdout: 'v1.0.0\n',
+        code: 0,
+      } as ShellString);
+
+      const resultWithGit = repoWithGit.getReleaseInfo('commit-hash');
+      const resultWithoutGit = repoWithoutGit.getReleaseInfo('commit-hash');
+
+      expect(resultWithGit.release?.url).toBe(
+        'https://github.com/test/head/releases/tag/v1.0.0',
+      );
+      expect(resultWithoutGit.release?.url).toBe(
+        'https://github.com/test/head/releases/tag/v1.0.0',
+      );
     });
   });
 });

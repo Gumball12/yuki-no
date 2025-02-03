@@ -90,6 +90,16 @@ export interface UserConfig {
    *   my-label
    */
   labels?: string;
+
+  /**
+   * Whether to enable release tracking.
+   * When enabled, Ryu-Cho will track releases for each issue and
+   * add comments about release status.
+   *
+   * Uses `process.env.RELEASE_TRACKING` if it exists.
+   * @default undefined
+   */
+  releaseTracking?: string;
 }
 
 export interface Config {
@@ -99,6 +109,7 @@ export interface Config {
   trackFrom: string;
   pathStartsWith?: string;
   labels?: string;
+  releaseTracking: boolean;
 
   remote: {
     upstream: Remote;
@@ -121,6 +132,7 @@ export function createConfig(config: UserConfig): Config {
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
     labels: config.labels,
+    releaseTracking: config.releaseTracking?.toLowerCase() === 'true',
 
     remote: {
       upstream: {

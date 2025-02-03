@@ -1,6 +1,7 @@
 import shell from 'shelljs';
 import { type Remote } from './config';
 import { Git } from './git';
+import type { ReleaseInfo, ReleaseTag } from './types';
 
 shell.config.silent = true;
 
@@ -76,5 +77,37 @@ export class Repository {
 
   reset() {
     this.git.reset();
+  }
+
+  getReleaseInfo(commitHash: string): ReleaseInfo {
+    if (!this.git) {
+      throw new Error('Git is not initialized');
+    }
+
+    this.git.fetch(this.head.name, '--tags');
+
+    const result = this.git.exec('tag --contains ' + commitHash);
+    if (!result || !result.stdout) {
+      return {};
+    }
+
+    const tags = result.stdout
+      .toString()
+      .split('\n')
+      .filter(Boolean)
+      .map((tag: string) => this.getTagInfo(tag));
+
+    return {
+      preRelease: tags.find((tag: ReleaseTag) => tag.tag.includes('-')),
+      release: tags.find((tag: ReleaseTag) => !tag.tag.includes('-')),
+    };
+  }
+
+  private getTagInfo(tag: string): ReleaseTag {
+    const repoUrl = this.head.url.replace(/\.git$/, '');
+    return {
+      tag: tag.trim(),
+      url: `${repoUrl}/releases/tag/${tag.trim()}`,
+    };
   }
 }

@@ -69,4 +69,10 @@ jobs:
             sync
             needs review
             my-label
+
+          # Whether to enable release tracking.
+          # When enabled, Yuki-no will track releases for each issue
+          # and add comments about release status. Optional.
+          # Defaults to 'false'
+          release-tracking: true
 ```

@@ -15,6 +15,9 @@ vi.mock('../src/github', () => ({
     searchIssue: vi.fn(),
     createIssue: vi.fn(),
     createPullRequest: vi.fn(),
+    getOpenIssues: vi.fn(),
+    getIssueComments: vi.fn(),
+    createComment: vi.fn(),
   })),
 }));
 
@@ -28,6 +31,7 @@ vi.mock('../src/repository', () => ({
     hasConflicts: vi.fn(),
     reset: vi.fn(),
     updateRemote: vi.fn(),
+    getReleaseInfo: vi.fn(),
   })),
 }));
 
@@ -39,6 +43,7 @@ describe('RyuCho', () => {
     accessToken: 'test-token',
     trackFrom: 'test-hash',
     pathStartsWith: 'docs/',
+    releaseTracking: false,
     remote: {
       upstream: {
         url: 'https://github.com/test/upstream.git',
@@ -101,6 +106,7 @@ describe('RyuCho', () => {
     vi.mocked(instance.github.createPullRequest).mockResolvedValue({
       data: { html_url: 'pr-url' },
     } as any);
+    vi.mocked(instance.github.createComment).mockResolvedValue();
   }
 
   beforeEach(() => {
@@ -183,6 +189,203 @@ describe('RyuCho', () => {
           expect.objectContaining({
             labels: [],
           }),
+        );
+      });
+    });
+  });
+
+  describe('release tracking', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      ryuCho = new RyuCho({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(ryuCho);
+    });
+
+    it('should skip when release tracking is disabled', async () => {
+      ryuCho = new RyuCho({
+        ...mockConfig,
+        releaseTracking: false,
+      });
+      setupMocks(ryuCho);
+
+      await ryuCho.start();
+
+      expect(ryuCho.github.getOpenIssues).not.toHaveBeenCalled();
+    });
+
+    it('should process open issues when enabled', async () => {
+      const mockIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([]);
+      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({});
+
+      await ryuCho.start();
+
+      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+        expect.anything(),
+        1,
+        '- pre-release: none\n- release: none',
+      );
+    });
+
+    it('should update comment when new pre-release is available', async () => {
+      const mockIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      const existingComment = {
+        id: 1,
+        body: '- pre-release: [v1.0.0-beta.1](pre-url-1)\n- release: none',
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+      };
+
+      ryuCho = new RyuCho({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(ryuCho);
+
+      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+        existingComment,
+      ]);
+      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({
+        preRelease: { tag: 'v1.0.0-beta.2', url: 'pre-url-2' },
+      });
+
+      await ryuCho.start();
+
+      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+        expect.anything(),
+        1,
+        '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: none',
+      );
+    });
+
+    it('should update comment when release is available', async () => {
+      const mockIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      const existingComment = {
+        id: 1,
+        body: '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: none',
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+      };
+
+      ryuCho = new RyuCho({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(ryuCho);
+
+      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+        existingComment,
+      ]);
+      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({
+        preRelease: { tag: 'v1.0.0-beta.2', url: 'pre-url-2' },
+        release: { tag: 'v1.0.0', url: 'release-url' },
+      });
+
+      await ryuCho.start();
+
+      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+        expect.anything(),
+        1,
+        '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: [v1.0.0](release-url)',
+      );
+    });
+
+    it('should skip issue with full release comment', async () => {
+      const mockIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      const mockComment = {
+        id: 1,
+        body: '- pre-release: [v1.0.0-beta.1](url)\n- release: [v1.0.0](url)',
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+        mockComment,
+      ]);
+
+      await ryuCho.start();
+
+      expect(ryuCho.github.createComment).not.toHaveBeenCalled();
+    });
+
+    describe('comment formatting', () => {
+      it('should format when no releases', () => {
+        const info = {};
+        const comment = ryuCho.formatReleaseComment(info);
+        expect(comment).toBe('- pre-release: none\n- release: none');
+      });
+
+      it('should format with pre-release only', () => {
+        const info = {
+          preRelease: { tag: 'v1.0.0-beta.1', url: 'pre-url' },
+        };
+        const comment = ryuCho.formatReleaseComment(info);
+        expect(comment).toBe(
+          '- pre-release: [v1.0.0-beta.1](pre-url)\n- release: none',
+        );
+      });
+
+      it('should format with both pre-release and release', () => {
+        const info = {
+          preRelease: { tag: 'v1.0.0-beta.1', url: 'pre-url' },
+          release: { tag: 'v1.0.0', url: 'release-url' },
+        };
+        const comment = ryuCho.formatReleaseComment(info);
+        expect(comment).toBe(
+          '- pre-release: [v1.0.0-beta.1](pre-url)\n- release: [v1.0.0](release-url)',
+        );
+      });
+
+      it('should format with release only', () => {
+        const info = {
+          release: { tag: 'v1.0.0', url: 'release-url' },
+        };
+        const comment = ryuCho.formatReleaseComment(info);
+        expect(comment).toBe(
+          '- pre-release: none\n- release: [v1.0.0](release-url)',
         );
       });
     });

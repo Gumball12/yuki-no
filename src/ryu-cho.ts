@@ -1,5 +1,6 @@
 import { log, extractBasename, removeHash, splitByNewline } from './utils';
 import type { Config, Remote } from './config';
+import type { Issue, Comment, ReleaseInfo } from './types';
 import { Rss } from './rss';
 import { GitHub } from './github';
 import { Repository } from './repository';
@@ -47,6 +48,10 @@ export class RyuCho {
 
     for (const i in feed) {
       await this.processFeed(feed[i] as Feed, run);
+    }
+
+    if (this.config.releaseTracking) {
+      await this.trackReleases();
     }
   }
 
@@ -167,5 +172,83 @@ export class RyuCho {
     }
 
     log('S', `Created new pull request: ${res.data.html_url}`);
+  }
+
+  protected async trackReleases(): Promise<void> {
+    const issues = await this.github.getOpenIssues(this.upstream);
+
+    for (const issue of issues) {
+      await this.processIssueRelease(issue);
+    }
+  }
+
+  protected async processIssueRelease(issue: Issue): Promise<void> {
+    if (!this.isRyuChoIssue(issue)) {
+      return;
+    }
+
+    const comments = await this.github.getIssueComments(
+      this.upstream,
+      issue.number,
+    );
+    const lastReleaseComment = this.findLastReleaseComment(comments);
+
+    if (lastReleaseComment && this.hasFullRelease(lastReleaseComment)) {
+      return;
+    }
+
+    const commitHash = this.extractCommitHash(issue.body ?? '');
+    if (!commitHash) {
+      return;
+    }
+
+    const releaseInfo = this.repo.getReleaseInfo(commitHash);
+
+    await this.github.createComment(
+      this.upstream,
+      issue.number,
+      this.formatReleaseComment(releaseInfo),
+    );
+  }
+
+  protected isRyuChoIssue(issue: Issue): boolean {
+    return (
+      issue.user?.login === this.config.userName &&
+      (issue.body ?? '').includes('New updates on head repo')
+    );
+  }
+
+  protected findLastReleaseComment(comments: Comment[]): Comment | undefined {
+    for (const comment of [...comments].reverse()) {
+      if (this.isReleaseTrackingComment(comment)) {
+        return comment;
+      }
+    }
+    return undefined;
+  }
+
+  protected isReleaseTrackingComment(comment: Comment): boolean {
+    const content = comment.body ?? '';
+    return (
+      content.startsWith('- pre-release:') &&
+      content.includes('\n- release:') &&
+      content.split('\n').length === 2
+    );
+  }
+
+  protected hasFullRelease(comment: Comment): boolean {
+    return (comment.body ?? '').includes('- release: [v');
+  }
+
+  protected extractCommitHash(body: string): string | undefined {
+    const match = body.match(/[\r|\n|\r\n](.+)$/);
+    return match ? extractBasename(match[1]) : undefined;
+  }
+
+  public formatReleaseComment(info: ReleaseInfo): string {
+    return [
+      `- pre-release: ${info.preRelease ? `[${info.preRelease.tag}](${info.preRelease.url})` : 'none'}`,
+      `- release: ${info.release ? `[${info.release.tag}](${info.release.url})` : 'none'}`,
+    ].join('\n');
   }
 }

@@ -34,6 +34,9 @@ inputs:
     required: false
     default: |
       sync
+  release-tracking:
+    description: 'Whether to enable release tracking. When enabled, Ryu-Cho will track releases for each issue and add comments about release status.'
+    required: false
 
 runs:
   using: 'composite'
@@ -52,6 +55,7 @@ runs:
         TRACK_FROM: ${{ inputs.track-from }}
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
         LABELS: ${{ inputs.labels }}
+        RELEASE_TRACKING: ${{ inputs.release-tracking }}
       run: |
         cd ryu-cho
         yarn install
