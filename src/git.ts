@@ -11,10 +11,21 @@ export class Git {
     return this.exec(`config ${prop} ${value}`);
   }
 
-  clone(userName: string, token: string, url: string, name: string) {
+  clone(
+    userName: string,
+    token: string,
+    url: string,
+    name: string,
+    dir?: string,
+  ) {
     url = url.replace('https://', `https://${userName}:${token}@`);
 
-    return this.exec(`clone ${url} ${name}`);
+    const options: ExecOptions = {};
+    if (dir) {
+      options.cwd = dir;
+    }
+
+    return this.exec(`clone ${url} ${name}`, options);
   }
 
   addRemote(url: string, name: string) {

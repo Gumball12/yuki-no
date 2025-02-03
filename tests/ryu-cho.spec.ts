@@ -323,6 +323,44 @@ describe('YukiNo', () => {
       expect(yukiNo.github.createComment).not.toHaveBeenCalled();
     });
 
+    it('should skip comment when release versions are identical', async () => {
+      const mockIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      const existingComment = {
+        id: 1,
+        body: '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: [v1.0.0](release-url)',
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+      };
+
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(yukiNo);
+
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
+        existingComment,
+      ]);
+      vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({
+        preRelease: { tag: 'v1.0.0-beta.2', url: 'pre-url-2' },
+        release: { tag: 'v1.0.0', url: 'release-url' },
+      });
+
+      await yukiNo.start();
+
+      expect(yukiNo.github.createComment).not.toHaveBeenCalled();
+    });
+
     describe('comment formatting', () => {
       it('should format when no releases', () => {
         const info = {};

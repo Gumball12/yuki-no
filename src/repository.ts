@@ -42,6 +42,7 @@ export class Repository {
       this.token,
       this.upstream.url,
       this.upstream.name,
+      'tmp',
     );
     shell.cd(this.upstream.name);
     this.git.addRemote(this.head.url, this.head.name);
