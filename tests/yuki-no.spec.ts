@@ -90,6 +90,7 @@ describe('YukiNo', () => {
     vi.mocked(instance.github.createIssue).mockResolvedValue({
       data: { number: 1, html_url: 'issue-url' },
     } as any);
+    vi.mocked(instance.github.getIssueComments).mockResolvedValue([]);
     vi.mocked(instance.github.createComment).mockResolvedValue();
   }
 
@@ -197,21 +198,97 @@ describe('YukiNo', () => {
   });
 
   describe('release tracking', () => {
-    beforeEach(() => {
-      vi.clearAllMocks();
-      yukiNo = new YukiNo({
-        ...mockConfig,
-        releaseTracking: true,
+    describe('issue identification', () => {
+      beforeEach(() => {
+        yukiNo = new YukiNo({
+          ...mockConfig,
+          releaseTracking: true,
+        });
+        setupMocks(yukiNo);
       });
-      setupMocks(yukiNo);
+
+      it('should identify issue with exact matching labels', async () => {
+        const issue = {
+          number: 1,
+          title: 'Test Issue',
+          body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+          state: 'open' as const,
+          labels: ['sync', 'needs review'],
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        };
+
+        yukiNo.config.labels = 'sync\nneeds review';
+        setupMocks(yukiNo);
+
+        vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+        vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
+
+        await yukiNo.start();
+
+        expect(yukiNo.github.getIssueComments).toHaveBeenCalled();
+      });
+
+      it('should identify issue with object-type labels', async () => {
+        const issue = {
+          number: 1,
+          title: 'Test Issue',
+          body: 'Some content',
+          state: 'open' as const,
+          labels: [{ name: 'sync' }],
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        };
+
+        vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+
+        await yukiNo.start();
+
+        expect(yukiNo.github.getIssueComments).toHaveBeenCalled();
+      });
+
+      it('should not identify issue with missing labels', async () => {
+        const issue = {
+          number: 1,
+          title: 'Test Issue',
+          body: 'Some content',
+          state: 'open' as const,
+          labels: ['sync'],
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        };
+
+        yukiNo.config.labels = 'sync\nneeds review';
+        setupMocks(yukiNo);
+
+        vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+
+        await yukiNo.start();
+
+        expect(yukiNo.github.getIssueComments).not.toHaveBeenCalled();
+      });
+
+      it('should identify issue with default sync label', async () => {
+        const issue = {
+          number: 1,
+          title: 'Test Issue',
+          body: 'Some content',
+          state: 'open' as const,
+          labels: ['sync'],
+          created_at: '2024-01-01T00:00:00Z',
+          updated_at: '2024-01-01T00:00:00Z',
+        };
+
+        vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+
+        await yukiNo.start();
+
+        expect(yukiNo.github.getIssueComments).toHaveBeenCalled();
+      });
     });
 
     it('should skip when release tracking is disabled', async () => {
-      yukiNo = new YukiNo({
-        ...mockConfig,
-        releaseTracking: false,
-      });
-      setupMocks(yukiNo);
+      yukiNo.config.releaseTracking = false;
 
       await yukiNo.start();
 
@@ -219,12 +296,18 @@ describe('YukiNo', () => {
     });
 
     it('should process open issues when enabled', async () => {
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(yukiNo);
+
       const mockIssue = {
         number: 1,
         title: 'Test Issue',
         body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
         state: 'open' as const,
-        user: { login: 'test-user' },
+        labels: ['sync'],
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
@@ -243,12 +326,18 @@ describe('YukiNo', () => {
     });
 
     it('should update comment when new pre-release is available', async () => {
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(yukiNo);
+
       const mockIssue = {
         number: 1,
         title: 'Test Issue',
         body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
         state: 'open' as const,
-        user: { login: 'test-user' },
+        labels: ['sync'],
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
@@ -259,12 +348,6 @@ describe('YukiNo', () => {
         user: { login: 'test-user' },
         created_at: '2024-01-01T00:00:00Z',
       };
-
-      yukiNo = new YukiNo({
-        ...mockConfig,
-        releaseTracking: true,
-      });
-      setupMocks(yukiNo);
 
       vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
       vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
@@ -284,12 +367,18 @@ describe('YukiNo', () => {
     });
 
     it('should update comment when release is available', async () => {
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        releaseTracking: true,
+      });
+      setupMocks(yukiNo);
+
       const mockIssue = {
         number: 1,
         title: 'Test Issue',
         body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
         state: 'open' as const,
-        user: { login: 'test-user' },
+        labels: ['sync'],
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
@@ -300,12 +389,6 @@ describe('YukiNo', () => {
         user: { login: 'test-user' },
         created_at: '2024-01-01T00:00:00Z',
       };
-
-      yukiNo = new YukiNo({
-        ...mockConfig,
-        releaseTracking: true,
-      });
-      setupMocks(yukiNo);
 
       vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
       vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
@@ -436,7 +519,7 @@ describe('YukiNo', () => {
         title: 'Regular Issue',
         body: 'This is not a Yuki-no issue',
         state: 'open' as const,
-        user: { login: 'test-user' },
+        labels: ['other'],
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
@@ -444,6 +527,7 @@ describe('YukiNo', () => {
       vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([
         nonYukiNoIssue,
       ]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([]);
 
       await yukiNo.start();
 
@@ -476,14 +560,16 @@ describe('YukiNo', () => {
         title: 'Test Issue',
         body: 'New updates on head repo.\r\nInvalid commit link',
         state: 'open' as const,
-        user: { login: 'test-user' },
+        labels: ['sync'],
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',
       };
 
       vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([invalidIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([]);
 
-      expect(async () => await yukiNo.start()).rejects.toThrow();
+      await yukiNo.start();
+
       expect(yukiNo.repo.getReleaseInfo).not.toHaveBeenCalled();
     });
   });

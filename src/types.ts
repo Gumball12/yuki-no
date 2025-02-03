@@ -27,4 +27,5 @@ export interface Issue {
   };
   created_at: string;
   updated_at: string;
+  labels?: (string | { name: string })[];
 }

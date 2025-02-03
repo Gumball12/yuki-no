@@ -115,17 +115,11 @@ git commit -m "fix: resolve issue #123"
 
 #### Common Issues
 
-1. **GitHub Actions Bot vs PAT Authentication**
-
-   - While GitHub Actions automatically creates issues as 'github-actions' bot, using PAT will create issues as the PAT owner
-   - When using PAT, make sure to set `USER_NAME` and `EMAIL` in `.env` to match the PAT owner's account
-   - Release tracking will not work if the issue creator doesn't match the configured `USER_NAME`
-
-1. **GitHub API 403 Errors**
-
-   - Check PAT permissions
-
 If you encounter any bugs not covered in this troubleshooting guide, please [open an issue](https://github.com/Gumball12/yuki-no/issues).
+
+**GitHub API 403 Errors**:
+
+- Check PAT permissions
 
 ## Project Structure
 

@@ -189,13 +189,17 @@ export class YukiNo {
   }
 
   protected isYukiNoIssue(issue: Issue): boolean {
-    const isActionsBot = issue.user?.login === 'github-actions[bot]';
-    const isSameUser = isActionsBot
-      ? this.config.userName === defaults.userName
-      : issue.user?.login === this.config.userName;
+    const configuredLabels = this.config.labels
+      ? splitByNewline(this.config.labels)
+      : [defaults.label];
 
-    return (
-      isSameUser && (issue.body ?? '').includes('New updates on head repo')
+    const issueLabels =
+      issue.labels?.map(label =>
+        typeof label === 'string' ? label : label.name,
+      ) ?? [];
+
+    return configuredLabels.every(label =>
+      issueLabels.some(issueLabel => issueLabel === label),
     );
   }
 

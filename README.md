@@ -4,7 +4,7 @@
 
 <img width="350" src="docs/logo.webp" title="logo" alt="logo">
 
-Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful fƒor tracking changes between repositories, especially in documentation translation projects.
+Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
 
 ## Project History
 
@@ -109,17 +109,26 @@ jobs:
 
 ### Caveats
 
-#### Repository Settings
+#### Upstream Repository Option (`upstream-repo`)
 
-- While `upstream-repo` can be specified manually, it is recommended to use the automatic inference in GitHub Actions environments.
-- The automatic inference uses `GITHUB_SERVER_URL` and `GITHUB_REPOSITORY` environment variables.
-- For local development, you must explicitly set `UPSTREAM_REPO` value as these variables are not available. See [Local environment setup](https://github.com/Gumball12/yuki-no/blob/main/CONTRIBUTING.md#local-environment-setup).
+- The automatic inference using `GITHUB_SERVER_URL` and `GITHUB_REPOSITORY` environment variables is recommended for GitHub Actions environments.
+- Manual specification of `upstream-repo` is optional and only needed in specific cases.
+- For local development, you'll need to set the `UPSTREAM_REPO` value as these variables aren't available in the local environment. See [Local environment setup](https://github.com/Gumball12/yuki-no/blob/main/CONTRIBUTING.md#local-environment-setup).
+
+#### Issue Labels
+
+- Yuki-no uses labels to identify issues it manages.
+- An issue is considered a Yuki-no issue if it has all the labels specified in the `labels` option.
+- For example:
+  - If `labels: sync\nneeds review` is set, an issue must have both labels to be managed
+  - If an issue has `sync, needs review, other` labels and `labels: sync\nneeds review` is set, it will be managed
+  - If an issue has `sync, other` labels and `labels: sync\nneeds review` is set, it will be ignored
+- By default, Yuki-no uses the `sync` label
 
 #### GitHub Actions Bot
 
-- Avoid modifying the default `username` and `email` settings.
+- The default `username` and `email` settings are optimized for most use cases.
 - Yuki-no uses [GitHub Actions bot](https://docs.github.com/en/actions/using-workflows/about-github-actions#about-github-actions) by default.
-- Using different credentials may break functionality, especially release tracking and comment authorship.
 
 ## How It Works
 
