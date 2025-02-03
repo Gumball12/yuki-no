@@ -29,6 +29,11 @@ inputs:
   path-starts-with:
     description: 'File path to track. If specified, Ryu-Cho will only track commits that modified files under this path. If not specified, it will track all files in the project root.'
     required: false
+  labels:
+    description: 'Labels to add to the issues. You can specify multiple labels separated by newlines. Defaults to "sync". If empty string is provided, no labels will be added.'
+    required: false
+    default: |
+      sync
 
 runs:
   using: 'composite'

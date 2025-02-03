@@ -4,6 +4,7 @@ import type { Remote } from './config';
 export interface CreateIssueOptions {
   title: string;
   body: string;
+  labels: string[];
 }
 
 export interface CreatePullRequestOptions {
@@ -39,6 +40,7 @@ export class GitHub {
       repo: remote.name,
       title: options.title,
       body: options.body,
+      labels: options.labels,
     });
   }
 

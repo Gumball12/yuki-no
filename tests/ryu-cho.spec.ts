@@ -55,42 +55,61 @@ describe('RyuCho', () => {
     },
   };
 
+  const mockFeed = {
+    link: 'commit-link',
+    title: 'commit title',
+    contentSnippet: 'commit message',
+    isoDate: '2024-01-01T00:00:00.000Z',
+  };
+
+  /**
+   * Sets up all necessary mocks for testing RyuCho
+   *
+   * This function mocks all external dependencies:
+   * - GitHub API calls (getLatestRun, getCommit, searchIssue, createIssue, createPullRequest)
+   * - Repository operations (branchExists, hasConflicts)
+   * - RSS feed fetching
+   *
+   * Default mock behavior:
+   * - Sets last run date to Dec 31, 2023 (commits after this date are "new")
+   * - Returns a single mock feed item
+   * - Simulates a commit that modified a file in docs/
+   * - Branch doesn't exist (allows new branch creation)
+   * - No existing issues found
+   * - No merge conflicts
+   *
+   * @param instance - RyuCho instance to mock
+   */
+  function setupMocks(instance: RyuCho) {
+    vi.mocked(instance.github.getLatestRun).mockResolvedValue({
+      created_at: '2023-12-31T00:00:00.000Z',
+    } as any);
+    vi.mocked(instance.rss.get).mockResolvedValue([mockFeed] as any);
+    vi.mocked(instance.github.getCommit).mockResolvedValue({
+      data: {
+        files: [{ filename: 'docs/test.md' }],
+      },
+    } as any);
+    vi.mocked(instance.repo.branchExists).mockReturnValue(false);
+    vi.mocked(instance.github.searchIssue).mockResolvedValue({
+      data: { total_count: 0 },
+    } as any);
+    vi.mocked(instance.github.createIssue).mockResolvedValue({
+      data: { number: 1, html_url: 'issue-url' },
+    } as any);
+    vi.mocked(instance.repo.hasConflicts).mockReturnValue(false);
+    vi.mocked(instance.github.createPullRequest).mockResolvedValue({
+      data: { html_url: 'pr-url' },
+    } as any);
+  }
+
   beforeEach(() => {
-    ryuCho = new RyuCho(mockConfig);
     vi.clearAllMocks();
+    ryuCho = new RyuCho(mockConfig);
+    setupMocks(ryuCho);
   });
 
   describe('commit processing', () => {
-    const mockFeed = {
-      link: 'commit-link',
-      title: 'commit title',
-      contentSnippet: 'commit message',
-      isoDate: '2024-01-01T00:00:00.000Z',
-    };
-
-    beforeEach(() => {
-      vi.mocked(ryuCho.github.getLatestRun).mockResolvedValue({
-        created_at: '2023-12-31T00:00:00.000Z',
-      } as any);
-      vi.mocked(ryuCho.rss.get).mockResolvedValue([mockFeed] as any);
-      vi.mocked(ryuCho.github.getCommit).mockResolvedValue({
-        data: {
-          files: [{ filename: 'docs/test.md' }],
-        },
-      } as any);
-      vi.mocked(ryuCho.repo.branchExists).mockReturnValue(false);
-      vi.mocked(ryuCho.github.searchIssue).mockResolvedValue({
-        data: { total_count: 0 },
-      } as any);
-      vi.mocked(ryuCho.github.createIssue).mockResolvedValue({
-        data: { number: 1, html_url: 'issue-url' },
-      } as any);
-      vi.mocked(ryuCho.repo.hasConflicts).mockReturnValue(false);
-      vi.mocked(ryuCho.github.createPullRequest).mockResolvedValue({
-        data: { html_url: 'pr-url' },
-      } as any);
-    });
-
     it('should process new commit and create PR', async () => {
       await ryuCho.start();
 
@@ -117,6 +136,55 @@ describe('RyuCho', () => {
 
       expect(ryuCho.repo.reset).toHaveBeenCalled();
       expect(ryuCho.github.createPullRequest).not.toHaveBeenCalled();
+    });
+
+    describe('issue labels', () => {
+      it('should use default sync label when labels not provided', async () => {
+        await ryuCho.start();
+
+        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: ['sync'],
+          }),
+        );
+      });
+
+      it('should use provided labels when specified', async () => {
+        const configWithLabels = {
+          ...mockConfig,
+          labels: 'label1\nlabel2\nlabel3',
+        };
+        ryuCho = new RyuCho(configWithLabels);
+        setupMocks(ryuCho);
+
+        await ryuCho.start();
+
+        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: ['label1', 'label2', 'label3'],
+          }),
+        );
+      });
+
+      it('should not add any labels when empty string provided', async () => {
+        const configWithEmptyLabels = {
+          ...mockConfig,
+          labels: '',
+        };
+        ryuCho = new RyuCho(configWithEmptyLabels);
+        setupMocks(ryuCho);
+
+        await ryuCho.start();
+
+        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: [],
+          }),
+        );
+      });
     });
   });
 });

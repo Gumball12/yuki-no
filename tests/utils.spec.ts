@@ -6,6 +6,7 @@ import {
   extractRepoName,
   extractRepoOwner,
   removeHash,
+  splitByNewline,
 } from '../src/utils';
 
 describe('utils', () => {
@@ -129,5 +130,27 @@ describe('utils', () => {
       );
       expect(removeHash('text without hash')).toBe('text without hash');
     });
+  });
+});
+
+describe('#splitByNewline', () => {
+  it('splits the text by newline', () => {
+    const text = 'line1\nline2\nline3\nline5';
+
+    expect(splitByNewline(text)).toEqual(['line1', 'line2', 'line3', 'line5']);
+  });
+
+  it('removes empty lines', () => {
+    const text = '\nline1\n\nline2\n\n';
+
+    expect(splitByNewline(text)).toEqual(['line1', 'line2']);
+  });
+
+  it('returns empty array if text is empty', () => {
+    expect(splitByNewline('')).toEqual([]);
+  });
+
+  it('returns empty array if text is undefined', () => {
+    expect(splitByNewline(undefined)).toEqual([]);
   });
 });

@@ -74,6 +74,21 @@ export interface UserConfig {
    * @example 'docs/'
    */
   pathStartsWith?: string;
+
+  /**
+   * Labels to add to the issues. You can specify multiple labels
+   * separated by newlines. Defaults to 'sync'.
+   * If empty string is provided, no labels will be added.
+   *
+   * Uses `process.env.LABELS` if it exists.
+   *
+   * @default 'sync'
+   * @example |
+   *   sync
+   *   needs review
+   *   my-label
+   */
+  labels?: string;
 }
 
 export interface Config {
@@ -82,6 +97,7 @@ export interface Config {
   accessToken: string;
   trackFrom: string;
   pathStartsWith?: string;
+  labels?: string;
 
   remote: {
     upstream: Remote;
@@ -103,6 +119,7 @@ export function createConfig(config: UserConfig): Config {
     accessToken: config.accessToken,
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
+    labels: config.labels,
 
     remote: {
       upstream: {
