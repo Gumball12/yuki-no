@@ -3,6 +3,7 @@ import type { Config, Remote } from './config';
 import { Rss } from './rss';
 import { GitHub } from './github';
 import { Repository } from './repository';
+import { defaults } from './defaults';
 
 interface Feed {
   link: string;
@@ -117,7 +118,7 @@ export class RyuCho {
     const labels =
       this.config.labels !== undefined
         ? splitByNewline(this.config.labels)
-        : ['sync'];
+        : [defaults.label];
 
     const res = await this.github.createIssue(this.upstream, {
       title,

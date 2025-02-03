@@ -1,4 +1,5 @@
 import { extractRepoOwner, extractRepoName } from './utils';
+import { defaults } from './defaults';
 
 export interface UserConfig {
   /**
@@ -114,8 +115,8 @@ export interface Remote {
 
 export function createConfig(config: UserConfig): Config {
   return {
-    userName: config.userName ?? 'github-actions',
-    email: config.email ?? 'action@github.com',
+    userName: config.userName ?? defaults.userName,
+    email: config.email ?? defaults.email,
     accessToken: config.accessToken,
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
@@ -126,13 +127,13 @@ export function createConfig(config: UserConfig): Config {
         url: config.upstreamRepo,
         owner: extractRepoOwner(config.upstreamRepo),
         name: extractRepoName(config.upstreamRepo),
-        branch: 'main',
+        branch: defaults.branch,
       },
       head: {
         url: config.headRepo,
         owner: extractRepoOwner(config.headRepo),
         name: extractRepoName(config.headRepo),
-        branch: config.headRepoBranch ?? 'main',
+        branch: config.headRepoBranch ?? defaults.branch,
       },
     },
   };
