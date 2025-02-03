@@ -62,6 +62,7 @@ describe('Repository', () => {
         'test-token',
         'https://github.com/test/upstream.git',
         'upstream',
+        'tmp',
       );
       expect(repository.git.addRemote).toHaveBeenCalledWith(
         'https://github.com/test/head.git',

@@ -153,18 +153,24 @@ export class YukiNo {
     }
 
     const releaseInfo = this.repo.getReleaseInfo(commitHash);
+    const newComment = this.formatReleaseComment(releaseInfo);
 
-    await this.github.createComment(
-      this.upstream,
-      issue.number,
-      this.formatReleaseComment(releaseInfo),
-    );
+    // Skip if the last comment has the same release information
+    if (lastReleaseComment && lastReleaseComment.body === newComment) {
+      return;
+    }
+
+    await this.github.createComment(this.upstream, issue.number, newComment);
   }
 
   protected isYukiNoIssue(issue: Issue): boolean {
+    const isActionsBot = issue.user?.login === 'github-actions[bot]';
+    const isSameUser = isActionsBot
+      ? this.config.userName === defaults.userName
+      : issue.user?.login === this.config.userName;
+
     return (
-      issue.user?.login === this.config.userName &&
-      (issue.body ?? '').includes('New updates on head repo')
+      isSameUser && (issue.body ?? '').includes('New updates on head repo')
     );
   }
 
