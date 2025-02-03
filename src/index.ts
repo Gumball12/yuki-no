@@ -1,6 +1,6 @@
 import { assert } from './utils';
 import { createConfig } from './config';
-import { RyuCho } from './ryu-cho';
+import { YukiNo } from './yuki-no';
 
 assert(!!process.env.ACCESS_TOKEN, '`accessToken` is required.');
 assert(!!process.env.UPSTREAM_REPO, '`upstreamRepo` is required.');
@@ -19,10 +19,10 @@ const config = createConfig({
   labels: process.env.LABELS,
 });
 
-const ryuCho = new RyuCho(config);
+const yukiNo = new YukiNo(config);
 
 process.on('unhandledRejection', err => {
   console.error(err);
 });
 
-ryuCho.start();
+yukiNo.start();

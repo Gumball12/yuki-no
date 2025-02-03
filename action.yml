@@ -1,4 +1,4 @@
-name: 'Ryu-Cho'
+name: 'Yuki-no'
 description: 'Automatic git commit tracking service.'
 
 inputs:
@@ -14,7 +14,7 @@ inputs:
     required: false
     default: 'action@github.com'
   upstream-repo:
-    description: 'The url for the upstream repo. This is the repository that you set up Ryu-Cho. e.g. https://github.com/vitejs/docs-ko.git'
+    description: 'The url for the upstream repo. This is the repository that you set up Yuki-no. e.g. https://github.com/vitejs/docs-ko.git'
     required: true
   head-repo:
     description: 'The head repo to track. This is the repository you want to take a diff. e.g. https://github.com/vitejs/vite.git'
@@ -24,10 +24,10 @@ inputs:
     required: false
     default: 'main'
   track-from:
-    description: 'The git commit sha of head repo to start tracking. Ryu-Cho will only track commit from this hash.'
+    description: 'The git commit sha of head repo to start tracking. Yuki-no will only track commit from this hash.'
     required: true
   path-starts-with:
-    description: 'File path to track. If specified, Ryu-Cho will only track commits that modified files under this path. If not specified, it will track all files in the project root.'
+    description: 'File path to track. If specified, Yuki-no will only track commits that modified files under this path. If not specified, it will track all files in the project root.'
     required: false
   labels:
     description: 'Labels to add to the issues. You can specify multiple labels separated by newlines. Defaults to "sync". If empty string is provided, no labels will be added.'
@@ -35,16 +35,16 @@ inputs:
     default: |
       sync
   release-tracking:
-    description: 'Whether to enable release tracking. When enabled, Ryu-Cho will track releases for each issue and add comments about release status.'
+    description: 'Whether to enable release tracking. When enabled, Yuki-no will track releases for each issue and add comments about release status.'
     required: false
 
 runs:
   using: 'composite'
   steps:
-    - name: Checkout Ryu-Cho
+    - name: Checkout Yuki-no
       run: ${{ github.action_path }}/scripts/checkout.sh
       shell: bash
-    - name: Run Ryu-Cho
+    - name: Run Yuki-no
       env:
         ACCESS_TOKEN: ${{ inputs.access-token }}
         USER_NAME: ${{ inputs.username }}
@@ -57,7 +57,7 @@ runs:
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
       run: |
-        cd ryu-cho
+        cd yuki-no
         yarn install
         yarn start
       shell: bash

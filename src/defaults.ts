@@ -1,5 +1,5 @@
 /**
- * Default configuration values for Ryu-Cho
+ * Default configuration values for Yuki-no
  */
 export const defaults = {
   /**

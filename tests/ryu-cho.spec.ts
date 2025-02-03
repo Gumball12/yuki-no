@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { RyuCho } from '../src/ryu-cho';
+import { YukiNo } from '../src/yuki-no';
 import type { Config } from '../src/config';
 
 vi.mock('../src/rss', () => ({
@@ -35,8 +35,8 @@ vi.mock('../src/repository', () => ({
   })),
 }));
 
-describe('RyuCho', () => {
-  let ryuCho: RyuCho;
+describe('YukiNo', () => {
+  let yukiNo: YukiNo;
   const mockConfig: Config = {
     userName: 'test-user',
     email: 'test@example.com',
@@ -68,7 +68,7 @@ describe('RyuCho', () => {
   };
 
   /**
-   * Sets up all necessary mocks for testing RyuCho
+   * Sets up all necessary mocks for testing YukiNo
    *
    * This function mocks all external dependencies:
    * - GitHub API calls (getLatestRun, getCommit, searchIssue, createIssue, createPullRequest)
@@ -83,9 +83,9 @@ describe('RyuCho', () => {
    * - No existing issues found
    * - No merge conflicts
    *
-   * @param instance - RyuCho instance to mock
+   * @param instance - YukiNo instance to mock
    */
-  function setupMocks(instance: RyuCho) {
+  function setupMocks(instance: YukiNo) {
     vi.mocked(instance.github.getLatestRun).mockResolvedValue({
       created_at: '2023-12-31T00:00:00.000Z',
     } as any);
@@ -111,44 +111,44 @@ describe('RyuCho', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    ryuCho = new RyuCho(mockConfig);
-    setupMocks(ryuCho);
+    yukiNo = new YukiNo(mockConfig);
+    setupMocks(yukiNo);
   });
 
   describe('commit processing', () => {
     it('should process new commit and create PR', async () => {
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.repo.setup).toHaveBeenCalled();
-      expect(ryuCho.github.createIssue).toHaveBeenCalled();
-      expect(ryuCho.github.createPullRequest).toHaveBeenCalled();
+      expect(yukiNo.repo.setup).toHaveBeenCalled();
+      expect(yukiNo.github.createIssue).toHaveBeenCalled();
+      expect(yukiNo.github.createPullRequest).toHaveBeenCalled();
     });
 
     it('should skip processing when commit is too old', async () => {
-      vi.mocked(ryuCho.github.getLatestRun).mockResolvedValue({
+      vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
         created_at: '2024-01-02T00:00:00.000Z',
       } as any);
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.createIssue).not.toHaveBeenCalled();
-      expect(ryuCho.github.createPullRequest).not.toHaveBeenCalled();
+      expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+      expect(yukiNo.github.createPullRequest).not.toHaveBeenCalled();
     });
 
     it('should handle merge conflicts', async () => {
-      vi.mocked(ryuCho.repo.hasConflicts).mockReturnValue(true);
+      vi.mocked(yukiNo.repo.hasConflicts).mockReturnValue(true);
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.repo.reset).toHaveBeenCalled();
-      expect(ryuCho.github.createPullRequest).not.toHaveBeenCalled();
+      expect(yukiNo.repo.reset).toHaveBeenCalled();
+      expect(yukiNo.github.createPullRequest).not.toHaveBeenCalled();
     });
 
     describe('issue labels', () => {
       it('should use default sync label when labels not provided', async () => {
-        await ryuCho.start();
+        await yukiNo.start();
 
-        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+        expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             labels: ['sync'],
@@ -161,12 +161,12 @@ describe('RyuCho', () => {
           ...mockConfig,
           labels: 'label1\nlabel2\nlabel3',
         };
-        ryuCho = new RyuCho(configWithLabels);
-        setupMocks(ryuCho);
+        yukiNo = new YukiNo(configWithLabels);
+        setupMocks(yukiNo);
 
-        await ryuCho.start();
+        await yukiNo.start();
 
-        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+        expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             labels: ['label1', 'label2', 'label3'],
@@ -179,12 +179,12 @@ describe('RyuCho', () => {
           ...mockConfig,
           labels: '',
         };
-        ryuCho = new RyuCho(configWithEmptyLabels);
-        setupMocks(ryuCho);
+        yukiNo = new YukiNo(configWithEmptyLabels);
+        setupMocks(yukiNo);
 
-        await ryuCho.start();
+        await yukiNo.start();
 
-        expect(ryuCho.github.createIssue).toHaveBeenCalledWith(
+        expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
             labels: [],
@@ -197,23 +197,23 @@ describe('RyuCho', () => {
   describe('release tracking', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      ryuCho = new RyuCho({
+      yukiNo = new YukiNo({
         ...mockConfig,
         releaseTracking: true,
       });
-      setupMocks(ryuCho);
+      setupMocks(yukiNo);
     });
 
     it('should skip when release tracking is disabled', async () => {
-      ryuCho = new RyuCho({
+      yukiNo = new YukiNo({
         ...mockConfig,
         releaseTracking: false,
       });
-      setupMocks(ryuCho);
+      setupMocks(yukiNo);
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.getOpenIssues).not.toHaveBeenCalled();
+      expect(yukiNo.github.getOpenIssues).not.toHaveBeenCalled();
     });
 
     it('should process open issues when enabled', async () => {
@@ -227,13 +227,13 @@ describe('RyuCho', () => {
         updated_at: '2024-01-01T00:00:00Z',
       };
 
-      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
-      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([]);
-      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({});
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([]);
+      vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+      expect(yukiNo.github.createComment).toHaveBeenCalledWith(
         expect.anything(),
         1,
         '- pre-release: none\n- release: none',
@@ -258,23 +258,23 @@ describe('RyuCho', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-      ryuCho = new RyuCho({
+      yukiNo = new YukiNo({
         ...mockConfig,
         releaseTracking: true,
       });
-      setupMocks(ryuCho);
+      setupMocks(yukiNo);
 
-      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
-      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
         existingComment,
       ]);
-      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({
+      vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({
         preRelease: { tag: 'v1.0.0-beta.2', url: 'pre-url-2' },
       });
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+      expect(yukiNo.github.createComment).toHaveBeenCalledWith(
         expect.anything(),
         1,
         '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: none',
@@ -299,24 +299,24 @@ describe('RyuCho', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-      ryuCho = new RyuCho({
+      yukiNo = new YukiNo({
         ...mockConfig,
         releaseTracking: true,
       });
-      setupMocks(ryuCho);
+      setupMocks(yukiNo);
 
-      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
-      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
         existingComment,
       ]);
-      vi.mocked(ryuCho.repo.getReleaseInfo).mockReturnValue({
+      vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({
         preRelease: { tag: 'v1.0.0-beta.2', url: 'pre-url-2' },
         release: { tag: 'v1.0.0', url: 'release-url' },
       });
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.createComment).toHaveBeenCalledWith(
+      expect(yukiNo.github.createComment).toHaveBeenCalledWith(
         expect.anything(),
         1,
         '- pre-release: [v1.0.0-beta.2](pre-url-2)\n- release: [v1.0.0](release-url)',
@@ -341,20 +341,20 @@ describe('RyuCho', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-      vi.mocked(ryuCho.github.getOpenIssues).mockResolvedValue([mockIssue]);
-      vi.mocked(ryuCho.github.getIssueComments).mockResolvedValue([
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([mockIssue]);
+      vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([
         mockComment,
       ]);
 
-      await ryuCho.start();
+      await yukiNo.start();
 
-      expect(ryuCho.github.createComment).not.toHaveBeenCalled();
+      expect(yukiNo.github.createComment).not.toHaveBeenCalled();
     });
 
     describe('comment formatting', () => {
       it('should format when no releases', () => {
         const info = {};
-        const comment = ryuCho.formatReleaseComment(info);
+        const comment = yukiNo.formatReleaseComment(info);
         expect(comment).toBe('- pre-release: none\n- release: none');
       });
 
@@ -362,7 +362,7 @@ describe('RyuCho', () => {
         const info = {
           preRelease: { tag: 'v1.0.0-beta.1', url: 'pre-url' },
         };
-        const comment = ryuCho.formatReleaseComment(info);
+        const comment = yukiNo.formatReleaseComment(info);
         expect(comment).toBe(
           '- pre-release: [v1.0.0-beta.1](pre-url)\n- release: none',
         );
@@ -373,7 +373,7 @@ describe('RyuCho', () => {
           preRelease: { tag: 'v1.0.0-beta.1', url: 'pre-url' },
           release: { tag: 'v1.0.0', url: 'release-url' },
         };
-        const comment = ryuCho.formatReleaseComment(info);
+        const comment = yukiNo.formatReleaseComment(info);
         expect(comment).toBe(
           '- pre-release: [v1.0.0-beta.1](pre-url)\n- release: [v1.0.0](release-url)',
         );
@@ -383,7 +383,7 @@ describe('RyuCho', () => {
         const info = {
           release: { tag: 'v1.0.0', url: 'release-url' },
         };
-        const comment = ryuCho.formatReleaseComment(info);
+        const comment = yukiNo.formatReleaseComment(info);
         expect(comment).toBe(
           '- pre-release: none\n- release: [v1.0.0](release-url)',
         );

@@ -13,7 +13,7 @@ interface Feed {
   isoDate: string;
 }
 
-export class RyuCho {
+export class YukiNo {
   config: Config;
   upstream: Remote;
   head: Remote;
@@ -56,7 +56,7 @@ export class RyuCho {
   }
 
   protected async getRun() {
-    const run = await this.github.getLatestRun(this.upstream, 'ryu-cho');
+    const run = await this.github.getLatestRun(this.upstream, 'yuki-no');
     return run ? new Date(run.created_at).toISOString() : '';
   }
 
@@ -183,7 +183,7 @@ export class RyuCho {
   }
 
   protected async processIssueRelease(issue: Issue): Promise<void> {
-    if (!this.isRyuChoIssue(issue)) {
+    if (!this.isYukiNoIssue(issue)) {
       return;
     }
 
@@ -211,7 +211,7 @@ export class RyuCho {
     );
   }
 
-  protected isRyuChoIssue(issue: Issue): boolean {
+  protected isYukiNoIssue(issue: Issue): boolean {
     return (
       issue.user?.login === this.config.userName &&
       (issue.body ?? '').includes('New updates on head repo')

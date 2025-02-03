@@ -30,7 +30,7 @@ export interface UserConfig {
   email?: string;
 
   /**
-   * The url for the upstream repo. This is the repository that you set up Ryu-Cho.
+   * The url for the upstream repo. This is the repository that you set up Yuki-no.
    *
    * Uses `process.env.UPSTREAM_REPO` if it exists.
    *
@@ -59,7 +59,7 @@ export interface UserConfig {
 
   /**
    * The git commit sha of head repo to start tracking.
-   * Ryu-Cho will only track commit from this hash.
+   * Yuki-no will only track commit from this hash.
    *
    * Uses `process.env.TRACK_FROM` if it exists.
    *
@@ -68,7 +68,7 @@ export interface UserConfig {
   trackFrom: string;
 
   /**
-   * File path to track. If specified, Ryu-Cho will only track commits that
+   * File path to track. If specified, Yuki-no will only track commits that
    * modified files under this path. If not specified, it will track all files
    * in the project root.
    *
@@ -93,7 +93,7 @@ export interface UserConfig {
 
   /**
    * Whether to enable release tracking.
-   * When enabled, Ryu-Cho will track releases for each issue and
+   * When enabled, Yuki-no will track releases for each issue and
    * add comments about release status.
    *
    * Uses `process.env.RELEASE_TRACKING` if it exists.
