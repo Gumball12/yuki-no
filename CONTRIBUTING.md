@@ -67,6 +67,10 @@ For more PAT details, see [GitHub documentation](https://docs.github.com/en/auth
    # ...
    ```
 
+   > [!IMPORTANT]
+   > Unlike in GitHub Actions environment, `UPSTREAM_REPO` must be explicitly set for local development.
+   > The automatic repository inference only works in GitHub Actions context.
+
 For detailed environment variable settings, see [action.yml](./action.yml).
 
 #### How It Works

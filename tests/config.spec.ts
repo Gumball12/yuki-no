@@ -1,13 +1,24 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createConfig } from '../src/config';
 import type { UserConfig } from '../src/config';
 
 describe('config', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    process.env.GITHUB_SERVER_URL = 'https://github.com';
+    process.env.GITHUB_REPOSITORY = 'test/current-repo';
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
   describe('createConfig', () => {
     it('should create config with only required fields', () => {
       const userConfig: UserConfig = {
         accessToken: 'test-token',
-        upstreamRepo: 'https://github.com/test/upstream.git',
         headRepo: 'https://github.com/test/head.git',
         trackFrom: 'test-hash',
       };
@@ -25,9 +36,9 @@ describe('config', () => {
         verbose: false,
         remote: {
           upstream: {
-            url: 'https://github.com/test/upstream.git',
+            url: 'https://github.com/test/current-repo.git',
             owner: 'test',
-            name: 'upstream',
+            name: 'current-repo',
             branch: 'main',
           },
           head: {
@@ -38,6 +49,38 @@ describe('config', () => {
           },
         },
       });
+    });
+
+    it('should use provided upstream repo over inferred one', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        upstreamRepo: 'https://github.com/test/upstream.git',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+      };
+
+      const config = createConfig(userConfig);
+
+      expect(config.remote.upstream).toEqual({
+        url: 'https://github.com/test/upstream.git',
+        owner: 'test',
+        name: 'upstream',
+        branch: 'main',
+      });
+    });
+
+    it('should throw error when GitHub repository cannot be inferred', () => {
+      delete process.env.GITHUB_REPOSITORY;
+
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+      };
+
+      expect(() => createConfig(userConfig)).toThrow(
+        'Failed to infer upstream repository: GITHUB_REPOSITORY environment variable is not set',
+      );
     });
 
     it('should create config with all optional fields', () => {
@@ -102,7 +145,6 @@ describe('config', () => {
     it('should use default values for optional fields when not provided', () => {
       const userConfig: UserConfig = {
         accessToken: 'test-token',
-        upstreamRepo: 'https://github.com/test/upstream.git',
         headRepo: 'https://github.com/test/head.git',
         trackFrom: 'test-hash',
       };

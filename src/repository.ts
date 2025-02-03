@@ -25,7 +25,11 @@ export class Repository {
   git: Git;
 
   constructor(options: Options) {
-    this.path = options.path ?? '.';
+    if (!options.path) {
+      throw new Error('Repository path is required');
+    }
+
+    this.path = options.path;
     this.token = options.token;
     this.userName = options.userName;
     this.email = options.email;

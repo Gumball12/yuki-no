@@ -57,10 +57,6 @@ jobs:
           # GitHub access token. Required.
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # The url for the upstream repo. This is the repository that you
-          # set up Yuki-no. Required.
-          upstream-repo: https://github.com/upstream-user/upstream-repo.git
-
           # The head repo to track. This is the repository you want to
           # take a diff. Required.
           head-repo: https://github.com/head-user/head-repo.git
@@ -100,7 +96,7 @@ jobs:
 | `access-token`     | Yes      | -                   | GitHub access token                                                                     |
 | `username`         | No       | `github-actions`    | Git username for commits                                                                |
 | `email`            | No       | `action@github.com` | Git email for commits                                                                   |
-| `upstream-repo`    | Yes      | -                   | URL of your repository                                                                  |
+| `upstream-repo`    | No       | Current repository  | URL of your repository                                                                  |
 | `head-repo`        | Yes      | -                   | URL of repository to track                                                              |
 | `head-repo-branch` | No       | `main`              | Branch to track in head repo                                                            |
 | `track-from`       | Yes      | -                   | Starting commit hash                                                                    |
@@ -108,6 +104,20 @@ jobs:
 | `labels`           | No       | `sync`              | Labels for issues (newline separated)                                                   |
 | `release-tracking` | No       | `false`             | Enable release status tracking                                                          |
 | `verbose`          | No       | `false`             | Enable verbose logging                                                                  |
+
+### Caveats
+
+#### Repository Settings
+
+- While `upstream-repo` can be specified manually, it is recommended to use the automatic inference in GitHub Actions environments.
+- The automatic inference uses `GITHUB_SERVER_URL` and `GITHUB_REPOSITORY` environment variables.
+- For local development, you must explicitly set `UPSTREAM_REPO` value as these variables are not available. See [Local environment setup](https://github.com/Gumball12/yuki-no/blob/main/CONTRIBUTING.md#local-environment-setup).
+
+#### GitHub Actions Bot
+
+- Avoid modifying the default `username` and `email` settings.
+- Yuki-no uses [GitHub Actions bot](https://docs.github.com/en/actions/using-workflows/about-github-actions#about-github-actions) by default.
+- Using different credentials may break functionality, especially release tracking and comment authorship.
 
 ## How It Works
 

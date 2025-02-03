@@ -14,8 +14,8 @@ inputs:
     required: false
     default: 'action@github.com'
   upstream-repo:
-    description: 'The url for the upstream repo. This is the repository that you set up Yuki-no. e.g. https://github.com/vitejs/docs-ko.git'
-    required: true
+    description: 'The url for the upstream repo. If not specified, the current repository will be used. e.g. https://github.com/vitejs/docs-ko.git'
+    required: false
   head-repo:
     description: 'The head repo to track. This is the repository you want to take a diff. e.g. https://github.com/vitejs/vite.git'
     required: true

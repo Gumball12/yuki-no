@@ -31,12 +31,14 @@ export interface UserConfig {
 
   /**
    * The url for the upstream repo. This is the repository that you set up Yuki-no.
+   * If not specified, the current repository will be used.
    *
    * Uses `process.env.UPSTREAM_REPO` if it exists.
+   * If not provided, uses GitHub Actions environment variables.
    *
    * @example 'https://github.com/vitejs/docs-ko.git'
    */
-  upstreamRepo: string;
+  upstreamRepo?: string;
 
   /**
    * The head repo to track. This is the repository you want to take a diff.
@@ -136,9 +138,11 @@ export interface Remote {
 }
 
 export function createConfig(config: UserConfig): Config {
+  const upstreamRepo = config.upstreamRepo || inferUpstreamRepo();
+
   return {
-    userName: config.userName ?? defaults.userName,
-    email: config.email ?? defaults.email,
+    userName: config.userName || defaults.userName,
+    email: config.email || defaults.email,
     accessToken: config.accessToken,
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
@@ -148,17 +152,32 @@ export function createConfig(config: UserConfig): Config {
 
     remote: {
       upstream: {
-        url: config.upstreamRepo,
-        owner: extractRepoOwner(config.upstreamRepo),
-        name: extractRepoName(config.upstreamRepo),
+        url: upstreamRepo,
+        owner: extractRepoOwner(upstreamRepo),
+        name: extractRepoName(upstreamRepo),
         branch: defaults.branch,
       },
       head: {
         url: config.headRepo,
         owner: extractRepoOwner(config.headRepo),
         name: extractRepoName(config.headRepo),
-        branch: config.headRepoBranch ?? defaults.branch,
+        branch: config.headRepoBranch || defaults.branch,
       },
     },
   };
+}
+
+function inferUpstreamRepo(): string {
+  const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
+  const repository = process.env.GITHUB_REPOSITORY;
+
+  if (!repository) {
+    throw new Error(
+      'Failed to infer upstream repository: GITHUB_REPOSITORY environment variable is not set.\n' +
+        'This typically happens when running outside of GitHub Actions.\n' +
+        'For local development, please explicitly set the UPSTREAM_REPO environment variable.',
+    );
+  }
+
+  return `${serverUrl}/${repository}.git`;
 }
