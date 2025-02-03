@@ -100,6 +100,16 @@ export interface UserConfig {
    * @default undefined
    */
   releaseTracking?: string;
+
+  /**
+   * Whether to enable verbose logging.
+   * When enabled, Yuki-no will show all log messages including info and success messages.
+   * This is useful for debugging.
+   *
+   * Uses `process.env.VERBOSE` if it exists.
+   * @default undefined
+   */
+  verbose?: string;
 }
 
 export interface Config {
@@ -110,6 +120,7 @@ export interface Config {
   pathStartsWith?: string;
   labels?: string;
   releaseTracking: boolean;
+  verbose: boolean;
 
   remote: {
     upstream: Remote;
@@ -133,6 +144,7 @@ export function createConfig(config: UserConfig): Config {
     pathStartsWith: config.pathStartsWith,
     labels: config.labels,
     releaseTracking: config.releaseTracking?.toLowerCase() === 'true',
+    verbose: config.verbose?.toLowerCase() === 'true',
 
     remote: {
       upstream: {

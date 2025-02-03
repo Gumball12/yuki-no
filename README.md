@@ -104,6 +104,12 @@ jobs:
           # and add comments about release status. Optional.
           # Defaults to 'false'
           release-tracking: true
+
+          # Whether to enable verbose logging.
+          # When enabled, Yuki-no will show all log messages including info and success messages.
+          # This is useful for debugging.
+          # Defaults to 'false'
+          verbose: true
 ```
 
 ### Configuration
@@ -120,6 +126,7 @@ jobs:
 | `path-starts-with` | No       | -                   | Path filter for changes               |
 | `labels`           | No       | `sync`              | Labels for issues (newline separated) |
 | `release-tracking` | No       | `false`             | Enable release status tracking        |
+| `verbose`          | No       | `false`             | Enable verbose logging                |
 
 ## How It Works
 

@@ -41,32 +41,44 @@ export class YukiNo {
   }
 
   async start(): Promise<void> {
+    log('I', 'Starting Yuki-no...');
     this.repo.setup();
 
     const run = await this.getRun();
     const feed = await this.getFeed();
+
+    log('I', `Found ${feed.length} commits to process`);
 
     for (const i in feed) {
       await this.processFeed(feed[i] as Feed, run);
     }
 
     if (this.config.releaseTracking) {
+      log('I', 'Starting release tracking...');
       await this.trackReleases();
     }
+
+    log('S', 'Yuki-no completed successfully');
   }
 
   protected async getRun() {
+    log('I', 'Getting latest run information...');
     const run = await this.github.getLatestRun(this.upstream, 'yuki-no');
     return run ? new Date(run.created_at).toISOString() : '';
   }
 
   protected async getFeed() {
+    log('I', 'Fetching commits from head repo...');
     return this.rss.get(this.head, this.config.trackFrom);
   }
 
   protected async processFeed(feed: Feed, run: string) {
     // Skip any feed which is older than the last run.
     if (run > feed.isoDate) {
+      log(
+        'I',
+        `Skipping commit "${feed.contentSnippet}" (older than last run)`,
+      );
       return;
     }
 
@@ -75,15 +87,21 @@ export class YukiNo {
     // Check if the commit contains file path that we want to track.
     // If not, do nothing and abort.
     if (!(await this.containsValidFile(feed, hash))) {
+      log(
+        'I',
+        `Skipping commit "${feed.contentSnippet}" (no relevant file changes)`,
+      );
       return;
     }
 
-    log('I', `New commit on head repo: "${feed.contentSnippet}"`);
+    log('I', `Processing commit "${feed.contentSnippet}"`);
 
     const issueNo = await this.createIssueIfNot(feed, hash);
 
     if (issueNo === null) {
-      log('W', 'Issue already exists');
+      log('W', `Issue already exists for commit "${feed.contentSnippet}"`);
+    } else {
+      log('S', `Created issue #${issueNo} for commit "${feed.contentSnippet}"`);
     }
   }
 
@@ -92,10 +110,18 @@ export class YukiNo {
       return true;
     }
 
+    log(
+      'I',
+      `Checking for file changes in path "${this.config.pathStartsWith}"`,
+    );
     const res = await this.github.getCommit(this.head, hash);
 
     return res.data.files!.some(file => {
-      return file.filename!.startsWith(this.config.pathStartsWith!);
+      const matches = file.filename!.startsWith(this.config.pathStartsWith!);
+      if (matches) {
+        log('I', `Found relevant file change: ${file.filename}`);
+      }
+      return matches;
     });
   }
 
@@ -126,6 +152,7 @@ export class YukiNo {
 
   protected async trackReleases(): Promise<void> {
     const issues = await this.github.getOpenIssues(this.upstream);
+    log('I', `Found ${issues.length} open issues to check for releases`);
 
     for (const issue of issues) {
       await this.processIssueRelease(issue);
@@ -134,8 +161,11 @@ export class YukiNo {
 
   protected async processIssueRelease(issue: Issue): Promise<void> {
     if (!this.isYukiNoIssue(issue)) {
+      log('I', `Skipping issue #${issue.number} (not a Yuki-no issue)`);
       return;
     }
+
+    log('I', `Processing release status for issue #${issue.number}`);
 
     const comments = await this.github.getIssueComments(
       this.upstream,
@@ -144,11 +174,13 @@ export class YukiNo {
     const lastReleaseComment = this.findLastReleaseComment(comments);
 
     if (lastReleaseComment && this.hasFullRelease(lastReleaseComment)) {
+      log('I', `Issue #${issue.number} already has full release status`);
       return;
     }
 
     const commitHash = this.extractCommitHash(issue.body ?? '');
     if (!commitHash) {
+      log('W', `Could not extract commit hash from issue #${issue.number}`);
       return;
     }
 
@@ -157,10 +189,13 @@ export class YukiNo {
 
     // Skip if the last comment has the same release information
     if (lastReleaseComment && lastReleaseComment.body === newComment) {
+      log('I', `No release status changes for issue #${issue.number}`);
       return;
     }
 
+    log('I', `Updating release status for issue #${issue.number}`);
     await this.github.createComment(this.upstream, issue.number, newComment);
+    log('S', `Updated release status for issue #${issue.number}`);
   }
 
   protected isYukiNoIssue(issue: Issue): boolean {

@@ -37,6 +37,9 @@ inputs:
   release-tracking:
     description: 'Whether to enable release tracking. When enabled, Yuki-no will track releases for each issue and add comments about release status.'
     required: false
+  verbose:
+    description: 'Whether to enable verbose logging. When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
+    required: false
 
 runs:
   using: 'composite'
@@ -56,6 +59,7 @@ runs:
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
+        VERBOSE: ${{ inputs.verbose }}
       run: |
         cd yuki-no
         yarn install

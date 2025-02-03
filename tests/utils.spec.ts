@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   log,
   assert,
@@ -11,75 +11,69 @@ import {
 
 describe('utils', () => {
   describe('log', () => {
-    let originalGithubActions: string | undefined;
-
-    beforeEach(() => {
-      originalGithubActions = process.env.GITHUB_ACTIONS;
-    });
-
     afterEach(() => {
-      process.env.GITHUB_ACTIONS = originalGithubActions;
+      delete process.env.VERBOSE;
       vi.clearAllMocks();
     });
 
-    it('should log info message in development', () => {
-      process.env.GITHUB_ACTIONS = undefined;
+    it('should log info message in verbose mode', () => {
+      process.env.VERBOSE = 'true';
       const consoleSpy = vi.spyOn(console, 'info');
       log('I', 'test message');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should log success message in development', () => {
-      process.env.GITHUB_ACTIONS = undefined;
+    it('should log success message in verbose mode', () => {
+      process.env.VERBOSE = 'true';
       const consoleSpy = vi.spyOn(console, 'info');
       log('S', 'test message');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should log warning message in development', () => {
-      process.env.GITHUB_ACTIONS = undefined;
+    it('should log warning message in verbose mode', () => {
+      process.env.VERBOSE = 'true';
       const consoleSpy = vi.spyOn(console, 'warn');
       log('W', 'test message');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should log error message in development', () => {
-      process.env.GITHUB_ACTIONS = undefined;
+    it('should log error message in verbose mode', () => {
+      process.env.VERBOSE = 'true';
       const consoleSpy = vi.spyOn(console, 'error');
       log('E', 'test message');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should not log info message in GitHub Actions', () => {
-      process.env.GITHUB_ACTIONS = 'true';
+    it('should not log info message in non-verbose mode', () => {
+      process.env.VERBOSE = undefined;
       const consoleSpy = vi.spyOn(console, 'info');
       log('I', 'test message');
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should not log success message in GitHub Actions', () => {
-      process.env.GITHUB_ACTIONS = 'true';
+    it('should not log success message in non-verbose mode', () => {
+      process.env.VERBOSE = undefined;
       const consoleSpy = vi.spyOn(console, 'info');
       log('S', 'test message');
       expect(consoleSpy).not.toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should log warning message in GitHub Actions', () => {
-      process.env.GITHUB_ACTIONS = 'true';
+    it('should log warning message in non-verbose mode', () => {
+      process.env.VERBOSE = undefined;
       const consoleSpy = vi.spyOn(console, 'warn');
       log('W', 'test message');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
 
-    it('should log error message in GitHub Actions', () => {
-      process.env.GITHUB_ACTIONS = 'true';
+    it('should log error message in non-verbose mode', () => {
+      process.env.VERBOSE = undefined;
       const consoleSpy = vi.spyOn(console, 'error');
       log('E', 'test message');
       expect(consoleSpy).toHaveBeenCalled();

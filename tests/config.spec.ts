@@ -22,6 +22,7 @@ describe('config', () => {
         pathStartsWith: undefined,
         labels: undefined,
         releaseTracking: false,
+        verbose: false,
         remote: {
           upstream: {
             url: 'https://github.com/test/upstream.git',
@@ -51,6 +52,7 @@ describe('config', () => {
         pathStartsWith: 'docs/',
         labels: 'test\nmy\nlabel',
         releaseTracking: 'true',
+        verbose: 'true',
       };
 
       const config = createConfig(userConfig);
@@ -63,6 +65,7 @@ describe('config', () => {
         pathStartsWith: 'docs/',
         labels: 'test\nmy\nlabel',
         releaseTracking: true,
+        verbose: true,
         remote: {
           upstream: {
             url: 'https://github.com/test/upstream.git',
