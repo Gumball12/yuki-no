@@ -80,23 +80,11 @@ export class YukiNo {
 
     log('I', `New commit on head repo: "${feed.contentSnippet}"`);
 
-    // branch names consisting of 40 hex characters are not allowed
-    const shortHash = hash.substr(0, 8);
-
-    // If the branch already exists on the upstream repo, then this feed is
-    // already handled. Let's stop here.
-    if (this.repo.branchExists(shortHash)) {
-      log('W', 'Branch already exists');
-      return;
-    }
-
     const issueNo = await this.createIssueIfNot(feed, hash);
 
     if (issueNo === null) {
       log('W', 'Issue already exists');
     }
-
-    await this.createPullRequest(hash, shortHash, feed, issueNo);
   }
 
   protected async containsValidFile(feed: Feed, hash: string) {
@@ -134,44 +122,6 @@ export class YukiNo {
     log('S', `Issue created: ${res.data.html_url}`);
 
     return res.data.number;
-  }
-
-  protected async createPullRequest(
-    hash: string,
-    shortHash: string,
-    feed: Feed,
-    issueNo: number | null,
-  ) {
-    this.repo.fetchHead();
-    this.repo.checkoutDefaultBranch();
-    this.repo.createBranch(shortHash);
-
-    if (this.repo.hasConflicts(hash)) {
-      log('W', 'Conflicts occurred. Please make a pull request by yourself.');
-      this.repo.reset();
-      return;
-    }
-
-    log('S', `Successfully Fully merged`);
-
-    this.repo.updateRemote(shortHash);
-
-    const ref = issueNo ? `(#${issueNo})` : '';
-    const title = `${removeHash(feed.contentSnippet)} ${ref}`;
-    const body = `resolves #${issueNo}\r\nCherry picked from ${feed.link}`;
-    const branch = shortHash;
-
-    const res = await this.github.createPullRequest(this.upstream, {
-      title,
-      body,
-      branch,
-    });
-
-    if (!res.data) {
-      return;
-    }
-
-    log('S', `Created new pull request: ${res.data.html_url}`);
   }
 
   protected async trackReleases(): Promise<void> {

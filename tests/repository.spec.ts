@@ -10,10 +10,6 @@ vi.mock('../src/git', () => ({
     config: vi.fn(),
     fetch: vi.fn(),
     exec: vi.fn(),
-    cherryPick: vi.fn(),
-    checkout: vi.fn(),
-    push: vi.fn(),
-    reset: vi.fn(),
   })),
 }));
 
@@ -79,30 +75,6 @@ describe('Repository', () => {
         'user.email',
         '"test@example.com"',
       );
-    });
-  });
-
-  describe('cherry-pick handling', () => {
-    it('should detect conflicts during cherry-pick', () => {
-      const shellString = new ShellString('');
-      shellString.code = 1;
-      vi.mocked(repository.git.cherryPick).mockReturnValue(shellString);
-
-      const hasConflicts = repository.hasConflicts('abc123');
-
-      expect(hasConflicts).toBe(true);
-      expect(repository.git.cherryPick).toHaveBeenCalledWith('abc123');
-    });
-
-    it('should handle successful cherry-pick', () => {
-      const shellString = new ShellString('');
-      shellString.code = 0;
-      vi.mocked(repository.git.cherryPick).mockReturnValue(shellString);
-
-      const hasConflicts = repository.hasConflicts('abc123');
-
-      expect(hasConflicts).toBe(false);
-      expect(repository.git.cherryPick).toHaveBeenCalledWith('abc123');
     });
   });
 

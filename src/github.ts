@@ -8,12 +8,6 @@ export interface CreateIssueOptions {
   labels: string[];
 }
 
-export interface CreatePullRequestOptions {
-  title: string;
-  body: string;
-  branch: string;
-}
-
 export class GitHub {
   api: Octokit;
 
@@ -42,17 +36,6 @@ export class GitHub {
       title: options.title,
       body: options.body,
       labels: options.labels,
-    });
-  }
-
-  createPullRequest(remote: Remote, options: CreatePullRequestOptions) {
-    return this.api.pulls.create({
-      owner: remote.owner,
-      repo: remote.name,
-      title: options.title,
-      body: options.body,
-      head: `${remote.owner}:${options.branch}`,
-      base: remote.branch,
     });
   }
 

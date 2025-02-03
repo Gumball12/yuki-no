@@ -14,7 +14,6 @@ vi.mock('../src/github', () => ({
     getCommit: vi.fn(),
     searchIssue: vi.fn(),
     createIssue: vi.fn(),
-    createPullRequest: vi.fn(),
     getOpenIssues: vi.fn(),
     getIssueComments: vi.fn(),
     createComment: vi.fn(),
@@ -24,13 +23,6 @@ vi.mock('../src/github', () => ({
 vi.mock('../src/repository', () => ({
   Repository: vi.fn(() => ({
     setup: vi.fn(),
-    fetchHead: vi.fn(),
-    branchExists: vi.fn(),
-    checkoutDefaultBranch: vi.fn(),
-    createBranch: vi.fn(),
-    hasConflicts: vi.fn(),
-    reset: vi.fn(),
-    updateRemote: vi.fn(),
     getReleaseInfo: vi.fn(),
   })),
 }));
@@ -71,19 +63,15 @@ describe('YukiNo', () => {
    * Sets up all necessary mocks for testing YukiNo
    *
    * This function mocks all external dependencies:
-   * - GitHub API calls (getLatestRun, getCommit, searchIssue, createIssue, createPullRequest)
-   * - Repository operations (branchExists, hasConflicts)
+   * - GitHub API calls (getLatestRun, getCommit, searchIssue, createIssue)
+   * - Repository operations
    * - RSS feed fetching
    *
    * Default mock behavior:
    * - Sets last run date to Dec 31, 2023 (commits after this date are "new")
    * - Returns a single mock feed item
    * - Simulates a commit that modified a file in docs/
-   * - Branch doesn't exist (allows new branch creation)
    * - No existing issues found
-   * - No merge conflicts
-   *
-   * @param instance - YukiNo instance to mock
    */
   function setupMocks(instance: YukiNo) {
     vi.mocked(instance.github.getLatestRun).mockResolvedValue({
@@ -95,16 +83,11 @@ describe('YukiNo', () => {
         files: [{ filename: 'docs/test.md' }],
       },
     } as any);
-    vi.mocked(instance.repo.branchExists).mockReturnValue(false);
     vi.mocked(instance.github.searchIssue).mockResolvedValue({
       data: { total_count: 0 },
     } as any);
     vi.mocked(instance.github.createIssue).mockResolvedValue({
       data: { number: 1, html_url: 'issue-url' },
-    } as any);
-    vi.mocked(instance.repo.hasConflicts).mockReturnValue(false);
-    vi.mocked(instance.github.createPullRequest).mockResolvedValue({
-      data: { html_url: 'pr-url' },
     } as any);
     vi.mocked(instance.github.createComment).mockResolvedValue();
   }
@@ -116,12 +99,11 @@ describe('YukiNo', () => {
   });
 
   describe('commit processing', () => {
-    it('should process new commit and create PR', async () => {
+    it('should process new commit and create issue', async () => {
       await yukiNo.start();
 
       expect(yukiNo.repo.setup).toHaveBeenCalled();
       expect(yukiNo.github.createIssue).toHaveBeenCalled();
-      expect(yukiNo.github.createPullRequest).toHaveBeenCalled();
     });
 
     it('should skip processing when commit is too old', async () => {
@@ -132,16 +114,6 @@ describe('YukiNo', () => {
       await yukiNo.start();
 
       expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
-      expect(yukiNo.github.createPullRequest).not.toHaveBeenCalled();
-    });
-
-    it('should handle merge conflicts', async () => {
-      vi.mocked(yukiNo.repo.hasConflicts).mockReturnValue(true);
-
-      await yukiNo.start();
-
-      expect(yukiNo.repo.reset).toHaveBeenCalled();
-      expect(yukiNo.github.createPullRequest).not.toHaveBeenCalled();
     });
 
     describe('issue labels', () => {

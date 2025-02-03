@@ -21,31 +21,7 @@ export class Git {
     return this.exec(`remote add ${name} ${url}`);
   }
 
-  branch(option?: string) {
-    return this.exec(`branch ${option}`);
-  }
-
-  checkout(branch: string, option?: string) {
-    return this.exec(`checkout ${option} ${branch}`);
-  }
-
   fetch(repo: string, branch: string) {
     return this.exec(`fetch ${repo} ${branch}`);
-  }
-
-  merge(branch: string) {
-    return this.exec(`merge ${branch}`);
-  }
-
-  cherryPick(hash: string) {
-    return this.exec(`cherry-pick ${hash}`);
-  }
-
-  push(repo: string, branch: string) {
-    return this.exec(`push ${repo} ${branch}`);
-  }
-
-  reset() {
-    return this.exec('reset --hard');
   }
 }
