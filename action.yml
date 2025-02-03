@@ -3,38 +3,32 @@ description: 'Automatic git commit tracking service.'
 
 inputs:
   access-token:
-    description: 'Access token for GitHub authentication'
+    description: 'GitHub access token.'
     required: true
   username:
-    description: 'Username for authenticated user'
-    required: true
-  email:
-    description: 'Email for authenticated user'
-    required: true
-  upstream-repo:
-    description: 'Repository that tracks the head repo. e.g. git@github.com:vuejs-jp/vite-docs-ja.git'
-    required: true
-  upstream-repo-branch:
-    description: 'Branch name for upstream repo. Defaults to `main`'
+    description: 'Git user name to use when making issues and PRs. Defaults to "github-actions". Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.'
     required: false
-    default: 'main'
+    default: 'github-actions'
+  email:
+    description: 'Git email address to use when making issues and PRs. Defaults to "action@github.com". Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.'
+    required: false
+    default: 'action@github.com'
+  upstream-repo:
+    description: 'The url for the upstream repo. This is the repository that you set up Ryu-Cho. e.g. https://github.com/vitejs/docs-ko.git'
+    required: true
   head-repo:
-    description: 'Repository to track. e.g. https://github.com/vitejs/vite'
+    description: 'The head repo to track. This is the repository you want to take a diff. e.g. https://github.com/vitejs/vite.git'
     required: true
   head-repo-branch:
-    description: 'Branch name for head repo. Defaults to `main`'
+    description: 'The branch for the head repo. Defaults to "main".'
     required: false
     default: 'main'
   track-from:
-    description: 'The git commit to track from. e.g. 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5'
+    description: 'The git commit sha of head repo to start tracking. Ryu-Cho will only track commit from this hash.'
     required: true
   path-starts-with:
-    description: 'File path to track. e.g `docs/`'
+    description: 'File path to track. If specified, Ryu-Cho will only track commits that modified files under this path. If not specified, it will track all files in the project root.'
     required: false
-  workflow-name:
-    description: 'GitHub workflow name that executes Ryu Cho action. Defaults to `ryu-cho`'
-    required: false
-    default: 'ryu-cho'
 
 runs:
   using: 'composite'
@@ -48,12 +42,10 @@ runs:
         USER_NAME: ${{ inputs.username }}
         EMAIL: ${{ inputs.email }}
         UPSTREAM_REPO: ${{ inputs.upstream-repo }}
-        UPSTREAM_REPO_BRANCH: ${{ inputs.upstream-repo-branch }}
         HEAD_REPO: ${{ inputs.head-repo }}
         HEAD_REPO_BRANCH: ${{ inputs.head-repo-branch }}
         TRACK_FROM: ${{ inputs.track-from }}
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
-        WORKFLOW_NAME: ${{ inputs.workflow-name }}
       run: |
         cd ryu-cho
         yarn install

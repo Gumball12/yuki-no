@@ -2,20 +2,6 @@ import { extractRepoOwner, extractRepoName } from './utils';
 
 export interface UserConfig {
   /**
-   * Git user name to use when making PR.
-   *
-   * Uses `process.env.USER_NAME` if it exists.
-   */
-  userName: string;
-
-  /**
-   * Git email address to use when making PR.
-   *
-   * Uses `process.env.EMAIL` if it exists.
-   */
-  email: string;
-
-  /**
    * GitHub access token.
    *
    * Uses `process.env.ACCESS_TOKEN` if it exists.
@@ -23,34 +9,46 @@ export interface UserConfig {
   accessToken: string;
 
   /**
-   * The url for the upstream repo.
+   * Git user name to use when making issues and PRs.
+   * Defaults to 'github-actions'.
+   * Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+   *
+   * Uses `process.env.USER_NAME` if it exists.
+   * @default 'github-actions'
+   */
+  userName?: string;
+
+  /**
+   * Git email address to use when making issues and PRs.
+   * Defaults to 'action@github.com'.
+   * Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+   *
+   * Uses `process.env.EMAIL` if it exists.
+   * @default 'action@github.com'
+   */
+  email?: string;
+
+  /**
+   * The url for the upstream repo. This is the repository that you set up Ryu-Cho.
    *
    * Uses `process.env.UPSTREAM_REPO` if it exists.
    *
-   * @example 'git@github.com:vuejs/vuejs.org'
+   * @example 'https://github.com/vitejs/docs-ko.git'
    */
   upstreamRepo: string;
 
   /**
-   * The branch to track on the upstream repo.
-   *
-   * Uses `process.env.UPSTREAM_REPO_BRANCH` if it exists.
-   *
-   * @default 'main'
-   */
-  upstreamRepoBranch?: string;
-
-  /**
-   * The url for the head repo.
+   * The head repo to track. This is the repository you want to take a diff.
    *
    * Uses `process.env.HEAD_REPO` if it exists.
    *
-   * @example 'https://github.com/vuejs/vuejs.org'
+   * @example 'https://github.com/vitejs/vite.git'
    */
   headRepo: string;
 
   /**
-   * The branch to track on head repo.
+   * The branch for the head repo.
+   * Defaults to 'main'.
    *
    * Uses `process.env.HEAD_REPO_BRANCH` if it exists.
    *
@@ -59,17 +57,8 @@ export interface UserConfig {
   headRepoBranch?: string;
 
   /**
-   * The name of the GitHub workflow. This value is used to determine the last
-   * run of the Che Tsumi.
-   *
-   * Uses `process.env.WORKFLOW_NAME` if it exists.
-   *
-   * @default 'ryu-cho'
-   */
-  workflowName?: string;
-
-  /**
-   * The git commit sha to start tracking.
+   * The git commit sha of head repo to start tracking.
+   * Ryu-Cho will only track commit from this hash.
    *
    * Uses `process.env.TRACK_FROM` if it exists.
    *
@@ -78,8 +67,9 @@ export interface UserConfig {
   trackFrom: string;
 
   /**
-   * File path to track. If this option is set, commit not containing the
-   * path will be not tracked.
+   * File path to track. If specified, Ryu-Cho will only track commits that
+   * modified files under this path. If not specified, it will track all files
+   * in the project root.
    *
    * @example 'docs/'
    */
@@ -90,7 +80,6 @@ export interface Config {
   userName: string;
   email: string;
   accessToken: string;
-  workflowName: string;
   trackFrom: string;
   pathStartsWith?: string;
 
@@ -109,10 +98,9 @@ export interface Remote {
 
 export function createConfig(config: UserConfig): Config {
   return {
-    userName: config.userName,
-    email: config.email,
+    userName: config.userName ?? 'github-actions',
+    email: config.email ?? 'action@github.com',
     accessToken: config.accessToken,
-    workflowName: config.workflowName ?? 'ryu-cho',
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
 
@@ -121,7 +109,7 @@ export function createConfig(config: UserConfig): Config {
         url: config.upstreamRepo,
         owner: extractRepoOwner(config.upstreamRepo),
         name: extractRepoName(config.upstreamRepo),
-        branch: config.upstreamRepoBranch ?? 'main',
+        branch: 'main',
       },
       head: {
         url: config.headRepo,

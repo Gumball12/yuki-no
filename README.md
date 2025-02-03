@@ -28,38 +28,34 @@ jobs:
           # GitHub access token. Required.
           access-token: ${{ secrets.ACCESS_TOKEN }}
 
-          # Git user name to use when making issues and PRs. Required.
-          username: johndoe
+          # Git user name to use when making issues and PRs. Optional.
+          # Defaults to 'github-actions'.
+          # Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+          username: github-actions
 
-          # Git email address to use when making issues and PRs. Required.
-          email: 'john.doe@example.com'
+          # Git email address to use when making issues and PRs. Optional.
+          # Defaults to 'action@github.com'.
+          # Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+          email: 'action@github.com'
 
           # The url for the upstream repo. This is the repository that you
           # set up Ryu-Cho. Required.
-          upstream-repo: https://github.com/vuejs-translations/docs-ja.git
-
-          # The branch for the upstream repo. Optional. Defaults to `main`.
-          upstream-repo-branch: main
+          upstream-repo: https://github.com/vitejs/docs-ko.git
 
           # The head repo to track. This is the repository you want to
           # take a diff. Required.
-          head-repo: https://github.com/vuejs/docs.git
+          head-repo: https://github.com/vitejs/vite.git
 
-          # The branch for the head repo. Optional. Defaults to `main`.
+          # The branch for the head repo. Optional.
+          # Defaults to 'main'.
           head-repo-branch: main
 
           # The git commit sha of head repo to start tracking. Ryu-Cho will
           # only track commit from this hash. Required.
           track-from: 4ed8b2f83a2f149734f3c5ecb6438309bd85a9e5
 
-          # File path to track. In this example, Ryu-Cho will only track
-          # commits that modified files under `docs` folder. Optional.
+          # File path to track. If specified, Ryu-Cho will only track commits
+          # that modified files under this path. If not specified, it will
+          # track all files in the project root. Optional.
           path-starts-with: docs/
-
-          # GitHub workflow name that runs Ryu-Cho. This is required since
-          # Ryu-Cho determines the last run by looking into last workflow
-          # run timestamp. Optional. Defaults to `ryu-cho`.
-          workflow-name: ryu-cho
 ```
-
-The important part to note is that you must match the GitHub workflow name to `workflow-name` option.

@@ -1,5 +1,5 @@
 import { log, extractBasename, removeHash } from './utils';
-import { Config, Remote } from './config';
+import type { Config, Remote } from './config';
 import { Rss } from './rss';
 import { GitHub } from './github';
 import { Repository } from './repository';
@@ -50,11 +50,7 @@ export class RyuCho {
   }
 
   protected async getRun() {
-    const run = await this.github.getLatestRun(
-      this.upstream,
-      this.config.workflowName,
-    );
-
+    const run = await this.github.getLatestRun(this.upstream, 'ryu-cho');
     return run ? new Date(run.created_at).toISOString() : '';
   }
 

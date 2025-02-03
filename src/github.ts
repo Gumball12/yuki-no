@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { Remote } from './config';
+import type { Remote } from './config';
 
 export interface CreateIssueOptions {
   title: string;
