@@ -1,6 +1,6 @@
 {
   "name": "yuki-no",
-  "description": "GitHub Action for tracking upstream documentation changes",
+  "description": "A GitHub Action that automatically tracks upstream repository changes and creates corresponding issues, designed specifically for documentation translation projects.",
   "repository": {
     "url": "https://github.com/Gumball12/yuki-no.git",
     "type": "git"
