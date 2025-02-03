@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
 
-Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
+<img width="350" src="docs/logo.webp" title="logo" alt="logo">
+
+Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful fƒor tracking changes between repositories, especially in documentation translation projects.
 
 ## Project History
 
@@ -26,7 +28,7 @@ The name "Yuki-no" (雪の, "of snow") was chosen to represent the project's goa
 
 1. **Required**: Configure workflow permissions in your repository settings:
 
-   ![Workflow Permissions Settings](docs/settings.png)
+   ![Workflow Permissions Settings](docs/settings.webp)
 
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
