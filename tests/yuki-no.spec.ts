@@ -50,6 +50,7 @@ describe('YukiNo', () => {
         branch: 'main',
       },
     },
+    verbose: false,
   };
 
   const mockFeed = {
@@ -104,16 +105,6 @@ describe('YukiNo', () => {
 
       expect(yukiNo.repo.setup).toHaveBeenCalled();
       expect(yukiNo.github.createIssue).toHaveBeenCalled();
-    });
-
-    it('should skip processing when commit is too old', async () => {
-      vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
-        created_at: '2024-01-02T00:00:00.000Z',
-      } as any);
-
-      await yukiNo.start();
-
-      expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
     });
 
     describe('issue labels', () => {
