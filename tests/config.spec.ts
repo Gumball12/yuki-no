@@ -20,6 +20,7 @@ describe('config', () => {
         accessToken: 'test-token',
         trackFrom: 'test-hash',
         pathStartsWith: undefined,
+        labels: undefined,
         remote: {
           upstream: {
             url: 'https://github.com/test/upstream.git',
@@ -47,6 +48,7 @@ describe('config', () => {
         headRepoBranch: 'develop',
         trackFrom: 'test-hash',
         pathStartsWith: 'docs/',
+        labels: 'test\nmy\nlabel',
       };
 
       const config = createConfig(userConfig);
@@ -57,6 +59,7 @@ describe('config', () => {
         accessToken: 'test-token',
         trackFrom: 'test-hash',
         pathStartsWith: 'docs/',
+        labels: 'test\nmy\nlabel',
         remote: {
           upstream: {
             url: 'https://github.com/test/upstream.git',

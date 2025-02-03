@@ -51,6 +51,7 @@ runs:
         HEAD_REPO_BRANCH: ${{ inputs.head-repo-branch }}
         TRACK_FROM: ${{ inputs.track-from }}
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
+        LABELS: ${{ inputs.labels }}
       run: |
         cd ryu-cho
         yarn install
