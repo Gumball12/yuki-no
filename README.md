@@ -2,15 +2,40 @@
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
 
-Yuki-no (means "fluent" in Japanese) is a GitHub Action that creates issues and PRs from the head repo based on its commit. Very useful for tracking diffs between translating docs, for example.
+Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
 
-Yuki-no is a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi). It works almost identical, while Che-Tsumi works as a stand-alone service while Yuki-no works with GitHub Action.
+## Project History
+
+Yuki-no is a fork of [Ryu-Cho](https://github.com/vuejs-translations/ryu-cho), which itself was a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi). While maintaining the core functionality, Yuki-no enhances the experience with additional features:
+
+- Custom issue labels for better organization
+- Release tracking for version management
+- Improved configuration options
+
+The name "Yuki-no" (雪の, "of snow") was chosen to represent the project's goal of maintaining a clean and pure tracking system, like freshly fallen snow.
+
+## Features
+
+- Automatically tracks commits from a head repository
+- Creates issues for new changes
+- Filters changes based on file paths
+- Supports custom labels for issues
+- Tracks release status with pre-release and release information
 
 ## Usage
 
-Yuki-no requires GitHub authentication to create issues and PRs to the repository. At first, create [Encrypted secret](https://docs.github.com/en/actions/reference/encrypted-secrets) that has access to the repository which you want to set up Yuki-no. Here we assume you've created a secret called `ACCESS_TOKEN`.
+1. **Required**: Configure workflow permissions in your repository settings:
 
-Next, create `.github/workflows/yuki-no.yml` file in your repository. Then configure the yaml file.
+   ![Workflow Permissions Settings](docs/settings.png)
+
+   - Go to Settings > Actions > General > Workflow permissions
+   - Select "Read and write permissions"
+   - Save the changes
+
+   This step is mandatory as Yuki-no needs write permissions to create issues in your repository.
+   If you're seeing 403 (Forbidden) errors, this permission setting is usually the solution.
+
+2. Create `.github/workflows/yuki-no.yml` in your repository:
 
 ```yml
 name: yuki-no
@@ -18,7 +43,9 @@ name: yuki-no
 on:
   # Schedule the interval of the checks.
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '0 * * * *' # Every hour
+  # Allow manual trigger (Optional)
+  workflow_dispatch:
 
 jobs:
   yuki-no:
@@ -30,14 +57,16 @@ jobs:
           # GitHub access token. Required.
           access-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # Git user name to use when making issues and PRs. Optional.
+          # Git user name to use when making issues. Optional.
           # Defaults to 'github-actions'.
-          # Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+          # Note: Using only one of username or email might cause
+          # GitHub Actions bot to work incorrectly.
           username: github-actions
 
-          # Git email address to use when making issues and PRs. Optional.
+          # Git email address to use when making issues. Optional.
           # Defaults to 'action@github.com'.
-          # Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.
+          # Note: Using only one of username or email might cause
+          # GitHub Actions bot to work incorrectly.
           email: 'action@github.com'
 
           # The url for the upstream repo. This is the repository that you
@@ -76,3 +105,70 @@ jobs:
           # Defaults to 'false'
           release-tracking: true
 ```
+
+### Configuration
+
+| Option             | Required | Default             | Description                           |
+| ------------------ | -------- | ------------------- | ------------------------------------- |
+| `access-token`     | Yes      | -                   | GitHub access token                   |
+| `username`         | No       | `github-actions`    | Git username for commits              |
+| `email`            | No       | `action@github.com` | Git email for commits                 |
+| `upstream-repo`    | Yes      | -                   | URL of your repository                |
+| `head-repo`        | Yes      | -                   | URL of repository to track            |
+| `head-repo-branch` | No       | `main`              | Branch to track in head repo          |
+| `track-from`       | Yes      | -                   | Starting commit hash                  |
+| `path-starts-with` | No       | -                   | Path filter for changes               |
+| `labels`           | No       | `sync`              | Labels for issues (newline separated) |
+| `release-tracking` | No       | `false`             | Enable release status tracking        |
+
+## How It Works
+
+1. Monitors the head repository for new commits
+2. When new commits are found:
+   - Creates issues in your repository with commit details
+   - If enabled, tracks release(`release-tracking: true`) status of changes
+3. For release tracking:
+   - Monitors both pre-release and release tags
+   - Updates issue comments with release status
+   - Stops tracking when final release is available
+
+## GitHub API Usage Considerations
+
+While most users won't need to worry about API usage, this section is provided for those who frequently interact with GitHub's API through other applications or workflows. If you're experiencing rate limit errors, this information will be particularly relevant. For more details about GitHub's API rate limits, see [GitHub's documentation on rate limiting](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28).
+
+### Comparing Release Tracking Options
+
+**releaseTracking: `false` (Default)**
+
+- GitHub API calls: Minimal, only for basic issue creation
+- API calls per issue: 2-3 calls (issue search, creation)
+- Advantages:
+  - Lower API usage
+  - Faster execution time
+- Best for:
+  - Simple translation tracking needs
+  - When API usage needs to be minimized
+
+**releaseTracking: `true`**
+
+- GitHub API calls: Requires release information check for all open issues
+- API calls per issue: 4-5+ calls (issue search, creation, comments)
+- Advantages:
+  - Track which version includes your translations
+  - View release status directly in issues
+- Best for:
+  - When tracking release status is important
+  - When API quota is not a concern
+
+### Recommended cron settings
+
+- releaseTracking: false → Every 10 minutes (`*/10 * * * *`)
+- releaseTracking: true → Every hour (`0 * * * *`)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.

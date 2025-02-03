@@ -1,0 +1,152 @@
+# Contributing to Yuki-no
+
+Thank you for your interest in contributing to Yuki-no! This document provides guidelines and instructions for contributing.
+
+## Development Setup
+
+### Prerequisites
+
+- **Node.js**: Version 22.0.0 or higher is recommended
+- **yarn**: This project uses [yarn classic](https://classic.yarnpkg.com/lang/en/) as its package manager. It's automatically available through [Node.js Corepack](https://nodejs.org/api/corepack.html):
+  ```bash
+  corepack enable
+  ```
+
+### Getting Started
+
+1. Fork and clone the repository:
+
+```bash
+git clone https://github.com/Gumball12/yuki-no.git
+cd yuki-no
+```
+
+2. Install dependencies:
+
+```bash
+yarn install
+```
+
+## Development Workflow
+
+1. Create a new branch for your changes:
+
+```bash
+git checkout -b feat/your-feature
+```
+
+2. Make your changes and ensure tests pass:
+
+```bash
+yarn test
+```
+
+3. Format your code:
+
+```bash
+yarn lint
+```
+
+4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+
+```bash
+git commit -m "feat: add new feature"
+git commit -m "fix: resolve issue #123"
+```
+
+5. Push your changes and create a pull request!
+
+## Project Structure
+
+```
+src/
+├── config.ts     # Configuration types and validation
+├── defaults.ts   # Default configuration values
+├── github.ts     # GitHub API interactions
+├── git.ts       # Git operations
+├── index.ts     # Entry point
+├── repository.ts # Repository operations
+├── rss.ts       # RSS feed handling
+├── types.ts     # Common type definitions
+├── utils.ts     # Utility functions
+└── yuki-no.ts   # Main application logic
+
+tests/           # Unit tests
+```
+
+## Testing
+
+The project uses [Vitest](https://vitest.dev/) for testing. Tests are located in the `tests/` directory.
+
+### Running Tests
+
+To run tests with coverage:
+
+```bash
+yarn test
+```
+
+### Writing Tests
+
+1. **Test Structure**
+
+```typescript
+describe('YukiNo', () => {
+  describe('feature', () => {
+    it('should handle specific case', () => {
+      // Arrange
+      const yukiNo = new YukiNo(mockConfig);
+
+      // Act
+      const result = yukiNo.someMethod();
+
+      // Assert
+      expect(result).toBe(expectedValue);
+    });
+  });
+});
+```
+
+2. **Mocking**
+
+```typescript
+vi.mock('../src/github', () => ({
+  GitHub: vi.fn(() => ({
+    getOpenIssues: vi.fn(),
+    createComment: vi.fn(),
+  })),
+}));
+```
+
+## Main Features and Their Tests
+
+1. **Commit Processing**
+
+   - Tracking new commits
+   - Creating issues and PRs
+   - Handling merge conflicts
+   - Path filtering
+
+2. **Release Tracking**
+
+   - Pre-release detection
+   - Release status updates
+   - Comment formatting
+   - Skip conditions
+
+3. **Configuration**
+   - Environment variables
+   - Default values
+   - Validation
+
+## Getting Help
+
+If you need help or have questions:
+
+1. Check existing issues and documentation
+2. Open a new issue with a clear description
+3. Use appropriate labels
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
