@@ -22,8 +22,18 @@ const config = createConfig({
 
 const yukiNo = new YukiNo(config);
 
-process.on('unhandledRejection', err => {
-  console.error(err);
+yukiNo.start().catch(err => {
+  console.error('Failed to start:', err);
+  process.exit(1);
 });
 
-yukiNo.start();
+// Setup error handling
+process.on('unhandledRejection', err => {
+  console.error('Unhandled rejection:', err);
+  process.exit(1);
+});
+
+process.on('uncaughtException', err => {
+  console.error('Uncaught exception:', err);
+  process.exit(1);
+});
