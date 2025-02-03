@@ -27,6 +27,7 @@ vi.mock('shelljs', () => ({
 describe('Repository', () => {
   let repository: Repository;
   const mockOptions: Options = {
+    path: '.',
     token: 'test-token',
     userName: 'test-user',
     email: 'test@example.com',

@@ -107,6 +107,33 @@ describe('YukiNo', () => {
       expect(yukiNo.github.createIssue).toHaveBeenCalled();
     });
 
+    it('should track all files when pathStartsWith is not specified', async () => {
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        pathStartsWith: undefined,
+      });
+      setupMocks(yukiNo);
+      vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
+        data: {
+          files: [{ filename: 'any/path/file.md' }],
+        },
+      } as any);
+
+      await yukiNo.start();
+
+      expect(yukiNo.github.createIssue).toHaveBeenCalled();
+    });
+
+    it('should skip when issue already exists', async () => {
+      vi.mocked(yukiNo.github.searchIssue).mockResolvedValue({
+        data: { total_count: 1 },
+      } as any);
+
+      await yukiNo.start();
+
+      expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+    });
+
     describe('issue labels', () => {
       it('should use default sync label when labels not provided', async () => {
         await yukiNo.start();
@@ -154,6 +181,18 @@ describe('YukiNo', () => {
           }),
         );
       });
+    });
+  });
+
+  describe('logging', () => {
+    it('should not throw error in verbose mode', async () => {
+      yukiNo = new YukiNo({
+        ...mockConfig,
+        verbose: true,
+      });
+      setupMocks(yukiNo);
+
+      await expect(yukiNo.start()).resolves.not.toThrow();
     });
   });
 
@@ -389,6 +428,63 @@ describe('YukiNo', () => {
           '- pre-release: none\n- release: [v1.0.0](release-url)',
         );
       });
+    });
+
+    it('should skip non-Yuki-no issues', async () => {
+      const nonYukiNoIssue = {
+        number: 1,
+        title: 'Regular Issue',
+        body: 'This is not a Yuki-no issue',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([
+        nonYukiNoIssue,
+      ]);
+
+      await yukiNo.start();
+
+      expect(yukiNo.github.getIssueComments).not.toHaveBeenCalled();
+    });
+
+    it('should skip issues created by different users', async () => {
+      const differentUserIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+        state: 'open' as const,
+        user: { login: 'different-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([
+        differentUserIssue,
+      ]);
+
+      await yukiNo.start();
+
+      expect(yukiNo.github.getIssueComments).not.toHaveBeenCalled();
+    });
+
+    it('should handle missing commit hash in issue body', async () => {
+      const invalidIssue = {
+        number: 1,
+        title: 'Test Issue',
+        body: 'New updates on head repo.\r\nInvalid commit link',
+        state: 'open' as const,
+        user: { login: 'test-user' },
+        created_at: '2024-01-01T00:00:00Z',
+        updated_at: '2024-01-01T00:00:00Z',
+      };
+
+      vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([invalidIssue]);
+
+      expect(async () => await yukiNo.start()).rejects.toThrow();
+      expect(yukiNo.repo.getReleaseInfo).not.toHaveBeenCalled();
     });
   });
 });
