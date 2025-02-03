@@ -17,6 +17,7 @@ const config = createConfig({
   trackFrom: process.env.TRACK_FROM!,
   pathStartsWith: process.env.PATH_STARTS_WITH,
   labels: process.env.LABELS,
+  releaseTracking: process.env.RELEASE_TRACKING,
 });
 
 const yukiNo = new YukiNo(config);
