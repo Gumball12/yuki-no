@@ -111,13 +111,13 @@ git commit -m "fix: resolve issue #123"
 
 #### Common Issues
 
-1. **PAT-related Notes**
+1. **GitHub Actions Bot vs PAT Authentication**
 
-   - `USER_NAME` and `EMAIL` must match the PAT creator's account
-   - When using PAT, release tracking only works for commits by the configured `USER_NAME` (see [`isYukiNoIssue`](https://github.com/Gumball12/yuki-no/blob/c39060e1c0d0e96c58699af22509277f601bc484/src/yuki-no.ts#L164))
-   - Release tracking will not work if they don't match
+   - While GitHub Actions automatically creates issues as 'github-actions' bot, using PAT will create issues as the PAT owner
+   - When using PAT, make sure to set `USER_NAME` and `EMAIL` in `.env` to match the PAT owner's account
+   - Release tracking will not work if the issue creator doesn't match the configured `USER_NAME`
 
-2. **GitHub API 403 Errors**
+1. **GitHub API 403 Errors**
 
    - Check PAT permissions
 
