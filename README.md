@@ -61,6 +61,8 @@ jobs:
           release-tracking: true
 ```
 
+Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash that match your `path-starts-with` filter. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
+
 ### Configuration
 
 | Option             | Required | Default             | Description                           |
