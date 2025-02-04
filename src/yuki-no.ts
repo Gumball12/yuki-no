@@ -45,11 +45,12 @@ export class YukiNo {
     this.repo.setup();
 
     const feed = await this.getFeed();
+    const lastSuccessfulRunAt = await this.getRun();
 
     log('I', `Found ${feed.length} commits to process`);
 
     for (const i in feed) {
-      await this.processFeed(feed[i] as Feed);
+      await this.processFeed(feed[i] as Feed, lastSuccessfulRunAt);
     }
 
     if (this.config.releaseTracking) {
@@ -71,7 +72,15 @@ export class YukiNo {
     return this.rss.get(this.head, this.config.trackFrom);
   }
 
-  protected async processFeed(feed: Feed) {
+  protected async processFeed(feed: Feed, lastSuccessfulRunAt: string) {
+    if (lastSuccessfulRunAt > feed.isoDate) {
+      log(
+        'I',
+        `Skipping commit "${feed.contentSnippet}" (older than last successful run)`,
+      );
+      return;
+    }
+
     const hash = extractBasename(feed.link);
 
     // Check if the commit contains file path that we want to track.

@@ -43,22 +43,18 @@ export class GitHub {
     return this.api.actions.listWorkflowRunsForRepo({
       owner: remote.owner,
       repo: remote.name,
+      status: 'success',
     });
   }
 
   async getLatestRun(remote: Remote, name: string) {
     const { data } = await this.getRuns(remote);
 
-    // Strip out all runs which are not relevant. We only want to keep a list
-    // of runs that has the name of `config.workflowName`.
-    const runs = data.workflow_runs.filter(run => {
-      return run.name === name;
-    });
+    // Get only successful runs with the specified workflow name
+    const successfulRuns = data.workflow_runs.filter(run => run.name === name);
 
-    // Return the second latest run from the list because the latest run is the
-    // run that is executing right now. What we want is the "previous" run,
-    // which is the second latest.
-    return runs[1] ?? null;
+    // Skip the current running workflow (index 0) and get the last successful run
+    return successfulRuns[1];
   }
 
   async getOpenIssues(remote: Remote): Promise<Issue[]> {

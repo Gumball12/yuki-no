@@ -106,6 +106,43 @@ describe('Basic Commit Processing', () => {
     expect(yukiNo.github.createIssue).toHaveBeenCalled();
   });
 
+  it('should skip commits older than last successful run', async () => {
+    const oldFeed = {
+      ...mockFeed,
+      isoDate: '2023-12-30T00:00:00.000Z',
+    };
+
+    vi.mocked(yukiNo.rss.get).mockResolvedValue([oldFeed] as any);
+    vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
+      created_at: '2023-12-31T00:00:00.000Z',
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('should process commits newer than last successful run', async () => {
+    const newFeed = {
+      ...mockFeed,
+      isoDate: '2024-01-02T00:00:00.000Z',
+    };
+
+    vi.mocked(yukiNo.rss.get).mockResolvedValue([newFeed] as any);
+    vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
+      created_at: '2024-01-01T00:00:00.000Z',
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+  });
+
+  it('should process all commits when no successful run exists', async () => {
+    vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue(undefined as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+  });
+
   it('should track all files when pathStartsWith is not specified', async () => {
     yukiNo = new YukiNo({ ...mockConfig, pathStartsWith: undefined });
     setupMocks(yukiNo);
