@@ -151,37 +151,123 @@ To run tests with coverage:
 yarn test
 ```
 
-### Writing Tests
+### Test Organization
+
+Tests are organized by feature groups to maintain clarity and readability. Each test file should follow this structure:
+
+1. **Mock Setup**
+
+   ```typescript
+   // Mock external dependencies
+   vi.mock('../src/github', () => ({
+     GitHub: vi.fn(() => ({
+       getOpenIssues: vi.fn(),
+       createComment: vi.fn(),
+     })),
+   }));
+
+   // Setup common test data
+   const mockConfig = {
+     // ... test configuration
+   };
+
+   // Helper function for common mock setup
+   function setupMocks(instance: YukiNo) {
+     // ... setup mock behaviors
+   }
+   ```
+
+2. **Test Groups**
+
+   ```typescript
+   describe('Feature Group', () => {
+     // Common setup for the group
+     beforeEach(() => {
+       // ... setup code
+     });
+
+     it('should handle specific case', () => {
+       // ... test case
+     });
+   });
+   ```
+
+### Test Writing Guidelines
 
 1. **Test Structure**
 
-```typescript
-describe('YukiNo', () => {
-  describe('feature', () => {
-    it('should handle specific case', () => {
-      // Arrange
-      const yukiNo = new YukiNo(mockConfig);
+   - Keep test groups flat (avoid deep nesting)
+   - Use clear, descriptive group names
+   - Group related test cases together
 
-      // Act
-      const result = yukiNo.someMethod();
+   ```typescript
+   // Good
+   describe('Basic Commit Processing', () => {
+     it('should process new commit and create issue', async () => {
+       // Arrange
+       const yukiNo = new YukiNo(mockConfig);
+       // Act
+       await yukiNo.start();
+       // Assert
+       expect(yukiNo.github.createIssue).toHaveBeenCalled();
+     });
+   });
+   ```
 
-      // Assert
-      expect(result).toBe(expectedValue);
-    });
-  });
-});
-```
+2. **Test Cases**
 
-2. **Mocking**
+   - Follow AAA pattern (Arrange, Act, Assert)
+   - Use descriptive test names that explain the behavior
+   - Keep test cases focused and concise
 
-```typescript
-vi.mock('../src/github', () => ({
-  GitHub: vi.fn(() => ({
-    getOpenIssues: vi.fn(),
-    createComment: vi.fn(),
-  })),
-}));
-```
+   ```typescript
+   it('should skip when issue already exists', async () => {
+     // Arrange
+     vi.mocked(yukiNo.github.searchIssue).mockResolvedValue({
+       data: { total_count: 1 },
+     } as any);
+     // Act
+     await yukiNo.start();
+     // Assert
+     expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+   });
+   ```
+
+3. **Mocking Best Practices**
+
+   - Mock external dependencies only
+   - Use type assertions wisely
+   - Reset mocks between tests
+
+   ```typescript
+   beforeEach(() => {
+     vi.clearAllMocks();
+     yukiNo = new YukiNo(mockConfig);
+     setupMocks(yukiNo);
+   });
+   ```
+
+### Test Categories
+
+Organize tests into these main categories:
+
+1. **Basic Functionality**
+
+   - Core feature testing
+   - Happy path scenarios
+   - Basic error cases
+
+2. **Configuration Testing**
+
+   - Different configuration options
+   - Default values
+   - Validation cases
+
+3. **Integration Points**
+
+   - GitHub API interactions
+   - Repository operations
+   - File system operations
 
 ## Main Features and Their Tests
 
