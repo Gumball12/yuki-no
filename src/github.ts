@@ -50,10 +50,12 @@ export class GitHub {
   async getLatestRun(remote: Remote, name: string) {
     const { data } = await this.getRuns(remote);
 
-    // Get only successful runs with the specified workflow name
+    // Filter runs by workflow name (e.g., 'yuki-no')
+    // Note: Only successful runs are included as filtered by getRuns
     const successfulRuns = data.workflow_runs.filter(run => run.name === name);
 
-    // Skip the current running workflow (index 0) and get the last successful run
+    // Return the second latest run (index 1) as the latest run (index 0)
+    // is the currently executing workflow
     return successfulRuns[1];
   }
 

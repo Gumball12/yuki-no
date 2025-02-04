@@ -6,16 +6,6 @@
 
 Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
 
-## Project History
-
-Yuki-no is a fork of [Ryu-Cho](https://github.com/vuejs-translations/ryu-cho), which itself was a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi). While maintaining the core functionality, Yuki-no enhances the experience with additional features:
-
-- Custom issue labels for better organization
-- Release tracking for version management
-- Improved configuration options
-
-The name "Yuki-no" (雪の, "of snow") was chosen to represent the project's goal of maintaining a clean and pure tracking system, like freshly fallen snow.
-
 ## Features
 
 - Automatically tracks commits from a head repository
@@ -26,32 +16,24 @@ The name "Yuki-no" (雪の, "of snow") was chosen to represent the project's goa
 
 ## Usage
 
-1. **Required**: Configure workflow permissions in your repository settings:
-
-   ![Workflow Permissions Settings](docs/settings.webp)
+1. **Required**: Configure workflow permissions
 
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
    - Save the changes
 
-   This step is mandatory as Yuki-no needs write permissions to create issues in your repository.
-   If you're seeing 403 (Forbidden) errors, this permission setting is usually the solution.
-
-2. Create `.github/workflows/yuki-no.yml` in your repository:
+2. Create `.github/workflows/yuki-no.yml`:
 
 ```yml
 name: yuki-no
 
 on:
-  # Schedule the interval of the checks.
   schedule:
     - cron: '0 * * * *' # Every hour
-  # Allow manual trigger (Optional)
-  workflow_dispatch:
+  workflow_dispatch: # Manual trigger (Optional)
 
 jobs:
   yuki-no:
-    name: Yuki-no
     runs-on: ubuntu-latest
     steps:
       - uses: Gumball12/yuki-no@v1
@@ -62,10 +44,6 @@ jobs:
           # The head repo to track. This is the repository you want to
           # take a diff. Required.
           head-repo: https://github.com/head-user/head-repo.git
-
-          # The branch for the head repo. Optional.
-          # Defaults to 'main'.
-          head-repo-branch: main
 
           # The git commit sha of head repo to start tracking. Yuki-no will
           # only track commit from this hash. Required.
@@ -88,42 +66,43 @@ jobs:
           # and add comments about release status. Optional.
           # Defaults to 'false'
           release-tracking: true
-
-          # Whether to enable verbose logging.
-          # When enabled, Yuki-no will show all log messages including info and success messages.
-          # This is useful for debugging.
-          # Defaults to 'false'
-          verbose: true
 ```
 
 ### Configuration
 
-| Option             | Required | Default             | Description                                                                             |
-| ------------------ | -------- | ------------------- | --------------------------------------------------------------------------------------- |
-| `access-token`     | Yes      | -                   | GitHub access token                                                                     |
-| `username`         | No       | `github-actions`    | Git username for commits                                                                |
-| `email`            | No       | `action@github.com` | Git email for commits                                                                   |
-| `upstream-repo`    | No       | Current repository  | URL of your repository                                                                  |
-| `head-repo`        | Yes      | -                   | URL of repository to track                                                              |
-| `head-repo-branch` | No       | `main`              | Branch to track in head repo                                                            |
-| `track-from`       | Yes      | -                   | Starting commit hash                                                                    |
-| `path-starts-with` | No       | -                   | Path filter for changes (If not specified, it will track all files in the project root) |
-| `labels`           | No       | `sync`              | Labels for issues (newline separated)                                                   |
-| `release-tracking` | No       | `false`             | Enable release status tracking                                                          |
-| `verbose`          | No       | `false`             | Enable verbose logging                                                                  |
+| Option             | Required | Default             | Description                           |
+| ------------------ | -------- | ------------------- | ------------------------------------- |
+| `access-token`     | Yes      | -                   | GitHub access token                   |
+| `head-repo`        | Yes      | -                   | URL of repository to track            |
+| `track-from`       | Yes      | -                   | Starting commit hash                  |
+| `path-starts-with` | No       | -                   | Path filter for changes               |
+| `labels`           | No       | `sync`              | Labels for issues (newline separated) |
+| `release-tracking` | No       | `false`             | Enable release status tracking        |
+| `verbose`          | No       | `false`             | Enable verbose logging                |
+| `username`         | No       | `github-actions`    | Git username for commits              |
+| `email`            | No       | `action@github.com` | Git email for commits                 |
+| `upstream-repo`    | No       | Current repository  | URL of your repository                |
+| `head-repo-branch` | No       | `main`              | Branch to track in head repo          |
 
 ### How It Works
 
 1. Monitors the head repository for new commits
 2. When new commits are found:
-   - Creates issues in your repository with commit details
-   - If enabled, tracks release(`release-tracking: true`) status of changes
+   - Checks if the commit is newer than the last successful workflow run
+   - Creates issues for new changes with specified labels
+   - Tracks release status if enabled
 3. For release tracking:
-   - Monitors both pre-release and release tags
-   - Updates issue comments with release status
+   - Monitors pre-release and release tags
+   - Updates issue comments with status changes
    - Stops tracking when final release is available
 
 ### Caveats
+
+#### Commit Processing
+
+- Commits are processed based on their timestamp relative to the last successful workflow run
+- If no successful workflow run exists, all commits will be processed
+- Commits older than the last successful run are skipped to avoid duplicate processing
 
 #### Upstream Repository Option (`upstream-repo`)
 

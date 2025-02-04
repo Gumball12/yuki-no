@@ -73,14 +73,6 @@ For more PAT details, see [GitHub documentation](https://docs.github.com/en/auth
 
 For detailed environment variable settings, see [action.yml](./action.yml).
 
-#### How It Works
-
-1. Detects new commits in `HEAD_REPO` repository
-   - Commits after `TRACK_FROM`
-   - Changes in `PATH_STARTS_WITH` directory (if not set, entire project)
-2. Creates issues for detected commits
-3. Adds release information as issue comments when `release-tracking` is enabled
-
 ### Development Workflow
 
 1. Create a new branch for your changes:
@@ -254,6 +246,7 @@ Organize tests into these main categories:
 1. **Basic Functionality**
 
    - Core feature testing
+   - Commit processing based on workflow runs
    - Happy path scenarios
    - Basic error cases
 
@@ -265,9 +258,15 @@ Organize tests into these main categories:
 
 3. **Integration Points**
 
-   - GitHub API interactions
+   - GitHub API interactions (workflow runs, commits, issues)
    - Repository operations
    - File system operations
+
+4. **Workflow Run Handling**
+
+   - Last successful run detection
+   - Commit timestamp comparison
+   - Skip conditions for old commits
 
 ## Main Features and Their Tests
 
