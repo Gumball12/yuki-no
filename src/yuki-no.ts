@@ -85,7 +85,7 @@ export class YukiNo {
 
     // Check if the commit contains file path that we want to track.
     // If not, do nothing and abort.
-    if (!(await this.containsValidFile(feed, hash))) {
+    if (!(await this.containsValidFile(hash))) {
       log(
         'I',
         `Skipping commit "${feed.contentSnippet}" (no relevant file changes)`,
@@ -104,7 +104,7 @@ export class YukiNo {
     }
   }
 
-  protected async containsValidFile(feed: Feed, hash: string) {
+  protected async containsValidFile(hash: string) {
     if (!this.config.pathStartsWith) {
       return true;
     }
