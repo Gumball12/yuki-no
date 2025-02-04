@@ -40,6 +40,7 @@ inputs:
   verbose:
     description: 'Whether to enable verbose logging. When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
     required: false
+    default: true
 
 runs:
   using: 'composite'

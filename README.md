@@ -78,7 +78,7 @@ jobs:
 | `path-starts-with` | No       | -                   | Path filter for changes               |
 | `labels`           | No       | `sync`              | Labels for issues (newline separated) |
 | `release-tracking` | No       | `false`             | Enable release status tracking        |
-| `verbose`          | No       | `false`             | Enable verbose logging                |
+| `verbose`          | No       | `true`              | Enable verbose logging                |
 | `username`         | No       | `github-actions`    | Git username for commits              |
 | `email`            | No       | `action@github.com` | Git email for commits                 |
 | `upstream-repo`    | No       | Current repository  | URL of your repository                |

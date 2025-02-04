@@ -109,7 +109,7 @@ export interface UserConfig {
    * This is useful for debugging.
    *
    * Uses `process.env.VERBOSE` if it exists.
-   * @default undefined
+   * @default true
    */
   verbose?: string;
 }
