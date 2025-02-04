@@ -54,13 +54,6 @@ jobs:
           # track all files in the project root. Optional.
           path-starts-with: docs/
 
-          # Labels to add to the issues. You can specify multiple labels.
-          # Each label must be separated by a newline. Optional.
-          # If empty string('') is provided, no labels will be added.
-          # Defaults to 'sync'.
-          labels: |
-            sync
-
           # Whether to enable release tracking.
           # When enabled, Yuki-no will track releases for each issue
           # and add comments about release status. Optional.
