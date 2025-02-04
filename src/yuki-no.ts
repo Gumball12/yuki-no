@@ -202,13 +202,8 @@ export class YukiNo {
       ? splitByNewline(this.config.labels)
       : [defaults.label];
 
-    const issueLabels =
-      issue.labels?.map(label =>
-        typeof label === 'string' ? label : label.name,
-      ) ?? [];
-
     return configuredLabels.every(label =>
-      issueLabels.some(issueLabel => issueLabel === label),
+      issue.labels.some(issueLabel => issueLabel === label),
     );
   }
 

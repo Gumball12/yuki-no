@@ -76,7 +76,7 @@ export class GitHub {
         break;
       }
 
-      const convertedIssues = response.data.map(item => ({
+      const convertedIssues = response.data.map<Issue>(item => ({
         number: item.number,
         title: item.title || '',
         body: item.body === null ? undefined : item.body,
@@ -84,6 +84,9 @@ export class GitHub {
         user: item.user === null ? undefined : { login: item.user.login },
         created_at: item.created_at,
         updated_at: item.updated_at,
+        labels: item.labels.map(label =>
+          typeof label === 'string' ? label : label.name,
+        ),
       }));
 
       issues.push(...convertedIssues);
