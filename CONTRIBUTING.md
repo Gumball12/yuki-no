@@ -43,6 +43,20 @@ For more PAT details, see [GitHub documentation](https://docs.github.com/en/auth
 >
 > - The `.env` file is included in .gitignore by default
 > - Never commit the `.env` file to git
+> - Yuki-no overrides local git user settings during execution
+
+> [!IMPORTANT]
+>
+> **Git User Settings Override**
+>
+> Yuki-no internally executes git commands with specific user settings:
+>
+> - When running locally (`yarn start:dev`), it uses either:
+>   - Values from your `.env` file (USER_NAME, EMAIL)
+>   - Default GitHub Actions bot settings if not specified
+> - These settings temporarily override your local git configuration (`user.name`, `user.email`)
+> - This behavior is intentional but may cause unexpected commit authorship
+> - Be cautious when running other git operations in the same session
 
 1. [Fork](https://github.com/Gumball12/yuki-no/fork) and clone the repository
 
