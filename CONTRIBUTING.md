@@ -253,36 +253,7 @@ Tests are organized by feature groups to maintain clarity and readability. Each 
    });
    ```
 
-### Test Categories
-
-Organize tests into these main categories:
-
-1. **Basic Functionality**
-
-   - Core feature testing
-   - Commit processing based on workflow runs
-   - Happy path scenarios
-   - Basic error cases
-
-2. **Configuration Testing**
-
-   - Different configuration options
-   - Default values
-   - Validation cases
-
-3. **Integration Points**
-
-   - GitHub API interactions (workflow runs, commits, issues)
-   - Repository operations
-   - File system operations
-
-4. **Workflow Run Handling**
-
-   - Last successful run detection
-   - Commit timestamp comparison
-   - Skip conditions for old commits
-
-## Main Features and Their Tests
+### Main Features and Their Tests
 
 1. **Commit Processing**
 
@@ -299,6 +270,7 @@ Organize tests into these main categories:
    - Skip conditions
 
 3. **Configuration**
+
    - Environment variables
    - Default values
    - Validation
