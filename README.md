@@ -112,6 +112,17 @@ jobs:
 | `release-tracking` | No       | `false`             | Enable release status tracking                                                          |
 | `verbose`          | No       | `false`             | Enable verbose logging                                                                  |
 
+### How It Works
+
+1. Monitors the head repository for new commits
+2. When new commits are found:
+   - Creates issues in your repository with commit details
+   - If enabled, tracks release(`release-tracking: true`) status of changes
+3. For release tracking:
+   - Monitors both pre-release and release tags
+   - Updates issue comments with release status
+   - Stops tracking when final release is available
+
 ### Caveats
 
 #### Upstream Repository Option (`upstream-repo`)
@@ -134,50 +145,6 @@ jobs:
 
 - The default `username` and `email` settings are optimized for most use cases.
 - Yuki-no uses [GitHub Actions bot](https://docs.github.com/en/actions/using-workflows/about-github-actions#about-github-actions) by default.
-
-## How It Works
-
-1. Monitors the head repository for new commits
-2. When new commits are found:
-   - Creates issues in your repository with commit details
-   - If enabled, tracks release(`release-tracking: true`) status of changes
-3. For release tracking:
-   - Monitors both pre-release and release tags
-   - Updates issue comments with release status
-   - Stops tracking when final release is available
-
-## GitHub API Usage Considerations
-
-While most users won't need to worry about API usage, this section is provided for those who frequently interact with GitHub's API through other applications or workflows. If you're experiencing rate limit errors, this information will be particularly relevant. For more details about GitHub's API rate limits, see [GitHub's documentation on rate limiting](https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28).
-
-### Comparing Release Tracking Options
-
-**releaseTracking: `false` (Default)**
-
-- GitHub API calls: Minimal, only for basic issue creation
-- API calls per issue: 2-3 calls (issue search, creation)
-- Advantages:
-  - Lower API usage
-  - Faster execution time
-- Best for:
-  - Simple translation tracking needs
-  - When API usage needs to be minimized
-
-**releaseTracking: `true`**
-
-- GitHub API calls: Requires release information check for all open issues
-- API calls per issue: 4-5+ calls (issue search, creation, comments)
-- Advantages:
-  - Track which version includes your translations
-  - View release status directly in issues
-- Best for:
-  - When tracking release status is important
-  - When API quota is not a concern
-
-### Recommended cron settings
-
-- releaseTracking: false → Every 10 minutes (`*/10 * * * *`)
-- releaseTracking: true → Every hour (`0 * * * *`)
 
 ## Contributing
 
