@@ -47,13 +47,14 @@ export class YukiNo {
     const lastSuccessfulRunAt = await this.getRun();
 
     log('I', `Found ${feed.length} commits to process`);
+    log('I', '=== Processing Commits ===');
 
     for (const i in feed) {
       await this.processFeed(feed[i] as Feed, lastSuccessfulRunAt);
     }
 
     if (this.config.releaseTracking) {
-      log('I', 'Starting release tracking...');
+      log('I', '=== Processing Release Tracking ===');
       await this.trackReleases();
     }
 
@@ -172,7 +173,9 @@ export class YukiNo {
     }
 
     const releaseInfo = this.repo.getReleaseInfo(commitHash);
+    log('I', '--- Managing Release Labels ---');
     await this.manageReleaseLabels(issue, releaseInfo);
+    log('I', '--- Managing Release Comments ---');
     await this.updateReleaseComment(issue, releaseInfo);
   }
 
@@ -198,7 +201,7 @@ export class YukiNo {
       log('I', `Updating labels for issue #${issue.number}`);
       await this.github.setLabels(this.upstream, issue.number, newLabels);
     } else {
-      log('I', `No labels change for issue ${issue.number}`);
+      log('I', `No labels change for issue #${issue.number}`);
     }
   }
 
