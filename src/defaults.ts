@@ -25,6 +25,12 @@ export const defaults = {
    * @default 'sync'
    */
   label: 'sync',
+
+  /**
+   * Default label for release tracking
+   * @default 'pending'
+   */
+  releaseTrackingLabel: 'pending',
 } as const;
 
 /**

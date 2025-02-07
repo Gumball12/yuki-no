@@ -1,10 +1,9 @@
-import { log, extractBasename, removeHash, splitByNewline } from './utils';
+import { log, extractBasename, removeHash } from './utils';
 import type { Config, Remote } from './config';
 import type { Issue, Comment, ReleaseInfo } from './types';
 import { Rss } from './rss';
 import { GitHub } from './github';
 import { Repository } from './repository';
-import { defaults } from './defaults';
 
 interface Feed {
   link: string;
@@ -133,15 +132,11 @@ export class YukiNo {
   protected async createIssue(feed: Feed) {
     const title = removeHash(feed.title);
     const body = `New updates on head repo.\r\n${feed.link}`;
-    const labels =
-      this.config.labels !== undefined
-        ? splitByNewline(this.config.labels)
-        : [defaults.label];
 
     const res = await this.github.createIssue(this.upstream, {
       title,
       body,
-      labels,
+      labels: this.config.labels,
     });
 
     log('S', `Issue created: ${res.data.html_url}`);
@@ -150,6 +145,10 @@ export class YukiNo {
   }
 
   protected async trackReleases(): Promise<void> {
+    if (!this.config.releaseTracking) {
+      return;
+    }
+
     const issues = await this.github.getOpenIssues(this.upstream);
     log('I', `Found ${issues.length} open issues to check for releases`);
 
@@ -166,6 +165,47 @@ export class YukiNo {
 
     log('I', `Processing release status for issue #${issue.number}`);
 
+    const commitHash = this.extractCommitHash(issue.body ?? '');
+    if (!commitHash) {
+      log('W', `Could not extract commit hash from issue #${issue.number}`);
+      return;
+    }
+
+    const releaseInfo = this.repo.getReleaseInfo(commitHash);
+    await this.manageReleaseLabels(issue, releaseInfo);
+    await this.updateReleaseComment(issue, releaseInfo);
+  }
+
+  private async manageReleaseLabels(
+    issue: Issue,
+    releaseInfo: ReleaseInfo,
+  ): Promise<void> {
+    const releaseTrackingLabels = this.config.releaseTrackingLabels;
+    const currentLabels = issue.labels.filter(
+      (label): label is string => label !== undefined,
+    );
+    const hasFullRelease = releaseInfo.release !== undefined;
+
+    // Calculate new labels
+    const newLabels = hasFullRelease
+      ? currentLabels.filter(label => !releaseTrackingLabels.includes(label))
+      : Array.from(new Set([...currentLabels, ...releaseTrackingLabels]));
+
+    // Only update if labels have changed
+    if (
+      JSON.stringify(currentLabels.sort()) !== JSON.stringify(newLabels.sort())
+    ) {
+      log('I', `Updating labels for issue #${issue.number}`);
+      await this.github.setLabels(this.upstream, issue.number, newLabels);
+    } else {
+      log('I', `No labels change for issue ${issue.number}`);
+    }
+  }
+
+  private async updateReleaseComment(
+    issue: Issue,
+    releaseInfo: ReleaseInfo,
+  ): Promise<void> {
     const comments = await this.github.getIssueComments(
       this.upstream,
       issue.number,
@@ -177,17 +217,8 @@ export class YukiNo {
       return;
     }
 
-    const commitHash = this.extractCommitHash(issue.body ?? '');
-    if (!commitHash) {
-      log('W', `Could not extract commit hash from issue #${issue.number}`);
-      return;
-    }
-
-    const releaseInfo = this.repo.getReleaseInfo(commitHash);
     const newComment = this.formatReleaseComment(releaseInfo);
-
-    // Skip if the last comment has the same release information
-    if (lastReleaseComment && lastReleaseComment.body === newComment) {
+    if (lastReleaseComment?.body === newComment) {
       log('I', `No release status changes for issue #${issue.number}`);
       return;
     }
@@ -198,11 +229,7 @@ export class YukiNo {
   }
 
   protected isYukiNoIssue(issue: Issue): boolean {
-    const configuredLabels = this.config.labels
-      ? splitByNewline(this.config.labels)
-      : [defaults.label];
-
-    return configuredLabels.every(label =>
+    return this.config.labels.every(label =>
       issue.labels.some(issueLabel => issueLabel === label),
     );
   }

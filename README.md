@@ -13,6 +13,7 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 - Filters changes based on file paths
 - Supports custom labels for issues
 - Tracks release status with pre-release and release information
+- Manages release tracking labels for unreleased changes
 
 ## Usage
 
@@ -65,19 +66,20 @@ Once configured, Yuki-no will create issues in your repository for any new chang
 
 ### Configuration
 
-| Option             | Required | Default             | Description                           |
-| ------------------ | -------- | ------------------- | ------------------------------------- |
-| `access-token`     | Yes      | -                   | GitHub access token                   |
-| `head-repo`        | Yes      | -                   | URL of repository to track            |
-| `track-from`       | Yes      | -                   | Starting commit hash                  |
-| `path-starts-with` | No       | -                   | Path filter for changes               |
-| `labels`           | No       | `sync`              | Labels for issues (newline separated) |
-| `release-tracking` | No       | `false`             | Enable release status tracking        |
-| `verbose`          | No       | `true`              | Enable verbose logging                |
-| `username`         | No       | `github-actions`    | Git username for commits              |
-| `email`            | No       | `action@github.com` | Git email for commits                 |
-| `upstream-repo`    | No       | Current repository  | URL of your repository                |
-| `head-repo-branch` | No       | `main`              | Branch to track in head repo          |
+| Option                    | Required | Default             | Description                           |
+| ------------------------- | -------- | ------------------- | ------------------------------------- |
+| `access-token`            | Yes      | -                   | GitHub access token                   |
+| `head-repo`               | Yes      | -                   | URL of repository to track            |
+| `track-from`              | Yes      | -                   | Starting commit hash                  |
+| `path-starts-with`        | No       | -                   | Path filter for changes               |
+| `labels`                  | No       | `sync`              | Labels for issues (newline separated) |
+| `release-tracking`        | No       | `false`             | Enable release status tracking        |
+| `release-tracking-labels` | No       | `pending`           | Labels for unreleased changes         |
+| `verbose`                 | No       | `true`              | Enable verbose logging                |
+| `username`                | No       | `github-actions`    | Git username for commits              |
+| `email`                   | No       | `action@github.com` | Git email for commits                 |
+| `upstream-repo`           | No       | Current repository  | URL of your repository                |
+| `head-repo-branch`        | No       | `main`              | Branch to track in head repo          |
 
 ### How It Works
 
@@ -89,6 +91,7 @@ Once configured, Yuki-no will create issues in your repository for any new chang
 3. For release tracking:
    - Monitors pre-release and release tags
    - Updates issue comments with status changes
+   - Manages release tracking labels for unreleased changes
    - Stops tracking when final release is available
 
 ### Caveats
@@ -113,7 +116,17 @@ Once configured, Yuki-no will create issues in your repository for any new chang
   - If `labels: sync\nneeds review` is set, an issue must have both labels to be managed
   - If an issue has `sync, needs review, other` labels and `labels: sync\nneeds review` is set, it will be managed
   - If an issue has `sync, other` labels and `labels: sync\nneeds review` is set, it will be ignored
+- If an empty string is provided, no labels will be added
 - By default, Yuki-no uses the `sync` label
+
+#### Release Tracking Labels
+
+- Release tracking labels are only used when **release tracking is enabled**
+  - Labels are added to issues that haven't been released yet
+  - Labels are removed when the changes are included in a release
+  - Any labels that overlap with the `labels` option are filtered out
+- If an empty string is provided, no labels will be added
+- By default, Yuki-no uses the `pending` label
 
 #### GitHub Actions Bot
 

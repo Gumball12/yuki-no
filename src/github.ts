@@ -1,6 +1,7 @@
 import { Octokit } from '@octokit/rest';
 import type { Remote } from './config';
 import type { Issue, Comment } from './types';
+import { log } from './utils';
 
 export interface CreateIssueOptions {
   title: string;
@@ -125,5 +126,22 @@ export class GitHub {
       issue_number: issueNumber,
       body,
     });
+  }
+
+  async setLabels(
+    remote: Remote,
+    issueNumber: number,
+    labels: string[],
+  ): Promise<void> {
+    log('I', `Setting labels for issue #${issueNumber}: ${labels.join(', ')}`);
+
+    await this.api.issues.setLabels({
+      owner: remote.owner,
+      repo: remote.name,
+      issue_number: issueNumber,
+      labels,
+    });
+
+    log('S', `Labels set for issue #${issueNumber}`);
   }
 }

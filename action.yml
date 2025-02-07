@@ -37,6 +37,11 @@ inputs:
   release-tracking:
     description: 'Whether to enable release tracking. When enabled, Yuki-no will track releases for each issue and add comments about release status.'
     required: false
+  release-tracking-labels:
+    description: 'Labels to add to issues when release tracking is enabled. These labels will be added to issues that have not been released yet and removed when the changes are released. You can specify multiple labels separated by newlines. Defaults to "pending". If empty string is provided, no labels will be added. Any labels that overlap with the "labels" option will be filtered out.'
+    required: false
+    default: |
+      pending
   verbose:
     description: 'Whether to enable verbose logging. When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
     required: false
@@ -68,6 +73,7 @@ runs:
         PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
+        RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
         VERBOSE: ${{ inputs.verbose }}
       run: |
         cd yuki-no

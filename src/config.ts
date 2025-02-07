@@ -1,4 +1,4 @@
-import { extractRepoOwner, extractRepoName } from './utils';
+import { extractRepoOwner, extractRepoName, splitByNewline } from './utils';
 import { defaults } from './defaults';
 
 export interface UserConfig {
@@ -104,6 +104,25 @@ export interface UserConfig {
   releaseTracking?: string;
 
   /**
+   * Labels to add to issues when release tracking is enabled.
+   * These labels will be added to issues that haven't been released yet
+   * and removed when the changes are released.
+   * You can specify multiple labels separated by newlines.
+   * Defaults to 'pending'.
+   * If empty string is provided, no labels will be added.
+   * Any labels that overlap with the 'labels' option will be filtered out.
+   *
+   * Uses `process.env.RELEASE_TRACKING_LABELS` if it exists.
+   * Only used when release tracking is enabled.
+   *
+   * @default 'pending'
+   * @example |
+   *   pending
+   *   unreleased
+   */
+  releaseTrackingLabels?: string;
+
+  /**
    * Whether to enable verbose logging.
    * When enabled, Yuki-no will show all log messages including info and success messages.
    * This is useful for debugging.
@@ -120,8 +139,9 @@ export interface Config {
   accessToken: string;
   trackFrom: string;
   pathStartsWith?: string;
-  labels?: string;
+  labels: string[];
   releaseTracking: boolean;
+  releaseTrackingLabels: string[];
   verbose: boolean;
 
   remote: {
@@ -139,6 +159,11 @@ export interface Remote {
 
 export function createConfig(config: UserConfig): Config {
   const upstreamRepo = config.upstreamRepo || inferUpstreamRepo();
+  const labels = parseLabels([defaults.label], config.labels);
+  const releaseTrackingLabels = filterReleaseTrackingLabels(
+    labels,
+    parseLabels([defaults.releaseTrackingLabel], config.releaseTrackingLabels),
+  );
 
   return {
     userName: config.userName || defaults.userName,
@@ -146,8 +171,9 @@ export function createConfig(config: UserConfig): Config {
     accessToken: config.accessToken,
     trackFrom: config.trackFrom,
     pathStartsWith: config.pathStartsWith,
-    labels: config.labels,
+    labels: labels,
     releaseTracking: config.releaseTracking?.toLowerCase() === 'true',
+    releaseTrackingLabels,
     verbose: config.verbose?.toLowerCase() === 'true',
 
     remote: {
@@ -180,4 +206,25 @@ function inferUpstreamRepo(): string {
   }
 
   return `${serverUrl}/${repository}.git`;
+}
+
+function parseLabels(defaultLabels: string[], rawLabels?: string): string[] {
+  if (rawLabels === '') {
+    return [];
+  }
+
+  if (!rawLabels) {
+    return defaultLabels;
+  }
+
+  return splitByNewline(rawLabels);
+}
+
+function filterReleaseTrackingLabels(
+  labels: string[],
+  releaseTrackingLabels: string[],
+) {
+  return releaseTrackingLabels.filter(
+    releaseTrackingLabel => !labels.includes(releaseTrackingLabel),
+  );
 }

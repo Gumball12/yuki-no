@@ -17,6 +17,7 @@ vi.mock('../src/github', () => ({
     getOpenIssues: vi.fn(),
     getIssueComments: vi.fn(),
     createComment: vi.fn(),
+    setLabels: vi.fn(),
   })),
 }));
 
@@ -35,6 +36,8 @@ const mockConfig: Config = {
   trackFrom: 'test-hash',
   pathStartsWith: 'docs/',
   releaseTracking: false,
+  labels: [],
+  releaseTrackingLabels: [],
   remote: {
     upstream: {
       url: 'https://github.com/test/upstream.git',
@@ -91,6 +94,7 @@ function setupMocks(instance: YukiNo) {
   } as any);
   vi.mocked(instance.github.getIssueComments).mockResolvedValue([]);
   vi.mocked(instance.github.createComment).mockResolvedValue();
+  vi.mocked(instance.github.setLabels).mockResolvedValue();
 }
 
 beforeEach(() => {
@@ -165,16 +169,11 @@ describe('Basic Commit Processing', () => {
 });
 
 describe('Issue Labels', () => {
-  it('should use default sync label when labels not provided', async () => {
-    await yukiNo.start();
-    expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({ labels: ['sync'] }),
-    );
-  });
-
   it('should use provided labels when specified', async () => {
-    yukiNo = new YukiNo({ ...mockConfig, labels: 'label1\nlabel2\nlabel3' });
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      labels: ['label1', 'label2', 'label3'],
+    });
     setupMocks(yukiNo);
 
     await yukiNo.start();
@@ -185,7 +184,7 @@ describe('Issue Labels', () => {
   });
 
   it('should not add any labels when empty string provided', async () => {
-    yukiNo = new YukiNo({ ...mockConfig, labels: '' });
+    yukiNo = new YukiNo({ ...mockConfig, labels: [] });
     setupMocks(yukiNo);
 
     await yukiNo.start();
@@ -404,5 +403,133 @@ describe('Error Handling', () => {
     yukiNo = new YukiNo({ ...mockConfig, verbose: true });
     setupMocks(yukiNo);
     await expect(yukiNo.start()).resolves.not.toThrow();
+  });
+});
+
+describe('Release Tracking Labels', () => {
+  beforeEach(() => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      releaseTracking: true,
+      releaseTrackingLabels: ['pending', 'unreleased'],
+    });
+    setupMocks(yukiNo);
+  });
+
+  it('should not add labels when release tracking labels is empty string', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      releaseTracking: true,
+      releaseTrackingLabels: [],
+    });
+    setupMocks(yukiNo);
+
+    const issue = {
+      number: 1,
+      title: 'Test Issue',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      state: 'open' as const,
+      labels: ['sync'],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+    vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
+
+    await yukiNo.start();
+    expect(yukiNo.github.setLabels).not.toHaveBeenCalled();
+  });
+
+  it('should not modify labels when release tracking labels match issue labels', async () => {
+    const issue = {
+      number: 1,
+      title: 'Test Issue',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      state: 'open' as const,
+      labels: ['sync', 'pending', 'unreleased'],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+    vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
+
+    await yukiNo.start();
+    expect(yukiNo.github.setLabels).not.toHaveBeenCalled();
+  });
+
+  it('should add tracking labels for unreleased changes', async () => {
+    const issue = {
+      number: 1,
+      title: 'Test Issue',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      state: 'open' as const,
+      labels: ['sync'],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+    vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
+
+    await yukiNo.start();
+    expect(yukiNo.github.setLabels).toHaveBeenCalledWith(
+      expect.anything(),
+      1,
+      expect.arrayContaining(['sync', 'pending', 'unreleased']),
+    );
+  });
+
+  it('should remove tracking labels when released', async () => {
+    const issue = {
+      number: 1,
+      title: 'Test Issue',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      state: 'open' as const,
+      labels: ['sync', 'pending', 'unreleased'],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+    vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({
+      release: { tag: 'v1.0.0', url: 'release-url' },
+    });
+
+    await yukiNo.start();
+    expect(yukiNo.github.setLabels).toHaveBeenCalledWith(expect.anything(), 1, [
+      'sync',
+    ]);
+  });
+
+  it('should filter out duplicate labels between issue labels and release tracking labels', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      releaseTracking: true,
+      labels: ['sync', 'pending'],
+      releaseTrackingLabels: ['pending', 'unreleased'],
+    });
+    setupMocks(yukiNo);
+
+    const issue = {
+      number: 1,
+      title: 'Test Issue',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      state: 'open' as const,
+      labels: ['sync', 'pending'],
+      created_at: '2024-01-01T00:00:00Z',
+      updated_at: '2024-01-01T00:00:00Z',
+    };
+
+    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([issue]);
+    vi.mocked(yukiNo.repo.getReleaseInfo).mockReturnValue({});
+
+    await yukiNo.start();
+    expect(yukiNo.github.setLabels).toHaveBeenCalledWith(
+      expect.anything(),
+      1,
+      expect.arrayContaining(['sync', 'pending', 'unreleased']),
+    );
   });
 });

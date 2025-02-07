@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { createConfig } from '../src/config';
 import type { UserConfig } from '../src/config';
+import { defaults } from 'src/defaults';
 
 const originalEnv = process.env;
 
@@ -30,8 +31,9 @@ describe('createConfig', () => {
       accessToken: 'test-token',
       trackFrom: 'test-hash',
       pathStartsWith: undefined,
-      labels: undefined,
+      labels: [defaults.label],
       releaseTracking: false,
+      releaseTrackingLabels: [defaults.releaseTrackingLabel],
       verbose: false,
       remote: {
         upstream: {
@@ -94,6 +96,7 @@ describe('createConfig', () => {
       pathStartsWith: 'docs/',
       labels: 'test\nmy\nlabel',
       releaseTracking: 'true',
+      releaseTrackingLabels: 'unreleased\nwip',
       verbose: 'true',
     };
 
@@ -105,8 +108,9 @@ describe('createConfig', () => {
       accessToken: 'test-token',
       trackFrom: 'test-hash',
       pathStartsWith: 'docs/',
-      labels: 'test\nmy\nlabel',
+      labels: ['test', 'my', 'label'],
       releaseTracking: true,
+      releaseTrackingLabels: ['unreleased', 'wip'],
       verbose: true,
       remote: {
         upstream: {
@@ -170,5 +174,101 @@ describe('createConfig', () => {
     expect(config.remote.upstream.name).toBe('repo-name');
     expect(config.remote.head.owner).toBe('other-org');
     expect(config.remote.head.name).toBe('other-repo');
+  });
+
+  describe('Label Handling', () => {
+    it('should use default sync label when labels not provided', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.labels).toEqual([defaults.label]);
+    });
+
+    it('should use empty array when empty string provided for labels', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        labels: '',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.labels).toEqual([]);
+    });
+
+    it('should parse newline separated labels', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        labels: 'label1\nlabel2\nlabel3',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.labels).toEqual(['label1', 'label2', 'label3']);
+    });
+
+    it('should use default pending label when release tracking labels not provided', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        releaseTracking: 'true',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.releaseTrackingLabels).toEqual([
+        defaults.releaseTrackingLabel,
+      ]);
+    });
+
+    it('should use empty array when empty string provided for release tracking labels', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        releaseTracking: 'true',
+        releaseTrackingLabels: '',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.releaseTrackingLabels).toEqual([]);
+    });
+
+    it('should parse newline separated release tracking labels', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        releaseTracking: 'true',
+        releaseTrackingLabels: 'pending\nunreleased\nwip',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.releaseTrackingLabels).toEqual([
+        'pending',
+        'unreleased',
+        'wip',
+      ]);
+    });
+
+    it('should filter out duplicate labels between issue labels and release tracking labels', () => {
+      const userConfig: UserConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        labels: 'sync\npending',
+        releaseTracking: 'true',
+        releaseTrackingLabels: 'pending\nunreleased\nwip',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.labels).toEqual(['sync', 'pending']);
+      expect(config.releaseTrackingLabels).toEqual(['unreleased', 'wip']);
+    });
   });
 });
