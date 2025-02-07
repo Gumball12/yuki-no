@@ -159,10 +159,10 @@ export interface Remote {
 
 export function createConfig(config: UserConfig): Config {
   const upstreamRepo = config.upstreamRepo || inferUpstreamRepo();
-  const labels = parseLabels([defaults.label], config.labels);
+  const labels = parseLabels(config.labels ?? defaults.label);
   const releaseTrackingLabels = filterReleaseTrackingLabels(
     labels,
-    parseLabels([defaults.releaseTrackingLabel], config.releaseTrackingLabels),
+    parseLabels(config.releaseTrackingLabels ?? defaults.releaseTrackingLabel),
   );
 
   return {
@@ -208,13 +208,9 @@ function inferUpstreamRepo(): string {
   return `${serverUrl}/${repository}.git`;
 }
 
-function parseLabels(defaultLabels: string[], rawLabels?: string): string[] {
+function parseLabels(rawLabels: string): string[] {
   if (rawLabels === '') {
     return [];
-  }
-
-  if (!rawLabels) {
-    return defaultLabels;
   }
 
   return splitByNewline(rawLabels);

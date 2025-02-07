@@ -61,18 +61,18 @@ export class YukiNo {
     log('S', 'Yuki-no completed successfully');
   }
 
-  protected async getRun() {
+  async getRun() {
     log('I', 'Getting latest run information...');
     const run = await this.github.getLatestRun(this.upstream, 'yuki-no');
     return run ? new Date(run.created_at).toISOString() : '';
   }
 
-  protected async getFeed() {
+  async getFeed() {
     log('I', 'Fetching commits from head repo...');
     return this.rss.get(this.head, this.config.trackFrom);
   }
 
-  protected async processFeed(feed: Feed, lastSuccessfulRunAt: string) {
+  async processFeed(feed: Feed, lastSuccessfulRunAt: string) {
     if (lastSuccessfulRunAt > feed.isoDate) {
       log(
         'I',
@@ -104,7 +104,7 @@ export class YukiNo {
     }
   }
 
-  protected async containsValidFile(hash: string) {
+  async containsValidFile(hash: string) {
     if (!this.config.pathStartsWith) {
       return true;
     }
@@ -124,13 +124,13 @@ export class YukiNo {
     });
   }
 
-  protected async createIssueIfNot(feed: Feed, hash: string) {
+  async createIssueIfNot(feed: Feed, hash: string) {
     const res = await this.github.searchIssue(this.upstream, hash);
 
     return res.data.total_count > 0 ? null : this.createIssue(feed);
   }
 
-  protected async createIssue(feed: Feed) {
+  async createIssue(feed: Feed) {
     const title = removeHash(feed.title);
     const body = `New updates on head repo.\r\n${feed.link}`;
 
@@ -145,7 +145,7 @@ export class YukiNo {
     return res.data.number;
   }
 
-  protected async trackReleases(): Promise<void> {
+  async trackReleases(): Promise<void> {
     if (!this.config.releaseTracking) {
       return;
     }
@@ -158,7 +158,7 @@ export class YukiNo {
     }
   }
 
-  protected async processIssueRelease(issue: Issue): Promise<void> {
+  async processIssueRelease(issue: Issue): Promise<void> {
     if (!this.isYukiNoIssue(issue)) {
       log('I', `Skipping issue #${issue.number} (not a Yuki-no issue)`);
       return;
@@ -174,12 +174,12 @@ export class YukiNo {
 
     const releaseInfo = this.repo.getReleaseInfo(commitHash);
     log('I', '--- Managing Release Labels ---');
-    await this.manageReleaseLabels(issue, releaseInfo);
+    await this.#manageReleaseLabels(issue, releaseInfo);
     log('I', '--- Managing Release Comments ---');
-    await this.updateReleaseComment(issue, releaseInfo);
+    await this.#updateReleaseComment(issue, releaseInfo);
   }
 
-  private async manageReleaseLabels(
+  async #manageReleaseLabels(
     issue: Issue,
     releaseInfo: ReleaseInfo,
   ): Promise<void> {
@@ -205,7 +205,7 @@ export class YukiNo {
     }
   }
 
-  private async updateReleaseComment(
+  async #updateReleaseComment(
     issue: Issue,
     releaseInfo: ReleaseInfo,
   ): Promise<void> {
@@ -231,22 +231,19 @@ export class YukiNo {
     log('S', `Updated release status for issue #${issue.number}`);
   }
 
-  protected isYukiNoIssue(issue: Issue): boolean {
+  isYukiNoIssue(issue: Issue): boolean {
     return this.config.labels.every(label =>
       issue.labels.some(issueLabel => issueLabel === label),
     );
   }
 
-  protected findLastReleaseComment(comments: Comment[]): Comment | undefined {
-    for (const comment of [...comments].reverse()) {
-      if (this.isReleaseTrackingComment(comment)) {
-        return comment;
-      }
-    }
-    return undefined;
+  findLastReleaseComment(comments: Comment[]): Comment | undefined {
+    return [...comments]
+      .reverse()
+      .find(comment => this.isReleaseTrackingComment(comment));
   }
 
-  protected isReleaseTrackingComment(comment: Comment): boolean {
+  isReleaseTrackingComment(comment: Comment): boolean {
     const content = comment.body ?? '';
     return (
       content.startsWith('- pre-release:') &&
@@ -255,11 +252,11 @@ export class YukiNo {
     );
   }
 
-  protected hasFullRelease(comment: Comment): boolean {
+  hasFullRelease(comment: Comment): boolean {
     return (comment.body ?? '').includes('- release: [v');
   }
 
-  protected extractCommitHash(body: string): string | undefined {
+  extractCommitHash(body: string): string | undefined {
     const match = body.match(/[\r|\n|\r\n](.+)$/);
     return match ? extractBasename(match[1]) : undefined;
   }

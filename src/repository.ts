@@ -70,7 +70,7 @@ export class Repository {
       .toString()
       .split('\n')
       .filter(Boolean)
-      .map((tag: string) => this.getTagInfo(tag));
+      .map((tag: string) => this.#getTagInfo(tag));
 
     return {
       preRelease: tags.find((tag: ReleaseTag) => tag.tag.includes('-')),
@@ -78,7 +78,7 @@ export class Repository {
     };
   }
 
-  private getTagInfo(tag: string): ReleaseTag {
+  #getTagInfo(tag: string): ReleaseTag {
     const repoUrl = getUrlWithoutDotGit(this.head.url);
     return {
       tag: tag.trim(),
