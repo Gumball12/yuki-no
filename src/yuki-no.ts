@@ -44,13 +44,15 @@ export class YukiNo {
     this.repo.setup();
 
     const feed = await this.getFeed();
+    feed.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
+
     const lastSuccessfulRunAt = await this.getRun();
 
     log('I', `Found ${feed.length} commits to process`);
     log('I', '=== Processing Commits ===');
 
     for (const i in feed) {
-      await this.processFeed(feed[i] as Feed, lastSuccessfulRunAt);
+      await this.processFeed(feed[i], lastSuccessfulRunAt);
     }
 
     if (this.config.releaseTracking) {
@@ -69,7 +71,7 @@ export class YukiNo {
 
   async getFeed() {
     log('I', 'Fetching commits from head repo...');
-    return this.rss.get(this.head, this.config.trackFrom);
+    return this.rss.get(this.head, this.config.trackFrom) as Promise<Feed[]>;
   }
 
   async processFeed(feed: Feed, lastSuccessfulRunAt: string) {
