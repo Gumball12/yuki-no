@@ -4,6 +4,7 @@ import type { Issue, Comment, ReleaseInfo } from './types';
 import { Rss } from './rss';
 import { GitHub } from './github';
 import { Repository } from './repository';
+import picomatch from 'picomatch';
 
 interface Feed {
   link: string;
@@ -106,21 +107,34 @@ export class YukiNo {
     }
   }
 
-  async containsValidFile(hash: string) {
-    if (!this.config.pathStartsWith) {
+  async containsValidFile(hash: string): Promise<boolean> {
+    // If no patterns specified, include all files
+    if (this.config.include.length === 0 && this.config.exclude.length === 0) {
       return true;
     }
 
-    log(
-      'I',
-      `Checking for file changes in path "${this.config.pathStartsWith}"`,
-    );
+    log('I', 'Checking for file changes...');
     const res = await this.github.getCommit(this.head, hash);
 
+    // Create matchers
+    const isMatch = picomatch(
+      this.config.include.length ? this.config.include : ['**'],
+    );
+    const isExcluded = picomatch(this.config.exclude);
+
     return res.data.files!.some(file => {
-      const matches = file.filename!.startsWith(this.config.pathStartsWith!);
+      const filename = file.filename!;
+
+      // Check exclude patterns first (they take precedence)
+      if (isExcluded(filename)) {
+        log('I', `Excluded file: ${filename}`);
+        return false;
+      }
+
+      // Check include patterns
+      const matches = isMatch(filename);
       if (matches) {
-        log('I', `Found relevant file change: ${file.filename}`);
+        log('I', `Found relevant file change: ${filename}`);
       }
       return matches;
     });

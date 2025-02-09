@@ -14,9 +14,12 @@ const config = createConfig({
   headRepo: process.env.HEAD_REPO!,
   headRepoBranch: process.env.HEAD_REPO_BRANCH,
   trackFrom: process.env.TRACK_FROM!,
-  pathStartsWith: process.env.PATH_STARTS_WITH,
+  include: process.env.INCLUDE,
+  exclude: process.env.EXCLUDE,
   labels: process.env.LABELS,
   releaseTracking: process.env.RELEASE_TRACKING,
+  releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
+  verbose: process.env.VERBOSE,
 });
 
 const yukiNo = new YukiNo(config);

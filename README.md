@@ -50,10 +50,12 @@ jobs:
           # only track commit from this hash. Required.
           track-from: head-commit-hash
 
-          # File path to track. If specified, Yuki-no will only track commits
-          # that modified files under this path. If not specified, it will
-          # track all files in the project root. Optional.
-          path-starts-with: docs/
+          # List of file patterns to track. Multiple patterns can be specified
+          # with newlines. Files matching these glob patterns will be included
+          # in tracking.
+          # If empty, all files will be tracked. Optional.
+          include: |
+            docs/**
 
           # Whether to enable release tracking.
           # When enabled, Yuki-no will track releases for each issue
@@ -62,7 +64,7 @@ jobs:
           release-tracking: true
 ```
 
-Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash that match your `path-starts-with` filter. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
+Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
 
 ### Configuration
 
@@ -71,7 +73,8 @@ Once configured, Yuki-no will create issues in your repository for any new chang
 | `access-token`            | Yes      | -                   | GitHub access token                   |
 | `head-repo`               | Yes      | -                   | URL of repository to track            |
 | `track-from`              | Yes      | -                   | Starting commit hash                  |
-| `path-starts-with`        | No       | -                   | Path filter for changes               |
+| `include`                 | No       | -                   | Glob patterns for files to track      |
+| `exclude`                 | No       | -                   | Glob patterns for files to exclude    |
 | `labels`                  | No       | `sync`              | Labels for issues (newline separated) |
 | `release-tracking`        | No       | `false`             | Enable release status tracking        |
 | `release-tracking-labels` | No       | `pending`           | Labels for unreleased changes         |
@@ -80,6 +83,22 @@ Once configured, Yuki-no will create issues in your repository for any new chang
 | `email`                   | No       | `action@github.com` | Git email for commits                 |
 | `upstream-repo`           | No       | Current repository  | URL of your repository                |
 | `head-repo-branch`        | No       | `main`              | Branch to track in head repo          |
+
+For more detailed option descriptions, please refer to the [config.ts](./src/config.ts).
+
+#### File Pattern Examples
+
+```yaml
+# Track only markdown and TypeScript files
+include: |
+  **/*.md
+  **/*.ts
+
+# Exclude test files
+exclude: |
+  **/*.test.ts
+  **/__tests__/**
+```
 
 ### How It Works
 

@@ -34,9 +34,10 @@ const mockConfig: Config = {
   email: 'test@example.com',
   accessToken: 'test-token',
   trackFrom: 'test-hash',
-  pathStartsWith: 'docs/',
-  releaseTracking: false,
+  include: [],
+  exclude: [],
   labels: [],
+  releaseTracking: false,
   releaseTrackingLabels: [],
   remote: {
     upstream: {
@@ -142,17 +143,6 @@ describe('Basic Commit Processing', () => {
 
   it('should process all commits when no successful run exists', async () => {
     vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue(undefined as any);
-
-    await yukiNo.start();
-    expect(yukiNo.github.createIssue).toHaveBeenCalled();
-  });
-
-  it('should track all files when pathStartsWith is not specified', async () => {
-    yukiNo = new YukiNo({ ...mockConfig, pathStartsWith: undefined });
-    setupMocks(yukiNo);
-    vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
-      data: { files: [{ filename: 'any/path/file.md' }] },
-    } as any);
 
     await yukiNo.start();
     expect(yukiNo.github.createIssue).toHaveBeenCalled();
@@ -531,5 +521,62 @@ describe('Release Tracking Labels', () => {
       1,
       expect.arrayContaining(['sync', 'pending', 'unreleased']),
     );
+  });
+});
+
+describe('File Pattern Matching', () => {
+  it('should include all files when no patterns specified', async () => {
+    yukiNo = new YukiNo({ ...mockConfig, include: [], exclude: [] });
+    setupMocks(yukiNo);
+    vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
+      data: { files: [{ filename: 'any/path/file.md' }] },
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+  });
+
+  it('should include files matching include pattern', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      include: ['docs/**/*.md', 'src/**/*.ts'],
+    });
+    setupMocks(yukiNo);
+    vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
+      data: { files: [{ filename: 'docs/guide/intro.md' }] },
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+  });
+
+  it('should exclude files matching exclude pattern', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      include: ['src/**/*.ts'],
+      exclude: ['**/*.test.ts'],
+    });
+    setupMocks(yukiNo);
+    vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
+      data: { files: [{ filename: 'src/utils.test.ts' }] },
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('should prioritize exclude over include patterns', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      include: ['src/**/*.ts'],
+      exclude: ['src/excluded/**'],
+    });
+    setupMocks(yukiNo);
+    vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
+      data: { files: [{ filename: 'src/excluded/file.ts' }] },
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
   });
 });

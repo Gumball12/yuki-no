@@ -26,8 +26,11 @@ inputs:
   track-from:
     description: 'The git commit sha of head repo to start tracking. Yuki-no will only track commit from this hash.'
     required: true
-  path-starts-with:
-    description: 'File path to track. If specified, Yuki-no will only track commits that modified files under this path. If not specified, it will track all files in the project root.'
+  include:
+    description: 'File patterns to include in tracking. Multiple patterns can be specified with newlines. Uses glob patterns. If not specified, all files will be tracked.'
+    required: false
+  exclude:
+    description: 'File patterns to exclude from tracking. Multiple patterns can be specified with newlines. Uses glob patterns. Takes precedence over include patterns.'
     required: false
   labels:
     description: 'Labels to add to the issues. You can specify multiple labels separated by newlines. Defaults to "sync". If empty string is provided, no labels will be added.'
@@ -70,7 +73,8 @@ runs:
         HEAD_REPO: ${{ inputs.head-repo }}
         HEAD_REPO_BRANCH: ${{ inputs.head-repo-branch }}
         TRACK_FROM: ${{ inputs.track-from }}
-        PATH_STARTS_WITH: ${{ inputs.path-starts-with }}
+        INCLUDE: ${{ inputs.include }}
+        EXCLUDE: ${{ inputs.exclude }}
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}

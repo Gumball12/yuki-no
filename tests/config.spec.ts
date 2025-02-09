@@ -30,7 +30,8 @@ describe('createConfig', () => {
       email: 'action@github.com',
       accessToken: 'test-token',
       trackFrom: 'test-hash',
-      pathStartsWith: undefined,
+      include: [],
+      exclude: [],
       labels: [defaults.label],
       releaseTracking: false,
       releaseTrackingLabels: [defaults.releaseTrackingLabel],
@@ -93,7 +94,8 @@ describe('createConfig', () => {
       headRepo: 'https://github.com/test/head.git',
       headRepoBranch: 'develop',
       trackFrom: 'test-hash',
-      pathStartsWith: 'docs/',
+      include: '**/*.md\n**/*.ts',
+      exclude: '**/*.test.ts\n**/__tests__/**',
       labels: 'test\nmy\nlabel',
       releaseTracking: 'true',
       releaseTrackingLabels: 'unreleased\nwip',
@@ -107,7 +109,8 @@ describe('createConfig', () => {
       email: 'test@example.com',
       accessToken: 'test-token',
       trackFrom: 'test-hash',
-      pathStartsWith: 'docs/',
+      include: ['**/*.md', '**/*.ts'],
+      exclude: ['**/*.test.ts', '**/__tests__/**'],
       labels: ['test', 'my', 'label'],
       releaseTracking: true,
       releaseTrackingLabels: ['unreleased', 'wip'],
@@ -157,7 +160,8 @@ describe('createConfig', () => {
     expect(config.userName).toBe('github-actions');
     expect(config.email).toBe('action@github.com');
     expect(config.remote.head.branch).toBe('main');
-    expect(config.pathStartsWith).toBeUndefined();
+    expect(config.include).toEqual([]);
+    expect(config.exclude).toEqual([]);
   });
 
   it('should handle different repository URL formats', () => {
@@ -269,6 +273,58 @@ describe('createConfig', () => {
       const config = createConfig(userConfig);
       expect(config.labels).toEqual(['sync', 'pending']);
       expect(config.releaseTrackingLabels).toEqual(['unreleased', 'wip']);
+    });
+  });
+
+  describe('File Pattern Handling', () => {
+    it('should parse include patterns correctly', () => {
+      const userConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        include: '**/*.md\n**/*.ts',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.include).toEqual(['**/*.md', '**/*.ts']);
+    });
+
+    it('should parse exclude patterns correctly', () => {
+      const userConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        exclude: '**/*.test.ts\n**/__tests__/**',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.exclude).toEqual(['**/*.test.ts', '**/__tests__/**']);
+    });
+
+    it('should handle empty include/exclude patterns', () => {
+      const userConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+        include: '',
+        exclude: '',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.include).toEqual([]);
+      expect(config.exclude).toEqual([]);
+    });
+
+    it('should handle undefined include/exclude patterns', () => {
+      const userConfig = {
+        accessToken: 'test-token',
+        headRepo: 'https://github.com/test/head.git',
+        trackFrom: 'test-hash',
+      };
+
+      const config = createConfig(userConfig);
+      expect(config.include).toEqual([]);
+      expect(config.exclude).toEqual([]);
     });
   });
 });

@@ -70,13 +70,18 @@ export interface UserConfig {
   trackFrom: string;
 
   /**
-   * File path to track. If specified, Yuki-no will only track commits that
-   * modified files under this path. If not specified, it will track all files
-   * in the project root.
-   *
-   * @example 'docs/'
+   * List of file patterns to track. Multiple patterns can be specified with newlines.
+   * Files matching these glob patterns will be included in tracking.
+   * If empty, all files will be tracked.
    */
-  pathStartsWith?: string;
+  include?: string;
+
+  /**
+   * List of file patterns to exclude from tracking. Multiple patterns can be specified with newlines.
+   * Files matching these glob patterns will be excluded from tracking.
+   * When a file matches both include and exclude patterns, exclude takes precedence.
+   */
+  exclude?: string;
 
   /**
    * Labels to add to the issues. You can specify multiple labels
@@ -138,7 +143,8 @@ export interface Config {
   email: string;
   accessToken: string;
   trackFrom: string;
-  pathStartsWith?: string;
+  include: string[];
+  exclude: string[];
   labels: string[];
   releaseTracking: boolean;
   releaseTrackingLabels: string[];
@@ -170,8 +176,9 @@ export function createConfig(config: UserConfig): Config {
     email: config.email || defaults.email,
     accessToken: config.accessToken,
     trackFrom: config.trackFrom,
-    pathStartsWith: config.pathStartsWith,
-    labels: labels,
+    include: parsePatterns(config.include),
+    exclude: parsePatterns(config.exclude),
+    labels,
     releaseTracking: config.releaseTracking?.toLowerCase() === 'true',
     releaseTrackingLabels,
     verbose: config.verbose?.toLowerCase() === 'true',
@@ -223,4 +230,12 @@ function filterReleaseTrackingLabels(
   return releaseTrackingLabels.filter(
     releaseTrackingLabel => !labels.includes(releaseTrackingLabel),
   );
+}
+
+function parsePatterns(patterns?: string): string[] {
+  if (!patterns) {
+    return [];
+  }
+
+  return splitByNewline(patterns);
 }
