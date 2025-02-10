@@ -19,54 +19,54 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 
 1. **Required**: Configure workflow permissions
 
-![settings](./docs/settings.webp)
+   ![settings](./docs/settings.webp)
 
-- Go to Settings > Actions > General > Workflow permissions
-- Select "Read and write permissions"
-- Save the changes
+   - Go to Settings > Actions > General > Workflow permissions
+   - Select "Read and write permissions"
+   - Save the changes
 
 2. Create `.github/workflows/yuki-no.yml`:
 
-```yml
-name: yuki-no
+   ```yml
+   name: yuki-no
 
-on:
-  schedule:
-    - cron: '0 * * * *' # Every hour
-  workflow_dispatch: # Manual trigger (Optional)
+   on:
+     schedule:
+       - cron: '0 * * * *' # Every hour
+     workflow_dispatch: # Manual trigger (Optional)
 
-jobs:
-  yuki-no:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: Gumball12/yuki-no@v1
-        with:
-          # GitHub access token. Required.
-          access-token: ${{ secrets.GITHUB_TOKEN }}
+   jobs:
+     yuki-no:
+       runs-on: ubuntu-latest
+       steps:
+         - uses: Gumball12/yuki-no@v1
+           with:
+             # GitHub access token. Required.
+             access-token: ${{ secrets.GITHUB_TOKEN }}
 
-          # The head repo to track. This is the repository you want to
-          # take a diff. Required.
-          head-repo: https://github.com/head-user/head-repo.git
+             # The head repo to track. This is the repository you want to
+             # take a diff. Required.
+             head-repo: https://github.com/head-user/head-repo.git
 
-          # The git commit sha of head repo to start tracking. Yuki-no will
-          # only track commit from this hash. Required.
-          track-from: head-commit-hash
+             # The git commit sha of head repo to start tracking. Yuki-no will
+             # only track commit from this hash. Required.
+             track-from: head-commit-hash
 
-          # List of file patterns to track. Multiple patterns can be specified
-          # with newlines. Files matching these glob patterns will be included
-          # in tracking.
-          # If empty, all files will be tracked. Optional.
-          include: |
-            docs/**
+             # List of file patterns to track. Multiple patterns can be specified
+             # with newlines. Files matching these glob patterns will be included
+             # in tracking.
+             # If empty, all files will be tracked. Optional.
+             include: |
+               docs/**
 
-          # Whether to enable release tracking.
-          # When enabled, Yuki-no will track releases for each issue
-          # and add comments about release status. Optional.
-          # Defaults to 'false'
-          release-tracking: true
-```
+             # Whether to enable release tracking.
+             # When enabled, Yuki-no will track releases for each issue
+             # and add comments about release status. Optional.
+             # Defaults to 'false'
+             release-tracking: true
+   ```
 
-Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
+   Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
 
 ### Configuration
 
