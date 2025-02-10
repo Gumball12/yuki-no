@@ -19,9 +19,11 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 
 1. **Required**: Configure workflow permissions
 
-   - Go to Settings > Actions > General > Workflow permissions
-   - Select "Read and write permissions"
-   - Save the changes
+![settings](./docs/settings.webp)
+
+- Go to Settings > Actions > General > Workflow permissions
+- Select "Read and write permissions"
+- Save the changes
 
 2. Create `.github/workflows/yuki-no.yml`:
 
