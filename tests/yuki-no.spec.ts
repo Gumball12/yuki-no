@@ -201,7 +201,7 @@ describe('Release Tracking', () => {
     const mockIssue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -247,7 +247,7 @@ describe('Release Status Updates', () => {
     const mockIssue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -281,7 +281,7 @@ describe('Release Status Updates', () => {
     const mockIssue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -316,7 +316,7 @@ describe('Release Status Updates', () => {
     const mockIssue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -417,7 +417,7 @@ describe('Release Tracking Labels', () => {
     const issue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -435,7 +435,7 @@ describe('Release Tracking Labels', () => {
     const issue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync', 'pending', 'unreleased'],
       created_at: '2024-01-01T00:00:00Z',
@@ -453,7 +453,7 @@ describe('Release Tracking Labels', () => {
     const issue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync'],
       created_at: '2024-01-01T00:00:00Z',
@@ -475,7 +475,7 @@ describe('Release Tracking Labels', () => {
     const issue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync', 'pending', 'unreleased'],
       created_at: '2024-01-01T00:00:00Z',
@@ -505,7 +505,7 @@ describe('Release Tracking Labels', () => {
     const issue = {
       number: 1,
       title: 'Test Issue',
-      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/hash123',
+      body: 'New updates on head repo.\r\nhttps://github.com/test/test/commit/1234567',
       state: 'open' as const,
       labels: ['sync', 'pending'],
       created_at: '2024-01-01T00:00:00Z',
@@ -578,5 +578,59 @@ describe('File Pattern Matching', () => {
 
     await yukiNo.start();
     expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+  });
+});
+
+describe('Commit Hash Extraction', () => {
+  it('should extract valid 40-character commit hash from GitHub URL', () => {
+    const body =
+      'https://github.com/test/test/commit/1234567890abcdef1234567890abcdef12345678';
+    const hash = yukiNo.extractCommitHash(body);
+    expect(hash).toBe('1234567890abcdef1234567890abcdef12345678');
+  });
+
+  it('should extract valid 7-character short commit hash from GitHub URL', () => {
+    const body = 'https://github.com/test/test/commit/1234567';
+    const hash = yukiNo.extractCommitHash(body);
+    expect(hash).toBe('1234567');
+  });
+
+  it('should extract commit hash regardless of surrounding text', () => {
+    const bodies = [
+      'New updates on head repo.\nhttps://github.com/test/test/commit/1234567',
+      'Previous translation process: https://github.com/test/test/commit/1234567',
+      'Random text before https://github.com/test/test/commit/1234567 and after',
+      'Multiple lines\nwith commit\nhttps://github.com/test/test/commit/1234567\nand more text',
+    ];
+
+    for (const body of bodies) {
+      const hash = yukiNo.extractCommitHash(body);
+      expect(hash).toBe('1234567');
+    }
+  });
+
+  it('should return undefined for invalid GitHub URL format', () => {
+    const body = 'https://not-github.com/test/test/commit/1234567';
+    const hash = yukiNo.extractCommitHash(body);
+    expect(hash).toBeUndefined();
+  });
+
+  it('should return undefined for invalid commit hash format', () => {
+    const invalidHashes = [
+      'https://github.com/test/test/commit/123456', // Too short (6 chars)
+      'https://github.com/test/test/commit/12345678', // Invalid length (8 chars)
+      'https://github.com/test/test/commit/123456g', // Invalid character
+    ];
+
+    for (const body of invalidHashes) {
+      const hash = yukiNo.extractCommitHash(body);
+      expect(hash).toBeUndefined();
+    }
+  });
+
+  it('should return undefined when no commit URL is present', () => {
+    const body = 'Some text without commit URL';
+    const hash = yukiNo.extractCommitHash(body);
+    expect(hash).toBeUndefined();
   });
 });

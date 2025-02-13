@@ -273,8 +273,28 @@ export class YukiNo {
   }
 
   extractCommitHash(body: string): string | undefined {
-    const match = body.match(/[\r|\n|\r\n](.+)$/);
-    return match ? extractBasename(match[1]) : undefined;
+    // Match GitHub commit URL pattern regardless of the surrounding text
+    // Supports both full (40 chars) and short (7 chars) commit hashes
+    const urlMatch = body.match(
+      /https:\/\/github\.com\/[^\/]+\/[^\/]+\/commit\/([a-f0-9]+)/i,
+    );
+    if (!urlMatch) {
+      return;
+    }
+
+    const hash = urlMatch[1];
+    // Validate git commit hash format
+    // Only accept 40 chars (full) or 7 chars (short) hashes
+    if (hash.length !== 40 && hash.length !== 7) {
+      return;
+    }
+
+    // Additional validation for hexadecimal format
+    if (!/^[a-f0-9]+$/i.test(hash)) {
+      return;
+    }
+
+    return hash;
   }
 
   public formatReleaseComment(info: ReleaseInfo): string {
