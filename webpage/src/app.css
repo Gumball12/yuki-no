@@ -1,0 +1,14 @@
+@import "tailwindcss";
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-black text-white;
+}
+
+* {
+  font-family: Intern;
+}

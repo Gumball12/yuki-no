@@ -14,6 +14,8 @@ export default defineConfig({
         '*.config.ts',
         // Test files
         'tests/*',
+        // Landing page
+        'webpage/*',
       ],
     },
   },
