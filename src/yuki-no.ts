@@ -45,6 +45,9 @@ export class YukiNo {
     this.repo.setup();
 
     const feed = await this.getFeed();
+
+    // rearrange processing order
+    // https://github.com/vuejs-translations/ryu-cho/pull/18
     feed.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
 
     const lastSuccessfulRunAt = await this.getRun();
