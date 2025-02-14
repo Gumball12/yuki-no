@@ -6,6 +6,8 @@
 
 Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
 
+> **Why Yuki-no?** Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
+
 ## Features
 
 - Automatically tracks commits from a head repository
@@ -14,6 +16,8 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 - Supports custom labels for issues
 - Tracks release status with pre-release and release information
 - Manages release tracking labels for unreleased changes
+
+Yuki-no is actively used in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), demonstrating its effectiveness in real-world translation workflows.
 
 ## Usage
 
@@ -53,8 +57,9 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
              track-from: head-commit-hash
 
              # List of file patterns to track. Multiple patterns can be specified
-             # with newlines. Files matching these glob patterns will be included
+             # with newlines. Files matching these Glob patterns will be included
              # in tracking.
+             # Glob Pattern: https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing
              # If empty, all files will be tracked. Optional.
              include: |
                docs/**

@@ -27,10 +27,10 @@ inputs:
     description: 'The git commit sha of head repo to start tracking. Yuki-no will only track commit from this hash.'
     required: true
   include:
-    description: 'File patterns to include in tracking. Multiple patterns can be specified with newlines. Uses glob patterns. If not specified, all files will be tracked.'
+    description: 'File patterns to include in tracking. Multiple patterns can be specified with newlines. Uses Glob patterns. If not specified, all files will be tracked.'
     required: false
   exclude:
-    description: 'File patterns to exclude from tracking. Multiple patterns can be specified with newlines. Uses glob patterns. Takes precedence over include patterns.'
+    description: 'File patterns to exclude from tracking. Multiple patterns can be specified with newlines. Uses Glob patterns. Takes precedence over include patterns.'
     required: false
   labels:
     description: 'Labels to add to the issues. You can specify multiple labels separated by newlines. Defaults to "sync". If empty string is provided, no labels will be added.'
