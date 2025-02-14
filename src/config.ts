@@ -71,14 +71,14 @@ export interface UserConfig {
 
   /**
    * List of file patterns to track. Multiple patterns can be specified with newlines.
-   * Files matching these glob patterns will be included in tracking.
+   * Files matching these Glob patterns will be included in tracking.
    * If empty, all files will be tracked.
    */
   include?: string;
 
   /**
    * List of file patterns to exclude from tracking. Multiple patterns can be specified with newlines.
-   * Files matching these glob patterns will be excluded from tracking.
+   * Files matching these Glob patterns will be excluded from tracking.
    * When a file matches both include and exclude patterns, exclude takes precedence.
    */
   exclude?: string;
@@ -87,6 +87,8 @@ export interface UserConfig {
    * Labels to add to the issues. You can specify multiple labels
    * separated by newlines. Defaults to 'sync'.
    * If empty string is provided, no labels will be added.
+   *
+   * WARNING: Using these labels on non-translation Issues may cause unexpected behavior.
    *
    * Uses `process.env.LABELS` if it exists.
    *
@@ -116,6 +118,8 @@ export interface UserConfig {
    * Defaults to 'pending'.
    * If empty string is provided, no labels will be added.
    * Any labels that overlap with the 'labels' option will be filtered out.
+   *
+   * WARNING: Using these labels on non-translation Issues may cause unexpected behavior.
    *
    * Uses `process.env.RELEASE_TRACKING_LABELS` if it exists.
    * Only used when release tracking is enabled.
