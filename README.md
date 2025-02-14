@@ -157,7 +157,7 @@ exclude: |
 #### GitHub Actions Bot
 
 - The default `username` and `email` settings are optimized for most use cases.
-- Yuki-no uses [GitHub Actions bot](https://docs.github.com/en/actions/using-workflows/about-github-actions#about-github-actions) by default.
+- Yuki-no uses GitHub Actions bot by default.
 
 ## Contributing
 
