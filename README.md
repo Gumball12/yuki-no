@@ -12,10 +12,10 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 
 - Automatically tracks commits from a head repository
 - Creates issues for new changes
-- Filters changes based on file paths
-- Supports custom labels for issues
-- Tracks release status with pre-release and release information
-- Manages release tracking labels for unreleased changes
+- Filters changes based on file paths (`include` and `exclude` options)
+- Supports custom labels for issues (`label` option)
+- Tracks release status with pre-release and release information (`release-tracking` option)
+- Manages release tracking labels for unreleased changes (`release-tracking-labels` option)
 
 Yuki-no is actively used in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), demonstrating its effectiveness in real-world translation workflows.
 
@@ -75,21 +75,21 @@ Yuki-no is actively used in the [Vite Korean docs translation project](https://g
 
 ### Configuration
 
-| Option                    | Required | Default             | Description                           |
-| ------------------------- | -------- | ------------------- | ------------------------------------- |
-| `access-token`            | Yes      | -                   | GitHub access token                   |
-| `head-repo`               | Yes      | -                   | URL of repository to track            |
-| `track-from`              | Yes      | -                   | Starting commit hash                  |
-| `include`                 | No       | -                   | Glob patterns for files to track      |
-| `exclude`                 | No       | -                   | Glob patterns for files to exclude    |
-| `labels`                  | No       | `sync`              | Labels for issues (newline separated) |
-| `release-tracking`        | No       | `false`             | Enable release status tracking        |
-| `release-tracking-labels` | No       | `pending`           | Labels for unreleased changes         |
-| `verbose`                 | No       | `true`              | Enable verbose logging                |
-| `username`                | No       | `github-actions`    | Git username for commits              |
-| `email`                   | No       | `action@github.com` | Git email for commits                 |
-| `upstream-repo`           | No       | Current repository  | URL of your repository                |
-| `head-repo-branch`        | No       | `main`              | Branch to track in head repo          |
+| Option                    | Required | Default             | Description                                       |
+| ------------------------- | -------- | ------------------- | ------------------------------------------------- |
+| `access-token`            | Yes      | -                   | GitHub access token                               |
+| `head-repo`               | Yes      | -                   | URL of repository to track                        |
+| `track-from`              | Yes      | -                   | Starting commit hash                              |
+| `include`                 | No       | -                   | Glob patterns for files to track                  |
+| `exclude`                 | No       | -                   | Glob patterns for files to exclude                |
+| `labels`                  | No       | `sync`              | Labels for issues (newline separated)             |
+| `release-tracking`        | No       | `false`             | Enable release status tracking                    |
+| `release-tracking-labels` | No       | `pending`           | Labels for unreleased changes (newline separated) |
+| `verbose`                 | No       | `true`              | Enable verbose logging                            |
+| `username`                | No       | `github-actions`    | Git username for commits                          |
+| `email`                   | No       | `action@github.com` | Git email for commits                             |
+| `upstream-repo`           | No       | Current repository  | URL of your repository                            |
+| `head-repo-branch`        | No       | `main`              | Branch to track in head repo                      |
 
 For more detailed option descriptions, please refer to the [config.ts](./src/config.ts).
 
