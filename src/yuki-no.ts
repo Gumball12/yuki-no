@@ -1,6 +1,6 @@
 import { log, extractBasename, removeHash } from './utils';
 import type { Config, Remote } from './config';
-import type { Issue, Comment, ReleaseInfo } from './types';
+import type { Issue, Comment, ReleaseInfo, BatchConfig } from './types';
 import { GitHub } from './github';
 import { Repository } from './repository';
 import picomatch from 'picomatch';
@@ -19,6 +19,12 @@ export class YukiNo {
   github: GitHub;
   repo: Repository;
 
+  private readonly batchConfig: BatchConfig = {
+    size: 5,
+    delayMs: 3000,
+    maxRetries: 3,
+  };
+
   constructor(config: Config) {
     this.config = config;
     this.upstream = config.remote.upstream;
@@ -31,29 +37,86 @@ export class YukiNo {
       token: config.accessToken,
       userName: config.userName,
       email: config.email,
-      upstream: this.upstream,
       head: this.head,
     });
   }
 
   async start(): Promise<void> {
-    log('I', 'Starting Yuki-no...');
+    log('I', 'Starting Yuki-no with batch processing...');
     this.repo.setup();
 
     const feed = await this.getFeed();
+    const lastSuccessfulRunAt = await this.getRun();
 
     // rearrange processing order
     // https://github.com/vuejs-translations/ryu-cho/pull/18
     feed.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
 
-    const lastSuccessfulRunAt = await this.getRun();
-
     log('I', `Found ${feed.length} commits to process`);
     log('I', '=== Processing Commits ===');
 
-    for (const i in feed) {
-      await this.processFeed(feed[i], lastSuccessfulRunAt);
+    let totalProcessed = 0;
+    let totalBatchTime = 0;
+    let totalCreatedIssues = 0;
+
+    for (let i = 0; i < feed.length; i += this.batchConfig.size) {
+      const batch = feed.slice(i, i + this.batchConfig.size);
+      const batchNumber = Math.floor(i / this.batchConfig.size) + 1;
+      const totalBatches = Math.ceil(feed.length / this.batchConfig.size);
+
+      log('I', `Processing batch ${batchNumber}/${totalBatches}`);
+
+      // Filter valid feeds (containing tracked files)
+      const validFeeds = await Promise.all(
+        batch.map(async feed => {
+          if (lastSuccessfulRunAt && lastSuccessfulRunAt > feed.isoDate) {
+            log(
+              'I',
+              `Skipping commit "${feed.contentSnippet}" (older than last successful run)`,
+            );
+            return null;
+          }
+          const hash = extractBasename(feed.link);
+          return (await this.containsValidFile(hash)) ? feed : null;
+        }),
+      );
+
+      const filteredBatch = validFeeds.filter(
+        (feed): feed is Feed => feed !== null,
+      );
+
+      if (filteredBatch.length > 0) {
+        const { batchTime, processedCount, createdIssues } =
+          await this.processFeedBatch(filteredBatch);
+        totalProcessed += processedCount;
+        totalBatchTime += batchTime;
+        totalCreatedIssues += createdIssues;
+
+        // Calculate and log progress
+        const progress = (totalProcessed / feed.length) * 100;
+        const avgBatchTime = totalBatchTime / batchNumber;
+        const remainingBatches = totalBatches - batchNumber;
+        const estimatedTimeRemaining = avgBatchTime * remainingBatches;
+
+        log('I', `Progress: ${Math.round(progress)}%`);
+        log(
+          'I',
+          `Estimated time remaining: ${Math.ceil(estimatedTimeRemaining / 1000)}s`,
+        );
+      }
+
+      // Add delay between batches
+      if (i + this.batchConfig.size < feed.length) {
+        await new Promise(resolve =>
+          setTimeout(resolve, this.batchConfig.delayMs),
+        );
+      }
     }
+
+    log(
+      'S',
+      `Processing completed: ${totalCreatedIssues} issues created from ${totalProcessed} commits`,
+    );
 
     if (this.config.releaseTracking) {
       log('I', '=== Processing Release Tracking ===');
@@ -86,10 +149,13 @@ export class YukiNo {
       log('W', 'Failed to fetch commits, continuing with existing data');
     }
 
-    // Get commit history using git log
-    const result = this.repo.git.exec(
-      `log ${this.head.name}/${this.head.branch} --format=format:"%H|%s|%aI" --no-merges`,
-    );
+    // Get commit history using git log, starting from trackFrom if specified
+    const gitLogCommand = this.config.trackFrom
+      ? `log ${this.head.name}/${this.head.branch} ${this.config.trackFrom}.. --format=format:"%H|%s|%aI" --no-merges`
+      : `log ${this.head.name}/${this.head.branch} --format=format:"%H|%s|%aI" --no-merges`;
+
+    log('I', `Executing git command: ${gitLogCommand}`);
+    const result = this.repo.git.exec(gitLogCommand);
 
     if (!result || !result.stdout || typeof result.stdout !== 'string') {
       return [];
@@ -121,35 +187,62 @@ export class YukiNo {
       .filter((item: Feed | null): item is Feed => item !== null);
   }
 
-  async processFeed(feed: Feed, lastSuccessfulRunAt: string) {
-    if (lastSuccessfulRunAt > feed.isoDate) {
-      log(
-        'I',
-        `Skipping commit "${feed.contentSnippet}" (older than last successful run)`,
-      );
-      return;
+  async processFeedBatch(feeds: Feed[]) {
+    const startTime = Date.now();
+    const hashes: string[] = [];
+    const feedMap = new Map<string, Feed>();
+
+    // Extract hashes and create feed mapping
+    for (const feed of feeds) {
+      const hash = extractBasename(feed.link);
+      hashes.push(hash);
+      feedMap.set(hash, feed);
     }
 
-    const hash = extractBasename(feed.link);
+    log('I', `Processing batch of ${feeds.length} commits`);
 
-    // Check if the commit contains file path that we want to track.
-    // If not, do nothing and abort.
-    if (!(await this.containsValidFile(hash))) {
-      log(
-        'I',
-        `Skipping commit "${feed.contentSnippet}" (no relevant file changes)`,
+    try {
+      const results = await this.github.batchSearchIssues(
+        this.upstream,
+        hashes,
       );
-      return;
-    }
 
-    log('I', `Processing commit "${feed.contentSnippet}"`);
+      // Create issues for commits without existing issues
+      const createIssuePromises: Promise<number | null>[] = [];
 
-    const issueNo = await this.createIssueIfNot(feed, hash);
+      for (const [hash, exists] of Object.entries(results.exists)) {
+        if (!exists) {
+          const feed = feedMap.get(hash);
+          if (feed) {
+            log('I', `Creating issue for commit "${feed.contentSnippet}"`);
+            createIssuePromises.push(this.createIssue(feed));
+          }
+        } else {
+          log(
+            'I',
+            `Skipping commit "${feedMap.get(hash)?.contentSnippet}" (issue exists)`,
+          );
+        }
+      }
 
-    if (issueNo === null) {
-      log('W', `Issue already exists for commit "${feed.contentSnippet}"`);
-    } else {
-      log('S', `Created issue #${issueNo} for commit "${feed.contentSnippet}"`);
+      if (createIssuePromises.length > 0) {
+        await Promise.all(createIssuePromises);
+      }
+
+      const batchTime = Date.now() - startTime;
+      log('I', `Batch processed in ${batchTime}ms`);
+
+      return {
+        batchTime,
+        processedCount: feeds.length,
+        createdIssues: createIssuePromises.length,
+      };
+    } catch (error) {
+      log(
+        'E',
+        `Error processing batch: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
     }
   }
 

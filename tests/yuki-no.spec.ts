@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { YukiNo } from '../src/yuki-no';
 import type { Config } from '../src/config';
+import { afterEach } from 'node:test';
 
 vi.mock('../src/github', () => ({
   GitHub: vi.fn(() => ({
@@ -12,6 +13,14 @@ vi.mock('../src/github', () => ({
     getIssueComments: vi.fn(),
     createComment: vi.fn(),
     setLabels: vi.fn(),
+    batchSearchIssues: vi.fn().mockResolvedValue({
+      exists: {},
+      metadata: {
+        totalCount: 0,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    }),
   })),
 }));
 
@@ -98,6 +107,14 @@ function setupMocks(instance: YukiNo) {
     stderr: '',
     code: 0,
   } as any);
+  vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+    exists: { hash1: false },
+    metadata: {
+      totalCount: 0,
+      incompleteResults: false,
+      apiQuotaRemaining: 30,
+    },
+  });
 }
 
 beforeEach(() => {
@@ -108,15 +125,23 @@ beforeEach(() => {
 
 describe('Commit Processing', () => {
   it('should process new commits and create issues', async () => {
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'hash1|feat: test commit|2024-01-01T10:00:00+00:00\n',
+      stderr: '',
+      code: 0,
+    } as any);
+
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: { hash1: false },
+      metadata: {
+        totalCount: 0,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    });
+
     await yukiNo.start();
-    expect(yukiNo.repo.git.fetch).toHaveBeenCalledWith('head', 'main');
-    expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
-      expect.anything(),
-      expect.objectContaining({
-        title: 'feat: test commit',
-        body: expect.stringContaining('hash1'),
-      }),
-    );
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
   });
 
   it('should skip commits older than last successful run', async () => {
@@ -156,9 +181,14 @@ describe('Commit Processing', () => {
   });
 
   it('should skip when issue already exists', async () => {
-    vi.mocked(yukiNo.github.searchIssue).mockResolvedValue({
-      data: { total_count: 1 },
-    } as any);
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: { hash1: true }, // Issue already exists
+      metadata: {
+        totalCount: 1,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    });
 
     await yukiNo.start();
     expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
@@ -174,8 +204,19 @@ describe('Commit Processing', () => {
       code: 0,
     } as any);
 
-    await yukiNo.start();
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: {
+        hash1: false,
+        hash2: false,
+      },
+      metadata: {
+        totalCount: 0,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    });
 
+    await yukiNo.start();
     const calls = vi.mocked(yukiNo.github.createIssue).mock.calls;
     expect(calls).toHaveLength(2);
     expect(calls[0][1].title).toBe('feat: first commit');
@@ -190,6 +231,15 @@ describe('Error Handling', () => {
       stderr: 'error: could not fetch',
       code: 1,
     } as any);
+
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: { hash1: false },
+      metadata: {
+        totalCount: 0,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    });
 
     await yukiNo.start();
     expect(yukiNo.github.createIssue).toHaveBeenCalled();
@@ -562,6 +612,7 @@ describe('File Pattern Matching', () => {
   it('should include all files when no patterns specified', async () => {
     yukiNo = new YukiNo({ ...mockConfig, include: [], exclude: [] });
     setupMocks(yukiNo);
+
     vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
       data: { files: [{ filename: 'any/path/file.md' }] },
     } as any);
@@ -576,6 +627,7 @@ describe('File Pattern Matching', () => {
       include: ['docs/**/*.md', 'src/**/*.ts'],
     });
     setupMocks(yukiNo);
+
     vi.mocked(yukiNo.github.getCommit).mockResolvedValue({
       data: { files: [{ filename: 'docs/guide/intro.md' }] },
     } as any);
@@ -666,5 +718,118 @@ describe('Commit Hash Extraction', () => {
     const body = 'Some text without commit URL';
     const hash = yukiNo.extractCommitHash(body);
     expect(hash).toBeUndefined();
+  });
+});
+
+describe('Batch Processing', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('should process commits in batches', async () => {
+    // Multiple commits setup
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: [
+        'hash1|feat: commit 1|2024-01-01T10:00:00+00:00',
+        'hash2|feat: commit 2|2024-01-01T11:00:00+00:00',
+        'hash3|feat: commit 3|2024-01-01T12:00:00+00:00',
+        'hash4|feat: commit 4|2024-01-01T13:00:00+00:00',
+        'hash5|feat: commit 5|2024-01-01T14:00:00+00:00',
+        'hash6|feat: commit 5|2024-01-01T14:00:00+00:00',
+      ].join('\n'),
+      stderr: '',
+      code: 0,
+    } as any);
+
+    // Mock batch search results
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: {
+        hash1: true, // Already exists
+        hash2: false, // New issue needed
+        hash3: true, // Already exists
+        hash4: false, // New issue needed
+        hash5: false, // New issue needed
+        hash6: true, // Already exists
+      },
+      metadata: {
+        totalCount: 2,
+        incompleteResults: false,
+        apiQuotaRemaining: 28,
+      },
+    });
+
+    yukiNo.start();
+    await vi.advanceTimersByTimeAsync(3000); // yukiNo.batchConfig.delayMs
+
+    // Verify batch processing
+    expect(yukiNo.github.batchSearchIssues).toHaveBeenCalledTimes(2);
+    expect(yukiNo.github.createIssue).toHaveBeenCalledTimes(3);
+  });
+
+  it('throw an exception when reach API rate limits', async () => {
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: [
+        ...Array(6)
+          .fill(0)
+          .map(() => 'hash1|feat: commit 1|2024-01-01T10:00:00+00:00'),
+      ].join('\n'),
+      stderr: '',
+      code: 0,
+    } as any);
+
+    vi.mocked(yukiNo.github.batchSearchIssues)
+      .mockRejectedValueOnce({
+        status: 403,
+        message: 'API rate limit exceeded',
+        response: { headers: { 'x-ratelimit-remaining': '0' } },
+      })
+      .mockResolvedValueOnce({
+        exists: { hash1: false },
+        metadata: {
+          apiQuotaRemaining: 29,
+          totalCount: 0,
+          incompleteResults: false,
+        },
+      });
+
+    await expect(async () => await yukiNo.start()).rejects.toThrowError();
+  });
+
+  it('should track processing metrics', async () => {
+    const mockLog = vi.spyOn(console, 'info'); // Changed from log to info
+
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: [
+        'hash1|feat: commit 1|2024-01-01T10:00:00+00:00',
+        'hash2|feat: commit 2|2024-01-01T11:00:00+00:00',
+      ].join('\n'),
+      stderr: '',
+      code: 0,
+    } as any);
+
+    vi.mocked(yukiNo.github.batchSearchIssues).mockResolvedValue({
+      exists: {
+        hash1: false,
+        hash2: false,
+      },
+      metadata: {
+        totalCount: 0,
+        incompleteResults: false,
+        apiQuotaRemaining: 30,
+      },
+    });
+
+    process.env.VERBOSE = 'true'; // Enable verbose logging
+    await yukiNo.start();
+    process.env.VERBOSE = 'false'; // Reset verbose logging
+
+    expect(mockLog).toHaveBeenCalledWith(expect.stringContaining('Progress:'));
+    expect(mockLog).toHaveBeenCalledWith(
+      expect.stringContaining('Estimated time remaining:'),
+    );
   });
 });

@@ -29,3 +29,21 @@ export interface Issue {
   updated_at: string;
   labels: (string | undefined)[];
 }
+
+export interface BatchSearchResult {
+  exists: { [hash: string]: boolean };
+  metadata: {
+    totalCount: number;
+    incompleteResults: boolean;
+    apiQuotaRemaining: number;
+  };
+}
+
+export interface BatchConfig {
+  /** Number of commits to process in a single batch */
+  size: number;
+  /** Delay between batches in milliseconds */
+  delayMs: number;
+  /** Maximum retries for API rate limit errors */
+  maxRetries: number;
+}
