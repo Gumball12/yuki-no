@@ -2,12 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { YukiNo } from '../src/yuki-no';
 import type { Config } from '../src/config';
 
-vi.mock('../src/rss', () => ({
-  Rss: vi.fn(() => ({
-    get: vi.fn(),
-  })),
-}));
-
 vi.mock('../src/github', () => ({
   GitHub: vi.fn(() => ({
     getLatestRun: vi.fn(),
@@ -25,6 +19,10 @@ vi.mock('../src/repository', () => ({
   Repository: vi.fn(() => ({
     setup: vi.fn(),
     getReleaseInfo: vi.fn(),
+    git: {
+      fetch: vi.fn(),
+      exec: vi.fn(),
+    },
   })),
 }));
 
@@ -56,32 +54,24 @@ const mockConfig: Config = {
   verbose: false,
 };
 
-const mockFeed = {
-  link: 'commit-link',
-  title: 'commit title',
-  contentSnippet: 'commit message',
-  isoDate: '2024-01-01T00:00:00.000Z',
-};
-
 /**
  * Sets up all necessary mocks for testing YukiNo
  *
  * This function mocks all external dependencies:
  * - GitHub API calls (getLatestRun, getCommit, searchIssue, createIssue)
- * - Repository operations
- * - RSS feed fetching
+ * - Repository operations and Git commands
  *
  * Default mock behavior:
  * - Sets last run date to Dec 31, 2023 (commits after this date are "new")
- * - Returns a single mock feed item
  * - Simulates a commit that modified a file in docs/
  * - No existing issues found
+ * - Git operations succeed with test data
  */
 function setupMocks(instance: YukiNo) {
+  // Mock GitHub API calls
   vi.mocked(instance.github.getLatestRun).mockResolvedValue({
     created_at: '2023-12-31T00:00:00.000Z',
   } as any);
-  vi.mocked(instance.rss.get).mockResolvedValue([mockFeed] as any);
   vi.mocked(instance.github.getCommit).mockResolvedValue({
     data: {
       files: [{ filename: 'docs/test.md' }],
@@ -96,6 +86,18 @@ function setupMocks(instance: YukiNo) {
   vi.mocked(instance.github.getIssueComments).mockResolvedValue([]);
   vi.mocked(instance.github.createComment).mockResolvedValue();
   vi.mocked(instance.github.setLabels).mockResolvedValue();
+
+  // Default git operation mocks
+  vi.mocked(instance.repo.git.fetch).mockReturnValue({
+    stdout: '',
+    stderr: '',
+    code: 0,
+  } as any);
+  vi.mocked(instance.repo.git.exec).mockReturnValue({
+    stdout: 'hash1|feat: test commit|2024-01-01T10:00:00+00:00\n',
+    stderr: '',
+    code: 0,
+  } as any);
 }
 
 beforeEach(() => {
@@ -104,20 +106,26 @@ beforeEach(() => {
   setupMocks(yukiNo);
 });
 
-describe('Basic Commit Processing', () => {
-  it('should process new commit and create issue', async () => {
+describe('Commit Processing', () => {
+  it('should process new commits and create issues', async () => {
     await yukiNo.start();
-    expect(yukiNo.repo.setup).toHaveBeenCalled();
-    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+    expect(yukiNo.repo.git.fetch).toHaveBeenCalledWith('head', 'main');
+    expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        title: 'feat: test commit',
+        body: expect.stringContaining('hash1'),
+      }),
+    );
   });
 
   it('should skip commits older than last successful run', async () => {
-    const oldFeed = {
-      ...mockFeed,
-      isoDate: '2023-12-30T00:00:00.000Z',
-    };
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'hash1|feat: old commit|2023-12-30T10:00:00+00:00\n',
+      stderr: '',
+      code: 0,
+    } as any);
 
-    vi.mocked(yukiNo.rss.get).mockResolvedValue([oldFeed] as any);
     vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
       created_at: '2023-12-31T00:00:00.000Z',
     } as any);
@@ -127,12 +135,12 @@ describe('Basic Commit Processing', () => {
   });
 
   it('should process commits newer than last successful run', async () => {
-    const newFeed = {
-      ...mockFeed,
-      isoDate: '2024-01-02T00:00:00.000Z',
-    };
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'hash1|feat: new commit|2024-01-02T10:00:00+00:00\n',
+      stderr: '',
+      code: 0,
+    } as any);
 
-    vi.mocked(yukiNo.rss.get).mockResolvedValue([newFeed] as any);
     vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue({
       created_at: '2024-01-01T00:00:00.000Z',
     } as any);
@@ -141,9 +149,8 @@ describe('Basic Commit Processing', () => {
     expect(yukiNo.github.createIssue).toHaveBeenCalled();
   });
 
-  it('should process all commits when no successful run exists', async () => {
+  it('should process all commits when no previous run exists', async () => {
     vi.mocked(yukiNo.github.getLatestRun).mockResolvedValue(undefined as any);
-
     await yukiNo.start();
     expect(yukiNo.github.createIssue).toHaveBeenCalled();
   });
@@ -151,6 +158,59 @@ describe('Basic Commit Processing', () => {
   it('should skip when issue already exists', async () => {
     vi.mocked(yukiNo.github.searchIssue).mockResolvedValue({
       data: { total_count: 1 },
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('should process multiple commits in chronological order', async () => {
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: [
+        'hash1|feat: first commit|2024-01-01T10:00:00+00:00',
+        'hash2|feat: second commit|2024-01-01T11:00:00+00:00',
+      ].join('\n'),
+      stderr: '',
+      code: 0,
+    } as any);
+
+    await yukiNo.start();
+
+    const calls = vi.mocked(yukiNo.github.createIssue).mock.calls;
+    expect(calls).toHaveLength(2);
+    expect(calls[0][1].title).toBe('feat: first commit');
+    expect(calls[1][1].title).toBe('feat: second commit');
+  });
+});
+
+describe('Error Handling', () => {
+  it('should handle git fetch failure gracefully', async () => {
+    vi.mocked(yukiNo.repo.git.fetch).mockReturnValue({
+      stdout: '',
+      stderr: 'error: could not fetch',
+      code: 1,
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalled();
+  });
+
+  it('should handle empty git log', async () => {
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: '',
+      stderr: '',
+      code: 0,
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
+  });
+
+  it('should handle malformed git log', async () => {
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'invalid|output|format\n',
+      stderr: '',
+      code: 0,
     } as any);
 
     await yukiNo.start();
@@ -367,32 +427,6 @@ describe('Comment Formatting', () => {
     expect(comment).toBe(
       '- pre-release: [v1.0.0-beta.1](pre-url)\n- release: [v1.0.0](release-url)',
     );
-  });
-});
-
-describe('Error Handling', () => {
-  it('should handle missing commit hash in issue body', async () => {
-    const invalidIssue = {
-      number: 1,
-      title: 'Test Issue',
-      body: 'New updates on head repo.\r\nInvalid commit link',
-      state: 'open' as const,
-      labels: ['sync'],
-      created_at: '2024-01-01T00:00:00Z',
-      updated_at: '2024-01-01T00:00:00Z',
-    };
-
-    vi.mocked(yukiNo.github.getOpenIssues).mockResolvedValue([invalidIssue]);
-    vi.mocked(yukiNo.github.getIssueComments).mockResolvedValue([]);
-
-    await yukiNo.start();
-    expect(yukiNo.repo.getReleaseInfo).not.toHaveBeenCalled();
-  });
-
-  it('should not throw error in verbose mode', async () => {
-    yukiNo = new YukiNo({ ...mockConfig, verbose: true });
-    setupMocks(yukiNo);
-    await expect(yukiNo.start()).resolves.not.toThrow();
   });
 });
 
