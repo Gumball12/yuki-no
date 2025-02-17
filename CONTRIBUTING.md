@@ -144,6 +144,16 @@ src/
 tests/           # Unit tests
 ```
 
+### Batch Processing
+
+Yuki-no uses fixed batch processing settings for optimal performance:
+
+- Batch size: 5 commits per batch
+- Delay between batches: 3000ms
+- Maximum retries: 3 attempts
+
+These values are hardcoded to maintain consistent behavior and prevent API abuse. If you need to modify these values, please open an issue for discussion.
+
 ## Testing
 
 The project uses [Vitest](https://vitest.dev/) for testing. Tests are located in the `tests/` directory.

@@ -112,6 +112,8 @@ exclude: |
 1. Monitors the head repository for new commits
 2. When new commits are found:
    - Checks if the commit is newer than the last successful workflow run
+   - Processes commits in optimized batches of 5 to minimize API usage
+   - Implements strategic delays between operations to respect API rate limits
    - Creates issues for new changes with specified labels
    - Tracks release status if enabled
 3. For release tracking:
@@ -122,42 +124,7 @@ exclude: |
 
 ### Caveats
 
-#### Commit Processing
-
-- Commits are processed based on their timestamp relative to the last successful workflow run
-- If no successful workflow run exists, all commits will be processed
-- Commits older than the last successful run are skipped to avoid duplicate processing
-
-#### Upstream Repository Option (`upstream-repo`)
-
-- The automatic inference using `GITHUB_SERVER_URL` and `GITHUB_REPOSITORY` environment variables is recommended for GitHub Actions environments.
-- Manual specification of `upstream-repo` is optional and only needed in specific cases.
-- For local development, you'll need to set the `UPSTREAM_REPO` value as these variables aren't available in the local environment. See [Local environment setup](https://github.com/Gumball12/yuki-no/blob/main/CONTRIBUTING.md#local-environment-setup).
-
-#### Issue Labels
-
-- Yuki-no uses labels to identify issues it manages.
-- An issue is considered a Yuki-no issue if it has all the labels specified in the `labels` option.
-- For example:
-  - If `labels: sync\nneeds review` is set, an issue must have both labels to be managed
-  - If an issue has `sync, needs review, other` labels and `labels: sync\nneeds review` is set, it will be managed
-  - If an issue has `sync, other` labels and `labels: sync\nneeds review` is set, it will be ignored
-- If an empty string is provided, no labels will be added
-- By default, Yuki-no uses the `sync` label
-
-#### Release Tracking Labels
-
-- Release tracking labels are only used when **release tracking is enabled**
-  - Labels are added to issues that haven't been released yet
-  - Labels are removed when the changes are included in a release
-  - Any labels that overlap with the `labels` option are filtered out
-- If an empty string is provided, no labels will be added
-- By default, Yuki-no uses the `pending` label
-
-#### GitHub Actions Bot
-
-- The default `username` and `email` settings are optimized for most use cases.
-- Yuki-no uses GitHub Actions bot by default.
+For important notes about initial setup, rate limits, error recovery, and other considerations, please refer to our [Caveats](./CAVEATS.md).
 
 ## Contributing
 
