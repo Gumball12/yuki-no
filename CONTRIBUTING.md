@@ -137,7 +137,6 @@ src/
 ├── git.ts       # Git operations
 ├── index.ts     # Entry point
 ├── repository.ts # Repository operations
-├── rss.ts       # RSS feed handling
 ├── types.ts     # Common type definitions
 ├── utils.ts     # Utility functions
 └── yuki-no.ts   # Main application logic
