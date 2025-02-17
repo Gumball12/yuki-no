@@ -9,7 +9,7 @@
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            isVisible = true;
+            setTimeout(() => (isVisible = true), 1000);
             observer.disconnect();
           }
         });
