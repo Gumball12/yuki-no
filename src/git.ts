@@ -22,6 +22,7 @@ export class Git {
 
     const options: ExecOptions = {};
     if (dir) {
+      shell.mkdir(dir);
       options.cwd = dir;
     }
 

@@ -30,12 +30,6 @@ const mockOptions: Options = {
   token: 'test-token',
   userName: 'test-user',
   email: 'test@example.com',
-  upstream: {
-    url: 'https://github.com/test/upstream.git',
-    owner: 'test',
-    name: 'upstream',
-    branch: 'main',
-  },
   head: {
     url: 'https://github.com/test/head.git',
     owner: 'test',
@@ -55,13 +49,13 @@ describe('setup', () => {
 
     const setupCalls = vi.mocked(shell.cd).mock.calls;
     expect(setupCalls[0]).toEqual(['.']);
-    expect(setupCalls[1]).toEqual(['upstream']);
+    expect(setupCalls[1]).toEqual(['tmp/head']);
 
     expect(repository.git.clone).toHaveBeenCalledWith(
       'test-user',
       'test-token',
-      'https://github.com/test/upstream.git',
-      'upstream',
+      'https://github.com/test/head.git',
+      'head',
       'tmp',
     );
     expect(repository.git.addRemote).toHaveBeenCalledWith(
