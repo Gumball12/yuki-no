@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import type { Remote } from './config';
-import type { Issue, Comment } from './types';
+import type { Issue, Comment, BatchSearchResult } from './types';
 import { log } from './utils';
 
 export interface CreateIssueOptions {
@@ -11,6 +11,7 @@ export interface CreateIssueOptions {
 
 export class GitHub {
   api: Octokit;
+  private lastQuotaRemaining: number = 0;
 
   constructor(auth: string) {
     this.api = new Octokit({ auth });
@@ -143,5 +144,95 @@ export class GitHub {
     });
 
     log('S', `Labels set for issue #${issueNumber}`);
+  }
+
+  /**
+   * Batch search for issues containing commit hashes
+   * Optimized to reduce API calls by searching multiple hashes at once
+   */
+  async batchSearchIssues(
+    remote: Remote,
+    hashes: string[],
+  ): Promise<BatchSearchResult> {
+    const MAX_QUERY_HASHES = 5;
+    const results: { [hash: string]: boolean } = {};
+
+    log(
+      'I',
+      `Searching for ${hashes.length} commits in batches of ${MAX_QUERY_HASHES}`,
+    );
+
+    for (let i = 0; i < hashes.length; i += MAX_QUERY_HASHES) {
+      const chunk = hashes.slice(i, i + MAX_QUERY_HASHES);
+      const query = chunk.map(hash => `${hash} in:body`).join(' OR ');
+
+      const searchQuery = `repo:${remote.owner}/${remote.name} type:issue (${query})`;
+
+      try {
+        log(
+          'D',
+          `Searching batch ${Math.floor(i / MAX_QUERY_HASHES) + 1}/${Math.ceil(hashes.length / MAX_QUERY_HASHES)}`,
+        );
+        const response = await this.api.search.issuesAndPullRequests({
+          q: searchQuery,
+        });
+
+        const foundHashes = response.data.items
+          .map(item => {
+            const hash = this.extractHashFromIssue(item);
+            return hash;
+          })
+          .filter(Boolean);
+
+        // Map results for each hash in the chunk
+        chunk.forEach(hash => {
+          results[hash] = foundHashes.includes(hash);
+          log(
+            'D',
+            `Commit ${hash}: ${results[hash] ? 'issue exists' : 'no issue found'}`,
+          );
+        });
+
+        this.lastQuotaRemaining = parseInt(
+          response.headers['x-ratelimit-remaining'] || '0',
+          10,
+        );
+        log('I', `API quota remaining: ${this.lastQuotaRemaining}`);
+
+        // Add delay between batches if not the last batch
+        if (i + MAX_QUERY_HASHES < hashes.length) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      } catch (error: unknown) {
+        if (
+          error &&
+          typeof error === 'object' &&
+          'status' in error &&
+          error.status === 403
+        ) {
+          log('W', 'API rate limit exceeded, waiting before retry...');
+          await new Promise(resolve => setTimeout(resolve, 60000));
+          i -= MAX_QUERY_HASHES; // Retry current chunk
+          continue;
+        }
+        throw error;
+      }
+    }
+
+    return {
+      exists: results,
+      metadata: {
+        totalCount: Object.values(results).filter(Boolean).length,
+        incompleteResults: false,
+        apiQuotaRemaining: this.lastQuotaRemaining,
+      },
+    };
+  }
+
+  private extractHashFromIssue(issue: any): string | null {
+    const commitUrlRegex =
+      /https:\/\/github\.com\/[^\/]+\/[^\/]+\/commit\/([a-f0-9]{7,40})/;
+    const match = issue.body?.match(commitUrlRegex);
+    return match ? match[1] : null;
   }
 }
