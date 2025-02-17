@@ -11,7 +11,6 @@ export interface Options {
   token: string;
   userName: string;
   email: string;
-  upstream: Remote;
   head: Remote;
 }
 
@@ -20,7 +19,6 @@ export class Repository {
   token: string;
   userName: string;
   email: string;
-  upstream: Remote;
   head: Remote;
   git: Git;
 
@@ -33,7 +31,6 @@ export class Repository {
     this.token = options.token;
     this.userName = options.userName;
     this.email = options.email;
-    this.upstream = options.upstream;
     this.head = options.head;
 
     this.git = new Git();
@@ -44,11 +41,11 @@ export class Repository {
     this.git.clone(
       this.userName,
       this.token,
-      this.upstream.url,
-      this.upstream.name,
+      this.head.url,
+      this.head.name,
       'tmp',
     );
-    shell.cd(this.upstream.name);
+    shell.cd(`tmp/${this.head.name}`);
     this.git.addRemote(this.head.url, this.head.name);
     this.git.config('user.name', `"${this.userName}"`);
     this.git.config('user.email', `"${this.email}"`);

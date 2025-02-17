@@ -16,6 +16,8 @@ export default defineConfig({
         'tests/*',
         // Landing page
         'webpage/*',
+        // Cloned External Git Repo
+        'tmp/*',
       ],
     },
   },
