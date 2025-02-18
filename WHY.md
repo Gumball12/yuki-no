@@ -71,7 +71,7 @@ These enhancements help create a more organized and efficient translation workfl
 
 Yuki-no fulfills the "three essential features for technical docs translation projects" and provides various other features and improvements. These include using GitHub Actions Bot by default, easier and clearer Actions config, `include` and `exclude` options for specifying change tracking targets based on [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing), and a `verbose` option for more detailed logging.
 
-If you're planning to start a translation project or considering implementing Yuki-no in an existing translation project, [check out this guide](https://shj.rip/article/Getting-Started-with-Technical-Documentation-Translation-on-GitHub.html). There's also a [migration guide](./MIGRATION.md) for users of issue-based translation processes like Ryu-Cho. For real-world usage examples, you can refer to the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
+If you're planning to start a translation project or considering implementing Yuki-no in an existing translation project, [check out this guide](README.md). There's also a [migration guide](./MIGRATION.md) for users of issue-based translation processes like Ryu-Cho. For real-world usage examples, you can refer to the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
 
 ## Other Open-Source Solutions
 
