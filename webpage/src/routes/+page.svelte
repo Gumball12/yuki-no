@@ -60,7 +60,7 @@
       icon: ClipboardIcon,
       title: "Efficient Workflow",
       description:
-        "Automated issue creation, smart labeling, and progress tracking. Reduces management overhead by up to 80%.",
+        "Automated issue creation, smart labeling, and progress tracking.",
     },
   ];
 
