@@ -29,6 +29,8 @@ Yuki-no is actively used in the [Vite Korean docs translation project](https://g
    - Select "Read and write permissions"
    - Save the changes
 
+   This is a standard requirement for any GitHub Actions that need to create issues or make repository changes. Without these permissions, the action will fail with a `403 "Resource not accessible by integration"` error when trying to create issues or manage labels.
+
 2. Create `.github/workflows/yuki-no.yml`:
 
    ```yml
