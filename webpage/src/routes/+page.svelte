@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import type { Component } from "svelte";
   import Card from "$lib/components/Card.svelte";
+  import ProjectCard from "$lib/components/ProjectCard.svelte";
   import SectionTitle from "$lib/components/SectionTitle.svelte";
   import Button from "$lib/components/Button.svelte";
   import {
@@ -62,6 +63,23 @@
       description:
         "Automated issue creation, smart labeling, and progress tracking.",
     },
+  ];
+
+  const projects = [
+    {
+      name: "vitejs/docs-ko",
+      description: "Korean translation of Vite",
+      logoUrl: "https://vitejs.dev/logo.svg",
+      logoAlt: "Vite logo",
+      href: "https://github.com/vitejs/docs-ko"
+    },
+    {
+      name: "vuejs-translations/docs-ko",
+      description: "Korean translation for Vue docs",
+      logoUrl: "https://vuejs.org/logo.svg",
+      logoAlt: "Vue.js logo",
+      href: "https://github.com/vuejs-translations/docs-ko"
+    }
   ];
 
   // SEO Metadata
@@ -200,35 +218,14 @@
     class="relative border-t border-gray-800 bg-black pt-32"
     aria-labelledby="social-proof-title"
   >
-    <div class="mx-auto max-w-4xl px-4 text-center">
+    <div class="mx-auto max-w-6xl px-4 text-center">
       <h2 id="social-proof-title" class="mb-16 text-3xl font-bold md:text-4xl">
         Used in Production
       </h2>
-      <div
-        class="relative rounded-2xl border border-gray-800 bg-gradient-to-b from-purple-500/5 p-8"
-      >
-        <div class="absolute -top-4 left-1/2 -translate-x-1/2">
-          <img
-            src="https://vitejs.dev/logo.svg"
-            alt="Vite logo"
-            width="32"
-            height="32"
-            class="h-8 w-8"
-          />
-        </div>
-        <p class="text-xl text-gray-300">
-          Currently powering the Vite Korean documentation translation project
-          through GitHub Actions
-        </p>
-        <a
-          href="https://github.com/vitejs/docs-ko"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="mt-6 inline-flex items-center text-purple-400 hover:text-purple-300"
-        >
-          View Project
-          <ArrowRightIcon class="ml-2 h-5 w-5" />
-        </a>
+      <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        {#each projects as project}
+          <ProjectCard {...project} />
+        {/each}
       </div>
     </div>
   </section>
