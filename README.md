@@ -17,7 +17,7 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 - Tracks release status with pre-release and release information (`release-tracking` option)
 - Manages release tracking labels for unreleased changes (`release-tracking-labels` option)
 
-Yuki-no is actively used in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), [Korean translation for Vue docs](https://github.com/vuejs-translations/docs-ko) demonstrating its effectiveness in real-world translation workflows.
+Yuki-no is actively used in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), [Korean translation for Vue docs](https://github.com/vuejs-translations/docs-ko), and [Template for Vite.js docs translation repositories](https://github.com/tony19/vite-docs-template) demonstrating its effectiveness in real-world translation workflows.
 
 ## Usage
 

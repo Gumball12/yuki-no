@@ -71,15 +71,22 @@
       description: "Korean translation of Vite",
       logoUrl: "https://vitejs.dev/logo.svg",
       logoAlt: "Vite logo",
-      href: "https://github.com/vitejs/docs-ko"
+      href: "https://github.com/vitejs/docs-ko",
+    },
+    {
+      name: "tony19/vite-docs-template",
+      description: "Template for Vite.js docs translation repositories",
+      logoUrl: "https://vitejs.dev/logo.svg",
+      logoAlt: "Vite logo",
+      href: "https://github.com/tony19/vite-docs-template",
     },
     {
       name: "vuejs-translations/docs-ko",
       description: "Korean translation for Vue docs",
       logoUrl: "https://vuejs.org/logo.svg",
       logoAlt: "Vue.js logo",
-      href: "https://github.com/vuejs-translations/docs-ko"
-    }
+      href: "https://github.com/vuejs-translations/docs-ko",
+    },
   ];
 
   // SEO Metadata
