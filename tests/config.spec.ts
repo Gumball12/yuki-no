@@ -19,7 +19,7 @@ describe('createConfig', () => {
   it('should create config with only required fields', () => {
     const userConfig: UserConfig = {
       accessToken: 'test-token',
-      headRepo: 'https://github.com/test/head.git',
+      headRepo: 'https://github.com/test/head.dev.git',
       trackFrom: 'test-hash',
     };
 
@@ -44,9 +44,9 @@ describe('createConfig', () => {
           branch: 'main',
         },
         head: {
-          url: 'https://github.com/test/head.git',
+          url: 'https://github.com/test/head.dev.git',
           owner: 'test',
-          name: 'head',
+          name: 'head.dev',
           branch: 'main',
         },
       },

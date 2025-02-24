@@ -721,6 +721,70 @@ describe('Commit Hash Extraction', () => {
   });
 });
 
+describe('Commit URL Formatting', () => {
+  it('should format commit URL correctly without .git extension', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      remote: {
+        ...mockConfig.remote,
+        head: {
+          url: 'https://github.com/test/repo.dev.git',
+          owner: 'test',
+          name: 'repo',
+          branch: 'main',
+        },
+      },
+    });
+    setupMocks(yukiNo);
+
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'hash1|feat: test commit|2024-01-01T10:00:00+00:00\n',
+      stderr: '',
+      code: 0,
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.stringContaining(
+          'https://github.com/test/repo.dev/commit/',
+        ),
+      }),
+    );
+  });
+
+  it('should handle URLs without .git extension correctly', async () => {
+    yukiNo = new YukiNo({
+      ...mockConfig,
+      remote: {
+        ...mockConfig.remote,
+        head: {
+          url: 'https://github.com/test/repo',
+          owner: 'test',
+          name: 'repo',
+          branch: 'main',
+        },
+      },
+    });
+    setupMocks(yukiNo);
+
+    vi.mocked(yukiNo.repo.git.exec).mockReturnValue({
+      stdout: 'hash1|feat: test commit|2024-01-01T10:00:00+00:00\n',
+      stderr: '',
+      code: 0,
+    } as any);
+
+    await yukiNo.start();
+    expect(yukiNo.github.createIssue).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        body: expect.stringContaining('https://github.com/test/repo/commit/'),
+      }),
+    );
+  });
+});
+
 describe('Batch Processing', () => {
   beforeEach(() => {
     vi.useFakeTimers();

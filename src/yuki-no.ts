@@ -1,4 +1,4 @@
-import { log, extractBasename, removeHash } from './utils';
+import { log, extractBasename, removeHash, getUrlWithoutDotGit } from './utils';
 import type { Config, Remote } from './config';
 import type { Issue, Comment, ReleaseInfo, BatchConfig } from './types';
 import { GitHub } from './github';
@@ -172,7 +172,8 @@ export class YukiNo {
         }
 
         try {
-          const commitUrl = `${this.head.url}/commit/${hash}`;
+          const commitUrl = `${getUrlWithoutDotGit(this.head.url)}/commit/${hash}`;
+
           return {
             link: commitUrl,
             title: subject,
