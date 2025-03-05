@@ -23,6 +23,10 @@ This guide explains how to use Yuki-no in projects that have translation process
 
 ### Migration Steps
 
+> [!WARNING]
+>
+> For a successful migration, set `track-from` to the last commit hash that was fully translated. When running yuki-no for the first time, using an incorrect value may result in duplicate issues for already translated content.
+
 1. Add Labels for Yuki-no Tracking to Translation Issues
 
    <img width="400" src="./docs/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
