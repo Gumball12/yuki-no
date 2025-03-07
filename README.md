@@ -6,7 +6,9 @@
 
 Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
 
-> **Why Yuki-no?** Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
+> **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
+
+> Looking to migrate from a GitHub Issues-based translation project like Ryu-cho? Check out our [migration guide](./MIGRATION.md) for a seamless transition.
 
 ## Features
 
