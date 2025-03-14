@@ -97,6 +97,8 @@ Yuki-no is actively used in the [Vite Korean docs translation project](https://g
 
 For more detailed option descriptions, please refer to the [config.ts](./src/config.ts).
 
+For more information on Glob Patterns, [refer to Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
+
 #### File Pattern Examples
 
 ```yaml
