@@ -53,7 +53,10 @@ export class YukiNo {
     feed.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
 
     log('I', `Found ${feed.length} commits to process`);
-    log('I', '=== Processing Commits ===');
+    log(
+      'I',
+      `=== Processing Commits (last successful run at: ${lastSuccessfulRunAt}) ===`,
+    );
 
     let totalProcessed = 0;
     let totalBatchTime = 0;
@@ -215,7 +218,10 @@ export class YukiNo {
         if (!exists) {
           const feed = feedMap.get(hash);
           if (feed) {
-            log('I', `Creating issue for commit "${feed.contentSnippet}"`);
+            log(
+              'I',
+              `Creating issue for commit "${feed.contentSnippet}" (hash: ${hash})`,
+            );
             createIssuePromises.push(this.createIssue(feed));
           }
         } else {

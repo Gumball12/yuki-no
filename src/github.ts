@@ -170,7 +170,7 @@ export class GitHub {
 
       try {
         log(
-          'D',
+          'I',
           `Searching batch ${Math.floor(i / MAX_QUERY_HASHES) + 1}/${Math.ceil(hashes.length / MAX_QUERY_HASHES)}`,
         );
         const response = await this.api.search.issuesAndPullRequests({
@@ -188,7 +188,7 @@ export class GitHub {
         chunk.forEach(hash => {
           results[hash] = foundHashes.includes(hash);
           log(
-            'D',
+            'I',
             `Commit ${hash}: ${results[hash] ? 'issue exists' : 'no issue found'}`,
           );
         });

@@ -7,9 +7,8 @@ import colors from 'colors/safe';
  * - S: For successful operations
  * - W: For warning messages
  * - E: For error messages
- * - D: For debug messages
  */
-export type LogType = 'I' | 'W' | 'E' | 'S' | 'D';
+export type LogType = 'I' | 'W' | 'E' | 'S';
 
 export function log(type: LogType, message: string): void {
   // Only show warnings and errors unless verbose mode is enabled
@@ -22,16 +21,16 @@ export function log(type: LogType, message: string): void {
 
   switch (type) {
     case 'I':
-      console.info(colors.blue(message));
+      console.info('[INFO]', colors.blue(message));
       break;
     case 'S':
-      console.info(colors.green(message));
+      console.info('[SUCCESS]', colors.green(message));
       break;
     case 'W':
-      console.warn(colors.yellow(message));
+      console.warn('[WARNING]', colors.yellow(message));
       break;
     case 'E':
-      console.error(colors.red(message));
+      console.error('[ERROR]', colors.red(message));
       break;
   }
 }
