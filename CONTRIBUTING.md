@@ -126,6 +126,42 @@ src/
 └── tests/             # Unit tests
 ```
 
+### Flow
+
+The diagram below shows the execution flow of Yuki-no:
+
+```mermaid
+stateDiagram-v2
+  state "syncCommits" as sc
+  state "releaseTracking" as rt
+
+  state Initialize {
+    direction LR
+
+    state "createConfig" as cf
+    state "Git" as g
+    state "GitHub" as gh
+
+    cf --> g
+    g --> gh
+  }
+
+  state if_rt <<choice>>
+
+  [*] --> Initialize
+  Initialize --> sc
+
+  sc --> if_rt
+  if_rt --> [*]: releaseTracking == false
+  if_rt --> rt: releaseTracking == true
+
+  rt --> [*]
+```
+
+1. **Initialize**: Sets up the configuration and initializes Git and GitHub clients
+2. **syncCommits**: Synchronizes commits from the head repository to issues
+3. **releaseTracking**: When enabled, updates issues with release information
+
 ## Testing
 
 The project uses [Vitest](https://vitest.dev/) for testing. Tests are in the `src/tests/` directory.
