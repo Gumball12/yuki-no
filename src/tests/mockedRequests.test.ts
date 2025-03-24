@@ -21,7 +21,7 @@ describe('GitHub API Integration Tests', () => {
   }
 
   const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
+    auth: process.env.MOCKED_REQUEST_TEST,
   });
 
   describe('Issues API', () => {
