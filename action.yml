@@ -6,34 +6,34 @@ inputs:
     description: 'GitHub access token.'
     required: true
   username:
-    description: 'Git user name to use when making issues and PRs. Defaults to "github-actions". Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.'
+    description: 'Git username used for GitHub issue operations. Defaults to "github-actions".'
     required: false
     default: 'github-actions'
   email:
-    description: 'Git email address to use when making issues and PRs. Defaults to "action@github.com". Note: Using only one of username or email might cause GitHub Actions bot to work incorrectly.'
+    description: 'Git username used for GitHub issue operations. Defaults to "action@github.com".'
     required: false
     default: 'action@github.com'
   upstream-repo:
-    description: 'The url for the upstream repo. If not specified, the current repository will be used. e.g. https://github.com/vitejs/docs-ko.git'
+    description: 'URL of your repository. If not specified, the current working repository will be used. e.g. https://github.com/vitejs/docs-ko.git'
     required: false
   head-repo:
-    description: 'The head repo to track. This is the repository you want to take a diff. e.g. https://github.com/vitejs/vite.git'
+    description: 'URL of repository to track. e.g. https://github.com/vitejs/vite.git'
     required: true
   head-repo-branch:
-    description: 'The branch for the head repo. Defaults to "main".'
+    description: 'Branch to track in head repo. Defaults to "main".'
     required: false
     default: 'main'
   track-from:
-    description: 'The git commit sha of head repo to start tracking. Yuki-no will only track commit from this hash.'
+    description: 'Starting commit hash. Tracking starts from the next commit.'
     required: true
   include:
-    description: 'File patterns to include in tracking. Multiple patterns can be specified with newlines. Uses Glob patterns. If not specified, all files will be tracked.'
+    description: 'Glob patterns for files to track. If not specified, all files will be tracked.'
     required: false
   exclude:
-    description: 'File patterns to exclude from tracking. Multiple patterns can be specified with newlines. Uses Glob patterns. Takes precedence over include patterns.'
+    description: 'Glob patterns for files to exclude. Take precedence over include patterns.'
     required: false
   labels:
-    description: 'Labels to add to the issues. You can specify multiple labels separated by newlines. Defaults to "sync". If empty string is provided, no labels will be added.'
+    description: 'Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. Defaults to "sync".'
     required: false
     default: |
       sync
@@ -41,12 +41,12 @@ inputs:
     description: 'Whether to enable release tracking. When enabled, Yuki-no will track releases for each issue and add comments about release status.'
     required: false
   release-tracking-labels:
-    description: 'Labels to add to issues when release tracking is enabled. These labels will be added to issues that have not been released yet and removed when the changes are released. You can specify multiple labels separated by newlines. Defaults to "pending". If empty string is provided, no labels will be added. Any labels that overlap with the "labels" option will be filtered out.'
+    description: 'Labels for unreleased changes. Added to issues until changes are released. If empty string is provided, no labels will be added. Defaults to "pending". (newline separated)'
     required: false
     default: |
       pending
   verbose:
-    description: 'Whether to enable verbose logging. When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
+    description: 'When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
     required: false
     default: true
 

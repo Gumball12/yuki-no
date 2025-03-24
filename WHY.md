@@ -1,22 +1,29 @@
 # Why Yuki-no
 
-Technical docs translation plays a vital role in helping more people utilize technology and growing the open-source community. For various reasons including cost, scalability, flexibility, and data ownership, translation projects often build their own translation processes based on open-source rather than using commercial SaaS solutions, and there are various open-source solutions supporting this.
+Technical docs translation helps more people use technology and grows the open-source community. Many translation projects build their own processes using open-source tools instead of commercial solutions. This choice offers better cost control, scalability, flexibility, and data ownership.
 
-Among them, [Ryu-Cho](https://github.com/vuejs-translations/ryu-cho) (a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi) project) is a well-established open-source translation management solution based on GitHub Actions created by [Vue.js Translations](https://github.com/vuejs-translations). It provides synchronization functionality that monitors specific repos and creates GitHub Issues when commits occur, and has been successfully used in various Vite/Vue.js ecosystem projects.
+[Ryu-Cho](https://github.com/vuejs-translations/ryu-cho) (a fork of [Che-Tsumi](https://github.com/vuejs-jp/che-tsumi)) is a popular open-source translation management tool created by [Vue.js Translations](https://github.com/vuejs-translations). It uses GitHub Actions to monitor specific repositories and creates GitHub Issues when new commits appear. Many Vite/Vue.js ecosystem projects use it successfully.
 
-Yuki-no (雪の, meaning "of snow" in Japanese) builds upon these foundations while introducing additional features and enhancements specifically designed for modern translation workflows. Through this evolution, Yuki-no aims to provide a comprehensive solution for building robust and efficient open-source translation processes.
+Yuki-no (雪の, "of snow" in Japanese) builds on these foundations. It adds new features designed specifically for modern translation workflows. The goal is to provide a complete solution for efficient open-source translation processes.
 
 ## The Problems
 
-I am participating as a maintainer in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko). This project previously used Ryu-Cho but has now switched to Yuki-no.
+I maintain the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko). We previously used Ryu-Cho but have switched to Yuki-no.
 
-Below are what I consider to be the _three essential features for technical docs translation projects_.
+Here are what I consider the _three essential features for technical docs translation projects_.
 
-### Change Tracking
+### 1. Change Tracking
 
-Automatic tracking of commits from the original docs is crucial. This is particularly important when docs are frequently updated or contain a large amount of content, where manual tracking becomes impractical.
+Automatically tracking commits from the original docs is crucial. This becomes especially important when:
 
-Change tracking directly affects the reliability of translated docs, making it more crucial than other features. Missing commits can lead to outdated translations or unnecessary work on content that may change again.
+- Documentation updates happen frequently
+- The content is extensive
+- Manual tracking is impractical
+
+Change tracking directly affects translation reliability. It's more important than most other features. Missing commits can lead to:
+
+- Outdated translations
+- Unnecessary work on content that might change again soon
 
 <p align="center">
 
@@ -26,20 +33,19 @@ _Example: Yuki-no automatically creates an issue for new commits in the head rep
 
 </p>
 
-Building on existing solutions, Yuki-no implements enhanced change tracking with several reliability improvements:
+Yuki-no improves on existing solutions with several reliability enhancements:
 
-- Maintains accurate tracking even when Actions fail by using successful run timestamps
-- Implements intelligent retry mechanisms for API failures
-- Provides detailed logging for better visibility and debugging
-- Uses batch processing to handle large numbers of commits efficiently
+- Keeps tracking accurate even when Actions fail by using successful run timestamps
+- Uses retry systems for GitHub API failures
+- Provides detailed logs for better troubleshooting
 
-These enhancements ensure that no commits are missed, even in edge cases like Action failures or API rate limits. By tracking only successful Action runs as checkpoints, Yuki-no prevents commits from being lost during temporary failures and automatically resumes from the last successful point. This makes it particularly reliable for projects with frequent documentation updates.
+These improvements ensure no commits are missed, even in challenging situations like Action failures or API rate limits. By tracking only successful Action runs as checkpoints, Yuki-no prevents losing commits during temporary failures. It automatically resumes from the last successful point. This makes it especially reliable for projects with frequent documentation updates.
 
-### Release Status Tracking
+### 2. Release Status Tracking
 
-Release status tracking is a critical aspect of documentation translation. Users generally expect documentation to align with released versions, making it important to distinguish between released and unreleased content during the translation process.
+Release status tracking is vital for documentation translation. Users expect documentation to match released software versions. Translators need to know which content is released and which isn't.
 
-While existing tools focus on change detection, Yuki-no introduces comprehensive release tracking capabilities. This feature helps translation teams make informed decisions about which content to prioritize, ensuring that documentation remains in sync with official releases.
+While existing tools focus mainly on detecting changes, Yuki-no adds comprehensive release tracking. This feature helps translation teams prioritize their work and keep documentation in sync with official releases.
 
 <p align="center">
 
@@ -49,56 +55,63 @@ _Example: Yuki-no tracks release status and updates issue comments accordingly_
 
 </p>
 
-Through the `release-tracking` and `release-tracking-labels` options, Yuki-no provides automated release status tracking using Issue Comments and Issue Labels. This systematic approach helps teams:
+Through the `release-tracking` and `release-tracking-labels` options, Yuki-no provides:
 
-- Prioritize translation work based on release status
-- Avoid premature translation of unreleased features
-- Maintain clear visibility of content readiness
-- Streamline the translation workflow
+- Automated release status tracking using Issue Comments
+- Issue Labels for better organization
 
-### Work Status Tracking
+This systematic approach helps teams prioritize translation based on release status and avoid translating unreleased features too early. It also maintains clear visibility of content readiness and streamlines the translation workflow.
 
-Effective coordination is essential in translation projects, whether working individually or as a team. Clear tracking of work assignments helps prevent duplication of effort and ensures consistent translation quality.
+### 3. Work Status Tracking
 
-Yuki-no enhances the GitHub Issues-based workflow with additional organizational features. The `labels` option enables teams to:
+Workflow management is essential in translation projects, whether working alone or in teams. Clear tracking of work assignments helps:
 
-- Easily filter and manage translation tasks
-- Maintain clear separation between translation and general issues
+- Prevent duplicate efforts
+- Help improve translation quality
+- Contribute to better translation consistency
 
-These enhancements help create a more organized and efficient translation workflow while leveraging GitHub's familiar interface.
+Yuki-no enhances GitHub Issues-based workflows with organizational features. The `labels` option allows teams to:
+
+- Filter and manage translation tasks easily
+- Keep translation issues separate from general issues
+
+These improvements create a more organized and efficient translation process while using GitHub's familiar interface.
 
 ### Yuki-no
 
-Yuki-no fulfills the "three essential features for technical docs translation projects" and provides various other features and improvements. These include using GitHub Actions Bot by default, easier and clearer Actions config, `include` and `exclude` options for specifying change tracking targets based on [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing), and a `verbose` option for more detailed logging.
+Yuki-no delivers all three essential features for technical docs translation projects, plus several improvements:
 
-If you're planning to start a translation project or considering implementing Yuki-no in an existing translation project, [check out this guide](README.md). There's also a [migration guide](./MIGRATION.md) for users of issue-based translation processes like Ryu-Cho. For real-world usage examples, you can refer to the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
+- Uses GitHub Actions Bot by default
+- Offers simpler and clearer configuration
+- Provides `include` and `exclude` options based on [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing)
+- Includes a `verbose` option for detailed logging
+
+If you want to start a translation project or add Yuki-no to an existing one, check out the [main guide](README.md). For users of issue-based translation processes like Ryu-Cho, we have a [migration guide](./MIGRATION.md). For real examples, see the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
 
 ## Other Open-Source Solutions
 
-Most open-source solutions were deemed unsuitable for docs translation projects because they either focus on application localization ([Tolgee](https://github.com/tolgee/tolgee-platform)), are not open-source ([Crowdin](https://crowdin.com/)), or have complexity issues ([GitLocalize](https://gitlocalize.com/)).
+Most open-source tools don't fit docs translation projects well. Some focus on service localization ([Tolgee](https://github.com/tolgee/tolgee-platform)), others aren't open-source ([Crowdin](https://crowdin.com/)), or they're too complex ([GitLocalize](https://gitlocalize.com/), [Weblate](https://github.com/WeblateOrg/weblate)).
 
 ### Weblate
 
-[Weblate](https://github.com/WeblateOrg/weblate) is a powerful open-source translation solution that provides various features along with real-time collaboration. It offers integration with Git-based platforms like GitHub and GitLab and is continuously developed with an active community.
+[Weblate](https://github.com/WeblateOrg/weblate) is a powerful open-source translation tool with many features including real-time collaboration. It integrates with Git platforms like GitHub and GitLab and has an active development community.
 
-However, it requires self-hosting and has complex setup and maintenance requirements. While it provides a web-based translation platform, this unfamiliarity might actually become a barrier to entry. Additionally, with its many features, it might not be suitable for projects seeking a streamlined translation process.
+However, Weblate requires self-hosting and has complex setup and maintenance needs. While it offers a web-based translation platform, this unfamiliar interface can become a barrier for new contributors. Its many features might be too much for projects seeking a simple translation process.
 
 ### Docusaurus
 
-[Docusaurus](https://github.com/facebook/docusaurus) is a static website generator developed by Meta (formerly Facebook) with built-in i18n capabilities. From a translation process perspective, it has the following characteristics:
+[Docusaurus](https://github.com/facebook/docusaurus), developed by Meta (formerly Facebook), generates static websites with built-in i18n support. From a translation perspective, it has these characteristics:
 
 **Advantages:**
 
-- Provides basic structure and tools for translation
-- Quick and easy multilingual site setup
-- Automatic translation file generation
-- Translation progress tracking
+- Provides basic translation structure and tools
+- Enables quick multilingual site setup
+- Generates translation files automatically
+- Tracks translation progress
 
 **Disadvantages:**
 
-- Manual translation synchronization process
-- Difficult to track changes in original documentation
-- Lack of release status tracking
-- Not optimized for GitHub Issues-based collaboration
+- Requires manual translation synchronization
+- Isn't optimized for GitHub Issues-based collaboration
 
-While Docusaurus is an excellent tool for building documentation sites, it has limitations in terms of translation process automation. Yuki-no complements these limitations by enabling efficient GitHub-based translation processes.
+While Docusaurus is excellent for building documentation sites, it has limitations in translation process automation. Yuki-no complements Docusaurus by enabling efficient GitHub-based translation workflows.

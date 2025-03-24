@@ -1,4 +1,3 @@
-import path from 'path';
 import colors from 'colors/safe';
 
 /**
@@ -14,7 +13,8 @@ export function log(type: LogType, message: string): void {
   // Only show warnings and errors unless verbose mode is enabled
   if (
     process.env.VERBOSE?.toLowerCase() !== 'true' &&
-    (type === 'I' || type === 'S')
+    type !== 'W' &&
+    type !== 'E'
   ) {
     return;
   }
@@ -35,43 +35,49 @@ export function log(type: LogType, message: string): void {
   }
 }
 
-export function assert(condition: boolean, message: string): void {
+export const assert = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
   }
-}
+};
 
-export function extractBasename(url: string): string {
-  return path.basename(url);
-}
+export const splitByNewline = (text?: string): string[] => {
+  const trimText = text?.trim();
 
-export function extractRepoName(url: string): string {
-  return path.basename(url, '.git');
-}
-
-export function extractRepoOwner(url: string): string {
-  let dirname = path.dirname(url);
-
-  if (dirname.includes(':')) {
-    dirname = dirname.split(':').pop()!;
-  }
-
-  return path.basename(dirname);
-}
-
-export function removeHash(text: string): string {
-  return text.replace(/( )?\(#.*\)/, '');
-}
-
-export function splitByNewline(text?: string): string[] {
-  if (!text) {
+  if (!trimText) {
     return [];
   }
 
-  return text.split('\n').filter(line => line.trim() !== '');
-}
+  return trimText.split('\n').filter(line => line.trim() !== '');
+};
 
-export function getUrlWithoutDotGit(url: string): string {
-  const repoUrl = url.replace(/\.git$/, '');
-  return repoUrl;
-}
+export const excludeFrom = (
+  excludeSource: string[],
+  reference: string[],
+): string[] => excludeSource.filter(sourceEl => !reference.includes(sourceEl));
+
+export const chunk = <T>(data: T[], chunkSize: number): T[][] => {
+  if (chunkSize >= data.length) {
+    return [data];
+  }
+
+  if (chunkSize < 1) {
+    throw new Error('Invalid chunkSize');
+  }
+
+  return [...Array(Math.ceil(data.length / chunkSize))].map<T[]>((_, ind) =>
+    data.slice(ind * chunkSize, (ind + 1) * chunkSize),
+  );
+};
+
+export const isNotEmpty = <T>(value: T | undefined | null): value is T => {
+  const isNotNullable = value !== undefined && value !== null;
+
+  if (typeof value === 'string') {
+    return isNotNullable && value.length > 0;
+  }
+
+  return isNotNullable;
+};
+
+export const unique = <T>(value: T[]): T[] => Array.from(new Set(value));

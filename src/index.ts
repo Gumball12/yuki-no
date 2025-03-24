@@ -1,41 +1,89 @@
-import { assert } from './utils';
-import { createConfig } from './config';
-import { YukiNo } from './yuki-no';
+import { type Config, createConfig } from './createConfig';
+import { Git } from './git/core';
+import { getCommits } from './git/getCommits';
+import { getRelease } from './git/getRelease';
+import { GitHub } from './github/core';
+import { createIssue } from './github/createIssue';
+import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
+import { getOpenedIssues } from './github/getOpenedIssues';
+import { lookupCommitsInIssues } from './github/lookupCommitsInIssues';
+import { updateIssueCommentByRelease } from './releaseTracking/updateIssueCommentsByRelease';
+import { updateIssueLabelsByRelease } from './releaseTracking/updateIssueLabelsByRelease';
+import { log } from './utils';
 
-assert(!!process.env.ACCESS_TOKEN, '`accessToken` is required.');
-assert(!!process.env.HEAD_REPO, '`headRepo` is required.');
-assert(!!process.env.TRACK_FROM, '`trackFrom` is required.');
+import shell from 'shelljs';
 
-const config = createConfig({
-  accessToken: process.env.ACCESS_TOKEN!,
-  userName: process.env.USER_NAME,
-  email: process.env.EMAIL,
-  upstreamRepo: process.env.UPSTREAM_REPO,
-  headRepo: process.env.HEAD_REPO!,
-  headRepoBranch: process.env.HEAD_REPO_BRANCH,
-  trackFrom: process.env.TRACK_FROM!,
-  include: process.env.INCLUDE,
-  exclude: process.env.EXCLUDE,
-  labels: process.env.LABELS,
-  releaseTracking: process.env.RELEASE_TRACKING,
-  releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
-  verbose: process.env.VERBOSE,
-});
+shell.config.silent = true;
 
-const yukiNo = new YukiNo(config);
+const start = async () => {
+  const startTime = new Date();
+  log('I', `Starting Yuki-no (${startTime.toISOString()})`);
 
-yukiNo.start().catch(err => {
-  console.error('Failed to start:', err);
-  process.exit(1);
-});
+  const config = createConfig();
+  log('S', 'Configuration initialized');
 
-// Setup error handling
-process.on('unhandledRejection', err => {
-  console.error('Unhandled rejection:', err);
-  process.exit(1);
-});
+  const git = new Git({ ...config, repoSpec: config.headRepoSpec });
+  git.clone();
+  git.exec(`config user.name "${config.userName}"`);
+  git.exec(`config user.email "${config.email}"`);
+  log('S', 'Git initialized');
 
-process.on('uncaughtException', err => {
-  console.error('Uncaught exception:', err);
-  process.exit(1);
-});
+  const github = new GitHub({ ...config, repoSpec: config.upstreamRepoSpec });
+  log('S', 'GitHub initialized');
+
+  await syncCommits(github, git, config);
+
+  if (config.releaseTracking) {
+    await releaseTracking(github, git, config);
+  }
+
+  const endTime = new Date();
+  const duration = (endTime.getTime() - startTime.getTime()) / 1000;
+  log(
+    'S',
+    `Yuki-No completed (${endTime.toISOString()}) - Duration: ${duration}s`,
+  );
+};
+
+const syncCommits = async (github: GitHub, git: Git, config: Config) => {
+  log('I', '=== Synchronization started ===');
+
+  const latestSuccessfulRun = await getLatestSuccessfulRunISODate(github);
+  const commits = getCommits(config, git, latestSuccessfulRun);
+  const notCreatedCommits = await lookupCommitsInIssues(github, commits);
+
+  log(
+    'I',
+    `syncCommits :: Number of commits to create as issues: ${notCreatedCommits.length}`,
+  );
+
+  for (const notCreatedCommit of notCreatedCommits) {
+    await createIssue(github, config.headRepoSpec, notCreatedCommit);
+  }
+
+  log(
+    'S',
+    `syncCommits :: ${notCreatedCommits.length} issues created successfully`,
+  );
+};
+
+const releaseTracking = async (github: GitHub, git: Git, config: Config) => {
+  log('I', '=== Release tracking started ===');
+
+  const openedIssues = await getOpenedIssues(github);
+  const releaseInfos = openedIssues.map(issue => getRelease(git, issue.hash));
+
+  for (let ind = 0; ind < releaseInfos.length; ind++) {
+    const releaseInfo = releaseInfos[ind];
+    const openedIssue = openedIssues[ind];
+    await updateIssueLabelsByRelease(github, config, openedIssue, releaseInfo);
+    await updateIssueCommentByRelease(github, openedIssue, releaseInfo);
+  }
+
+  log(
+    'S',
+    `releaseTracking :: Release information updated for ${openedIssues.length} issues`,
+  );
+};
+
+start();

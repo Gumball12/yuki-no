@@ -1,14 +1,14 @@
 # Migrate to Yuki-no
 
-This guide explains how to use Yuki-no in projects that have translation processes based on GitHub Issues, such as those using Ryu-Cho.
+This guide shows how to use Yuki-no in projects that use GitHub Issues for translation, such as those using [Ryu-Cho](https://github.com/vuejs-translations/ryu-cho).
 
 ## Migration Process
 
 ### Eligible Projects
 
-- Projects with translation processes based on GitHub Issues, like Ryu-Cho
-  - Tracks Head Repo changes through GitHub Issues
-  - Each Issue is linked to a specific commit in the Head Repo
+- Projects that use GitHub Issues for translation, like Ryu-Cho
+  - Track Head Repo changes through GitHub Issues
+  - Each issue body contains links to a specific commit in the Head Repo
   - Head Repo must be a Public GitHub repository
 - GitHub Issues must contain GitHub Commit URLs for original commits
   - GitHub Commit URL format: `https://github.com/<org_name>/<repo_name>/commit/<commit_hash>`
@@ -25,45 +25,47 @@ This guide explains how to use Yuki-no in projects that have translation process
 
 > [!WARNING]
 >
-> For a successful migration, set `track-from` to the last commit hash that was fully translated. When running yuki-no for the first time, using an incorrect value may result in duplicate issues for already translated content.
+> For a successful migration, set `track-from` to the last commit hash that was fully translated. Using an incorrect value when first running Yuki-no may create duplicate issues for already translated content. Note that Yuki-no starts tracking from the commit after your specified `track-from` hash, not including the `track-from` commit itself.
 
-1. Add Labels for Yuki-no Tracking to Translation Issues
+1. Add Labels to Translation Issues for Yuki-no Tracking
 
    <img width="400" src="./docs/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
 
-   - Yuki-no identifies translation Issues it manages through Issue Labels.
-   - To set this up, access GitHub and create labels for synchronization, such as `sync`. Then, add these labels to your existing translation Issues.
-   - Note: Using these labels on non-translation Issues may cause unexpected behavior.
+   - Yuki-no identifies which issues it manages through labels
+   - Go to GitHub and create labels like `sync`
+   - Add these labels to your existing translation issues
+   - Note: Adding these labels to non-translation issues may cause problems
 
 2. Create Yuki-no Action Configuration File
 
    <img width="350" src="./docs/create-an-action.webp" title="Create an Action" alt="Create an Action">
 
-   - Remove any existing Action configuration files used for synchronization (e.g., Ryu-Cho).
-   - Then, create a new Yuki-no Action configuration file by referring to the [Usage](https://github.com/Gumball12/yuki-no?tab=readme-ov-file#usage) section. If migrating from Ryu-Cho, you can refer to the [Yuki-no Options vs Ryu-Cho Options](#yuki-no-options-vs-ryu-cho-options) section.
+   - Remove any existing sync action files (like Ryu-Cho)
+   - Create a new Yuki-no config file by following the [Usage](https://github.com/Gumball12/yuki-no?tab=readme-ov-file#usage) section
+   - If moving from Ryu-Cho, check the [Yuki-no Options vs Ryu-Cho Options](#yuki-no-options-vs-ryu-cho-options) section below
 
 3. Run the Action
 
-   - Wait for the next Cron schedule, or if you've enabled `on.workflow_dispatch`, you can trigger the action manually (see [GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow))
-   - The first run may take some time as it processes all commits after the `track-from` hash.
-   - Check your translation Issues after execution.
+   - Wait for the next scheduled run, or trigger it manually if you enabled `on.workflow_dispatch` (see [GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow))
+   - The first run may take some time as it processes all commits after the `track-from` hash
+   - Check your translation issues after it finishes
 
 #### Yuki-no Options vs Ryu-Cho Options
 
-For detailed option descriptions, please refer to the [config.ts](./src/config.ts).
+For detailed option descriptions, see [README](./README.md#configuration).
 
-**No Longer "Required" Options:**
+**Options No Longer Required:**
 
-- `username`: Not needed in most cases as it uses GitHub Actions bot
-- `email`: Not needed in most cases as it uses GitHub Actions bot
-- `upstream-repo`: Automatically inferred in GitHub Actions environment
+- `username`: Not needed - uses GitHub Actions bot by default
+- `email`: Not needed - uses GitHub Actions bot by default
+- `upstream-repo`: Automatically detected in GitHub Actions
 
 **Removed Options:**
 
 - `upstream-repo-branch`: Upstream Repo always uses the default branch
 - `workflow-name`: Not used in Yuki-no
 
-**Retained Options:**
+**Options Kept the Same:**
 
 - `head-repo`: URL of the original repository
 - `head-repo-branch`: Branch of the original repository (default: `main`)
@@ -71,18 +73,18 @@ For detailed option descriptions, please refer to the [config.ts](./src/config.t
 
 **Changed Options:**
 
-- `path-starts-with`: Use the `include` option instead, with [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing) (e.g., `docs/` becomes `docs/**`)
+- `path-starts-with`: Use the new `include` option with [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing) instead (e.g., `docs/` becomes `docs/**`)
 
 **New Options:**
 
-- `include`, `exclude`: Filtering options using Glob patterns for tracking targets
+- `include`, `exclude`: Filter files to track using Glob patterns
 - `labels`: Labels to add to issues (default: `sync`)
-- `release-tracking`, `release-tracking-labels`: Release tracking functionality (`release-tracking-labels` default: `pending`)
-- `verbose`: Enable detailed logging (default: `true`)
+- `release-tracking`, `release-tracking-labels`: Track release status (`release-tracking-labels` default: `pending`)
+- `verbose`: Show detailed logs (default: `true`)
 
 #### Important Notes
 
-**If issues or issue comments are not being created:**
+**If issues or comments aren't being created:**
 
 ![settings](./docs/settings.webp)
 

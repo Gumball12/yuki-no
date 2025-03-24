@@ -2,23 +2,13 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
+    include: ['./src/tests/**', '!./src/tests/setup.ts'],
+    setupFiles: ['./src/tests/setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        // External dependencies and entry points
-        'src/git.ts',
-        'src/github.ts',
-        'src/index.ts',
-        // Config files
-        '*.config.ts',
-        // Test files
-        'tests/*',
-        // Landing page
-        'webpage/*',
-        // Cloned External Git Repo
-        'tmp/*',
-      ],
+      include: ['src/*'],
+      exclude: ['src/tests/*', 'src/index.ts', '*.config.ts'],
     },
   },
 });

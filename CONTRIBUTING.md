@@ -1,13 +1,13 @@
 # Contributing to Yuki-no
 
-Thank you for your interest in contributing to Yuki-no! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Yuki-no! This guide will help you get started.
 
 ## Development Setup
 
 ### Prerequisites
 
 - Node.js v22.0.0 or higher
-- [Yarn Classic](https://classic.yarnpkg.com/lang/en/) (available through [Node Corepack](https://nodejs.org/api/corepack.html))
+- [Yarn Classic](https://classic.yarnpkg.com/lang/en/) (install via [Node Corepack](https://nodejs.org/api/corepack.html))
   ```bash
   corepack enable
   ```
@@ -30,10 +30,10 @@ Thank you for your interest in contributing to Yuki-no! This document provides g
    - Choose your upstream repository
 3. Repository Permissions:
    - Contents: Read and write
-   - Issues: Read and write (required for release tracking)
-   - Metadata: Read (automatically set)
+   - Issues: Read and write (needed for release tracking)
+   - Metadata: Read (set automatically)
 
-For more PAT details, see [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
+For more details, see [GitHub documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens).
 
 ### Local Environment Setup
 
@@ -41,22 +41,8 @@ For more PAT details, see [GitHub documentation](https://docs.github.com/en/auth
 >
 > **Important Notes**
 >
-> - The `.env` file is included in .gitignore by default
+> - The `.env` file is in .gitignore by default
 > - Never commit the `.env` file to git
-> - Yuki-no overrides local git user settings during execution
-
-> [!IMPORTANT]
->
-> **Git User Settings Override**
->
-> Yuki-no internally executes git commands with specific user settings:
->
-> - When running locally (`yarn start:dev`), it uses either:
->   - Values from your `.env` file (USER_NAME, EMAIL)
->   - Default GitHub Actions bot settings if not specified
-> - These settings temporarily override your local git configuration (`user.name`, `user.email`)
-> - This behavior is intentional but may cause unexpected commit authorship
-> - Be cautious when running other git operations in the same session
 
 1. [Fork](https://github.com/Gumball12/yuki-no/fork) and clone the repository
 
@@ -82,10 +68,10 @@ For more PAT details, see [GitHub documentation](https://docs.github.com/en/auth
    ```
 
    > [!IMPORTANT]
-   > Unlike in GitHub Actions environment, `UPSTREAM_REPO` must be explicitly set for local development.
-   > The automatic repository inference only works in GitHub Actions context.
+   > For local development, you must set `UPSTREAM_REPO` explicitly.
+   > The automatic repository detection only works in GitHub Actions.
 
-For detailed environment variable settings, see [action.yml](./action.yml).
+For more environment variables, see [README](./README.md#configuration).
 
 ### Development Workflow
 
@@ -95,7 +81,7 @@ For detailed environment variable settings, see [action.yml](./action.yml).
 git checkout -b feat/your-feature
 ```
 
-2. Running and ensure tests pass:
+2. Run tests and the application:
 
 ```bash
 yarn test # unit tests
@@ -121,42 +107,28 @@ git commit -m "fix: resolve issue #123"
 
 #### Common Issues
 
-If you encounter any bugs not covered in this troubleshooting guide, please [open an issue](https://github.com/Gumball12/yuki-no/issues).
+If you find bugs not covered here, please [open an issue](https://github.com/Gumball12/yuki-no/issues).
 
 **GitHub API 403 Errors**:
 
-- Check PAT permissions
+- Check your PAT permissions
 
 ## Project Structure
 
 ```
 src/
-├── config.ts     # Configuration types and validation
-├── defaults.ts   # Default configuration values
-├── github.ts     # GitHub API interactions
-├── git.ts       # Git operations
-├── index.ts     # Entry point
-├── repository.ts # Repository operations
-├── types.ts     # Common type definitions
-├── utils.ts     # Utility functions
-└── yuki-no.ts   # Main application logic
-
-tests/           # Unit tests
+├── index.ts           # Entry point
+├── createConfig.ts    # Configuration setup and validation
+├── utils.ts           # Utility functions
+├── git/               # Git operations
+├── github/            # GitHub API interactions
+├── releaseTracking/   # Release tracking functionality
+└── tests/             # Unit tests
 ```
-
-### Batch Processing
-
-Yuki-no uses fixed batch processing settings for optimal performance:
-
-- Batch size: 5 commits per batch
-- Delay between batches: 3000ms
-- Maximum retries: 3 attempts
-
-These values are hardcoded to maintain consistent behavior and prevent API abuse. If you need to modify these values, please open an issue for discussion.
 
 ## Testing
 
-The project uses [Vitest](https://vitest.dev/) for testing. Tests are located in the `tests/` directory.
+The project uses [Vitest](https://vitest.dev/) for testing. Tests are in the `src/tests/` directory.
 
 ### Running Tests
 
@@ -166,131 +138,30 @@ To run tests with coverage:
 yarn test
 ```
 
-### Test Organization
+### About Mocking
 
-Tests are organized by feature groups to maintain clarity and readability. Each test file should follow this structure:
+We generally recommend avoiding excessive mocking in tests. However, for operations with side-effects that aren't directly related to what you're testing, mocking is appropriate:
 
-1. **Mock Setup**
+- Network requests to external services (e.g. GitHub API)
+- File system operations (creating/deleting files, like Git)
+- Other operations with unpredictable results
 
-   ```typescript
-   // Mock external dependencies
-   vi.mock('../src/github', () => ({
-     GitHub: vi.fn(() => ({
-       getOpenIssues: vi.fn(),
-       createComment: vi.fn(),
-     })),
-   }));
+External libraries without side-effects should **not** be mocked. These libraries are typically well-tested already, and as long as their version remains consistent, they won't introduce unexpected behavior.
 
-   // Setup common test data
-   const mockConfig = {
-     // ... test configuration
-   };
+For similar reasons, most mocked behaviors are excluded from our test coverage metrics. Currently, we only have [mockedRequests.test.ts](./src/tests/mockedRequests.test.ts) for testing GitHub API interactions while maintaining idempotence.
 
-   // Helper function for common mock setup
-   function setupMocks(instance: YukiNo) {
-     // ... setup mock behaviors
-   }
-   ```
+When mocking is necessary, follow these practices:
 
-2. **Test Groups**
-
-   ```typescript
-   describe('Feature Group', () => {
-     // Common setup for the group
-     beforeEach(() => {
-       // ... setup code
-     });
-
-     it('should handle specific case', () => {
-       // ... test case
-     });
-   });
-   ```
-
-### Test Writing Guidelines
-
-1. **Test Structure**
-
-   - Keep test groups flat (avoid deep nesting)
-   - Use clear, descriptive group names
-   - Group related test cases together
-
-   ```typescript
-   // Good
-   describe('Basic Commit Processing', () => {
-     it('should process new commit and create issue', async () => {
-       // Arrange
-       const yukiNo = new YukiNo(mockConfig);
-       // Act
-       await yukiNo.start();
-       // Assert
-       expect(yukiNo.github.createIssue).toHaveBeenCalled();
-     });
-   });
-   ```
-
-2. **Test Cases**
-
-   - Follow AAA pattern (Arrange, Act, Assert)
-   - Use descriptive test names that explain the behavior
-   - Keep test cases focused and concise
-
-   ```typescript
-   it('should skip when issue already exists', async () => {
-     // Arrange
-     vi.mocked(yukiNo.github.searchIssue).mockResolvedValue({
-       data: { total_count: 1 },
-     } as any);
-     // Act
-     await yukiNo.start();
-     // Assert
-     expect(yukiNo.github.createIssue).not.toHaveBeenCalled();
-   });
-   ```
-
-3. **Mocking Best Practices**
-
-   - Mock external dependencies only
-   - Use type assertions wisely
-   - Reset mocks between tests
-
-   ```typescript
-   beforeEach(() => {
-     vi.clearAllMocks();
-     yukiNo = new YukiNo(mockConfig);
-     setupMocks(yukiNo);
-   });
-   ```
-
-### Main Features and Their Tests
-
-1. **Commit Processing**
-
-   - Tracking new commits
-   - Creating issues and PRs
-   - Handling merge conflicts
-   - Path filtering
-
-2. **Release Tracking**
-
-   - Pre-release detection
-   - Release status updates
-   - Comment formatting
-   - Skip conditions
-
-3. **Configuration**
-
-   - Environment variables
-   - Default values
-   - Validation
+- Mock only the specific functions needed
+- Keep mocks as close to real behavior as possible
+- Reset mocks between tests using `vi.clearAllMocks()`
 
 ## Getting Help
 
-If you need help or have questions:
+If you need help:
 
-1. Check existing issues and documentation
+1. Check existing issues and docs
 2. Open a new issue with a clear description
-3. Use appropriate labels
 
 ## License
 

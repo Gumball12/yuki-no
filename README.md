@@ -1,10 +1,8 @@
-# Yuki-no
+# <img width="35" src="docs/logo.webp" title="logo" alt="logo"> Yuki-no
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
 
-<img width="350" src="docs/logo.webp" title="logo" alt="logo">
-
-Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates issues from the head repo based on its commits. This is particularly useful for tracking changes between repositories, especially in documentation translation projects.
+Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.
 
 > **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
 
@@ -19,7 +17,23 @@ Yuki-no (雪の, means "of snow" in Japanese) is a GitHub Action that creates is
 - Tracks release status with pre-release and release information (`release-tracking` option)
 - Manages release tracking labels for unreleased changes (`release-tracking-labels` option)
 
-Yuki-no is actively used in the [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), [Korean translation for Vue docs](https://github.com/vuejs-translations/docs-ko), and [Template for Vite.js docs translation repositories](https://github.com/tony19/vite-docs-template) demonstrating its effectiveness in real-world translation workflows.
+Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg"> [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), <img width="20" src="https://vuejs.org/logo.svg"> [Korean translation for Vue docs](https://github.com/vuejs-translations/docs-ko), and <img width="20" src="https://vitejs.dev/logo.svg"> [Template for Vite.js docs translation repositories](https://github.com/tony19/vite-docs-template) demonstrating its effectiveness in real-world translation workflows.
+
+### How It Works
+
+1. **Repository Monitoring Process**
+   - Clones the `head-repo` in a [OS's temporary directory](https://nodejs.org/docs/latest-v22.x/api/os.html#ostmpdir)
+   - Uses GitHub Actions Bot credentials by default
+2. **Commit Change Detection and Issue Creation**
+   - Tracks commits newer than the last successful run
+   - Filters changes based on `include`/`exclude` patterns
+   - Creates issues for new changes with your specified `labels`
+3. **Version `release-tracking` System** (when enabled)
+   - Monitors pre-release and release tags
+   - Adds status comments and manages `release-tracking-labels` automatically
+   - Stops tracking when production release is available
+
+The entire process runs safely without affecting your local environment or git configuration.
 
 ## Usage
 
@@ -31,7 +45,7 @@ Yuki-no is actively used in the [Vite Korean docs translation project](https://g
    - Select "Read and write permissions"
    - Save the changes
 
-   This is a standard requirement for any GitHub Actions that need to create issues or make repository changes. Without these permissions, the action will fail with a `403 "Resource not accessible by integration"` error when trying to create issues or manage labels.
+   This is a standard requirement for any GitHub Actions that need to create issues or view repository content. Without these permissions, the action will fail with a `403 "Resource not accessible by integration"` error when trying to create issues or manage labels.
 
 2. Create `.github/workflows/yuki-no.yml`:
 
@@ -49,60 +63,64 @@ Yuki-no is actively used in the [Vite Korean docs translation project](https://g
        steps:
          - uses: Gumball12/yuki-no@v1
            with:
-             # GitHub access token. Required.
+             # [Required]
+             # GitHub access token.
              access-token: ${{ secrets.GITHUB_TOKEN }}
 
+             # [Required]
              # The head repo to track. This is the repository you want to
-             # take a diff. Required.
+             # take a diff.
              head-repo: https://github.com/head-user/head-repo.git
 
+             # [Required]
              # The git commit sha of head repo to start tracking. Yuki-no will
-             # only track commit from this hash. Required.
+             # only track commit from this hash.
+             #
+             # WARNING: TRACK_FROM commit is not included, tracking starts from
+             # the next commit
              track-from: head-commit-hash
 
+             # [Optional]
              # List of file patterns to track. Multiple patterns can be specified
              # with newlines. Files matching these Glob patterns will be included
              # in tracking.
-             # Glob Pattern: https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing
-             # If empty, all files will be tracked. Optional.
+             # If empty, all files will be tracked.
+             #
+             # (Glob Pattern: https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing)
              include: |
                docs/**
 
+             # [Optional]
              # Whether to enable release tracking.
-             # When enabled, Yuki-no will track releases for each issue
-             # and add comments about release status. Optional.
-             # Defaults to 'false'
+             # When enabled, Yuki-no will track releases for each issue and add
+             # comments about release status. Defaults to 'false'
              release-tracking: true
    ```
 
-   Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
+   Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `on.workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
 
 ### Configuration
 
-| Option                    | Required | Default             | Description                                       |
-| ------------------------- | -------- | ------------------- | ------------------------------------------------- |
-| `access-token`            | Yes      | -                   | GitHub access token                               |
-| `head-repo`               | Yes      | -                   | URL of repository to track                        |
-| `track-from`              | Yes      | -                   | Starting commit hash                              |
-| `include`                 | No       | -                   | Glob patterns for files to track                  |
-| `exclude`                 | No       | -                   | Glob patterns for files to exclude                |
-| `labels`                  | No       | `sync`              | Labels for issues (newline separated)             |
-| `release-tracking`        | No       | `false`             | Enable release status tracking                    |
-| `release-tracking-labels` | No       | `pending`           | Labels for unreleased changes (newline separated) |
-| `verbose`                 | No       | `true`              | Enable verbose logging                            |
-| `username`                | No       | `github-actions`    | Git username for commits                          |
-| `email`                   | No       | `action@github.com` | Git email for commits                             |
-| `upstream-repo`           | No       | Current repository  | URL of your repository                            |
-| `head-repo-branch`        | No       | `main`              | Branch to track in head repo                      |
-
-For more detailed option descriptions, please refer to the [config.ts](./src/config.ts).
-
-For more information on Glob Patterns, [refer to Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
+| Option                    | Required | Default                    | Description                                                                                                                     |
+| ------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `access-token`            | Yes      | -                          | GitHub access token.                                                                                                            |
+| `username`                | No       | `github-actions`           | Git username used for GitHub issue operations.                                                                                  |
+| `email`                   | No       | `action@github.com`        | Git username used for GitHub issue operations.                                                                                  |
+| `upstream-repo`           | No       | Current working repository | URL of your repository.                                                                                                         |
+| `head-repo`               | Yes      | -                          | URL of repository to track                                                                                                      |
+| `track-from`              | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                     |
+| `head-repo-branch`        | No       | `main`                     | Branch to track in head repo                                                                                                    |
+| `include`                 | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked.                                                  |
+| `exclude`                 | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns.                                                      |
+| `labels`                  | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. |
+| `release-tracking`        | No       | `false`                    | When enabled, Yuki-no will track releases for each commit and add comments about release status.                                |
+| `release-tracking-labels` | No       | `pending`                  | Labels for unreleased changes. Added to issues until changes are released. (newline separated)                                  |
+| `verbose`                 | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
 
 #### File Pattern Examples
 
 ```yaml
-# Track only markdown and TypeScript files
+# Track only markdown(*.md) and TypeScript(*.ts) files
 include: |
   **/*.md
   **/*.ts
@@ -113,24 +131,7 @@ exclude: |
   **/__tests__/**
 ```
 
-### How It Works
-
-1. Monitors the head repository for new commits
-2. When new commits are found:
-   - Checks if the commit is newer than the last successful workflow run
-   - Processes commits in optimized batches of 5 to minimize API usage
-   - Implements strategic delays between operations to respect API rate limits
-   - Creates issues for new changes with specified labels
-   - Tracks release status if enabled
-3. For release tracking:
-   - Monitors pre-release and release tags
-   - Updates issue comments with status changes
-   - Manages release tracking labels for unreleased changes
-   - Stops tracking when final release is available
-
-### Caveats
-
-For important notes about initial setup, rate limits, error recovery, and other considerations, please refer to our [Caveats](./CAVEATS.md).
+For more information on Glob Patterns, see [Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
 
 ## Contributing
 
