@@ -28,7 +28,6 @@ describe('GitHub API Integration Tests', () => {
     it('Should list repository issues with the expected structure', async () => {
       const { data } = await octokit.issues.listForRepo({
         ...TEST_REPO,
-        state: 'open',
         per_page: 1,
       });
 
