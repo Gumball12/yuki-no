@@ -2,6 +2,7 @@ import { type Config, createConfig } from './createConfig';
 import { Git } from './git/core';
 import { getCommits } from './git/getCommits';
 import { getRelease } from './git/getRelease';
+import { hasAnyRelease } from './git/hasAnyRelease';
 import { GitHub } from './github/core';
 import { createIssue } from './github/createIssue';
 import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
@@ -72,12 +73,18 @@ const releaseTracking = async (github: GitHub, git: Git, config: Config) => {
 
   const openedIssues = await getOpenedIssues(github);
   const releaseInfos = openedIssues.map(issue => getRelease(git, issue.hash));
+  const releasesAvailable = hasAnyRelease(git);
 
   for (let ind = 0; ind < releaseInfos.length; ind++) {
     const releaseInfo = releaseInfos[ind];
     const openedIssue = openedIssues[ind];
-    await updateIssueLabelsByRelease(github, config, openedIssue, releaseInfo);
-    await updateIssueCommentByRelease(github, openedIssue, releaseInfo);
+    await updateIssueLabelsByRelease(github, openedIssue, releaseInfo);
+    await updateIssueCommentByRelease(
+      github,
+      openedIssue,
+      releaseInfo,
+      releasesAvailable,
+    );
   }
 
   log(

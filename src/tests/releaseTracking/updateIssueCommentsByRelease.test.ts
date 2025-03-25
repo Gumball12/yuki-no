@@ -7,11 +7,14 @@ import { updateIssueCommentByRelease } from '../../releaseTracking/updateIssueCo
 
 import { beforeEach, expect, it, vi } from 'vitest';
 
+const MOCK_RELEASE_TRACKING_LABELS = ['pending'];
+
 // Mocking to bypass network requests
 vi.mock('../../github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
+    releaseTrackingLabels: MOCK_RELEASE_TRACKING_LABELS,
   })),
 }));
 
@@ -37,6 +40,7 @@ const MOCK_ISSUE: Issue = {
   body: 'Issue body',
   labels: ['bug', 'enhancement'],
   hash: 'abc123',
+  isoDate: '2023-01-01T12:00:00',
 };
 
 const MOCK_RELEASE_INFO: ReleaseInfo = {
@@ -64,7 +68,12 @@ it('Should not add a new comment if a release comment already exists', async () 
     '- release: [v0.9.0](https://github.com/...)',
   );
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, MOCK_RELEASE_INFO);
+  await updateIssueCommentByRelease(
+    mockGitHub,
+    MOCK_ISSUE,
+    MOCK_RELEASE_INFO,
+    false,
+  );
 
   expect(createIssueCommentMock).not.toHaveBeenCalled();
 });
@@ -77,7 +86,12 @@ it('Should create a correct comment', async () => {
     release: undefined,
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, preReleaseOnly);
+  await updateIssueCommentByRelease(
+    mockGitHub,
+    MOCK_ISSUE,
+    preReleaseOnly,
+    false,
+  );
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -93,7 +107,7 @@ it('Should create a correct comment', async () => {
     },
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseOnly);
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseOnly, false);
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -106,7 +120,7 @@ it('Should create a correct comment', async () => {
     release: undefined,
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, noRelease);
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, noRelease, false);
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -128,7 +142,35 @@ it('Should not add a new comment if the same content already exists', async () =
     release: undefined,
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, prereleaseOnly);
+  await updateIssueCommentByRelease(
+    mockGitHub,
+    MOCK_ISSUE,
+    prereleaseOnly,
+    false,
+  );
 
   expect(createIssueCommentMock).not.toHaveBeenCalled();
+});
+
+it('Adds an informational comment when no releases exist', async () => {
+  getLastIssueCommentMock.mockResolvedValue('');
+
+  const releaseInfo: ReleaseInfo = {
+    prerelease: undefined,
+    release: undefined,
+  };
+
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseInfo, true);
+
+  expect(createIssueCommentMock).toHaveBeenCalledWith(
+    mockGitHub,
+    MOCK_ISSUE.number,
+    [
+      '> This comment and the `pending` label appear because release-tracking is enabled.',
+      '> To disable, remove the `release-tracking` option or set it to `false`.',
+      '\n',
+      '- pre-release: none',
+      '- release: none',
+    ].join('\n'),
+  );
 });

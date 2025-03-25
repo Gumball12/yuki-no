@@ -9,6 +9,7 @@ export const updateIssueCommentByRelease = async (
   github: GitHub,
   issue: Issue,
   releaseInfo: ReleaseInfo,
+  releasesAvailable: boolean,
 ): Promise<void> => {
   const comment = await getLastIssueComment(github, issue.number);
   const isReleased = comment.includes('- release: [v');
@@ -23,12 +24,15 @@ export const updateIssueCommentByRelease = async (
     return;
   }
 
-  const nextComment = createReleaseComment(releaseInfo);
-  const isSameComment = nextComment === comment;
+  const nextComment = createReleaseComment(
+    github,
+    releaseInfo,
+    releasesAvailable,
+  );
 
   log('I', `updateIssueCommentByRelease :: Creating comment (${nextComment})`);
 
-  if (isSameComment) {
+  if (nextComment === comment) {
     log(
       'S',
       'updateIssueCommentByRelease :: Not added (identical comment already exists)',
@@ -40,8 +44,23 @@ export const updateIssueCommentByRelease = async (
   log('S', 'updateIssueCommentByRelease :: Comment added successfully');
 };
 
-const createReleaseComment = ({ prerelease, release }: ReleaseInfo): string => {
+const createReleaseComment = (
+  github: GitHub,
+  { prerelease, release }: ReleaseInfo,
+  releasesAvailable: boolean,
+): string => {
   const pRelContent = `- pre-release: ${prerelease ? `[${prerelease.version}](${prerelease.url})` : 'none'}`;
   const relContent = `- release: ${release ? `[${release.version}](${release.url})` : 'none'}`;
-  return [pRelContent, relContent].join('\n');
+
+  const releaseAvailableContent =
+    releasesAvailable &&
+    [
+      `> This comment and the \`${github.releaseTrackingLabels.join(', ')}\` label appear because release-tracking is enabled.`,
+      '> To disable, remove the `release-tracking` option or set it to `false`.',
+      '\n',
+    ].join('\n');
+
+  return [releaseAvailableContent, pRelContent, relContent]
+    .filter(Boolean)
+    .join('\n');
 };

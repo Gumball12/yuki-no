@@ -1,4 +1,3 @@
-import type { Config } from '../createConfig';
 import type { ReleaseInfo } from '../git/getRelease';
 import type { GitHub } from '../github/core';
 import type { Issue } from '../github/getOpenedIssues';
@@ -7,11 +6,10 @@ import { log, unique } from '../utils';
 
 export const updateIssueLabelsByRelease = async (
   github: GitHub,
-  config: Pick<Config, 'releaseTrackingLabels'>,
   issue: Issue,
   releaseInfo: ReleaseInfo,
 ): Promise<void> => {
-  const releaseTrackingLabels = config.releaseTrackingLabels;
+  const releaseTrackingLabels = github.releaseTrackingLabels;
   const isReleased = releaseInfo.release !== undefined;
   const nextLabels = isReleased
     ? issue.labels.filter(label => !releaseTrackingLabels.includes(label))

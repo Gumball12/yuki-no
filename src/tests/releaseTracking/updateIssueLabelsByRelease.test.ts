@@ -1,4 +1,3 @@
-import type { Config } from '../../createConfig';
 import type { ReleaseInfo } from '../../git/getRelease';
 import { GitHub } from '../../github/core';
 import type { Issue } from '../../github/getOpenedIssues';
@@ -7,11 +6,14 @@ import { updateIssueLabelsByRelease } from '../../releaseTracking/updateIssueLab
 
 import { beforeEach, expect, it, vi } from 'vitest';
 
+const MOCK_RELEASE_TRACKING_LABELS = ['needs-release', 'in-next-release'];
+
 // Mocking to avoid network requests
 vi.mock('../../github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
+    releaseTrackingLabels: MOCK_RELEASE_TRACKING_LABELS,
   })),
 }));
 
@@ -24,16 +26,12 @@ const mockGitHub = new GitHub({} as any);
 // Mocking for spy
 const setIssueLabelsMock = vi.mocked(SetIssueLabelsModule.setIssueLabels);
 
-const MOCK_RELEASE_TRACKING_LABELS = ['needs-release', 'in-next-release'];
-const MOCK_CONFIG: Pick<Config, 'releaseTrackingLabels'> = {
-  releaseTrackingLabels: MOCK_RELEASE_TRACKING_LABELS,
-};
-
 const MOCK_ISSUE: Issue = {
   number: 123,
   body: 'Issue body',
   labels: ['bug', 'enhancement'],
   hash: 'abc123',
+  isoDate: '2023-01-01T12:00:00',
 };
 
 const MOCK_RELEASE_INFO: ReleaseInfo = {
@@ -59,7 +57,6 @@ it('For released issues, release tracking labels should be removed', async () =>
 
   await updateIssueLabelsByRelease(
     mockGitHub,
-    MOCK_CONFIG,
     issueWithTrackingLabels,
     MOCK_RELEASE_INFO,
   );
@@ -77,12 +74,7 @@ it('For unreleased issues, release tracking labels should be added', async () =>
     release: undefined,
   };
 
-  await updateIssueLabelsByRelease(
-    mockGitHub,
-    MOCK_CONFIG,
-    MOCK_ISSUE,
-    prereleaseOnly,
-  );
+  await updateIssueLabelsByRelease(mockGitHub, MOCK_ISSUE, prereleaseOnly);
 
   expect(setIssueLabelsMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -107,7 +99,6 @@ it('For unreleased issues, if all release tracking labels are already present, n
 
   await updateIssueLabelsByRelease(
     mockGitHub,
-    MOCK_CONFIG,
     issueWithAllTrackingLabels,
     prereleaseOnly,
   );
@@ -128,7 +119,6 @@ it('For unreleased issues, if only some release tracking labels are present, the
 
   await updateIssueLabelsByRelease(
     mockGitHub,
-    MOCK_CONFIG,
     issueWithSomeTrackingLabels,
     prereleaseOnly,
   );
@@ -149,12 +139,7 @@ it('If release information is undefined, it should be treated as unreleased and 
     release: undefined,
   };
 
-  await updateIssueLabelsByRelease(
-    mockGitHub,
-    MOCK_CONFIG,
-    MOCK_ISSUE,
-    noReleaseInfo,
-  );
+  await updateIssueLabelsByRelease(mockGitHub, MOCK_ISSUE, noReleaseInfo);
 
   expect(setIssueLabelsMock).toHaveBeenCalledWith(
     mockGitHub,
