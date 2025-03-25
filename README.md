@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
 
+[![asciicast](https://asciinema.org/a/ZmSCwDTR7p2uPCc9QaW44Shb1.svg)](https://asciinema.org/a/ZmSCwDTR7p2uPCc9QaW44Shb1)
+
 Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.
 
 > **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
