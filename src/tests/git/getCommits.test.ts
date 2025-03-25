@@ -87,7 +87,7 @@ describe('getCommits - git log command creation', () => {
 
 describe('getCommits - result verification', () => {
   it('return an empty array when result is empty', () => {
-    mockGit.exec.mockReturnValue('     ');
+    mockGit.exec.mockReturnValue('');
 
     const result = getCommits(MOCK_CONFIG, mockGit);
 

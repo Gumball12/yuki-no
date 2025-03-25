@@ -26,8 +26,8 @@ describe('getRelease - when there are no tags', () => {
     });
   });
 
-  it('Should handle null as undefined', () => {
-    mockGit.exec.mockReturnValue(null);
+  it('Should handle empty as undefined', () => {
+    mockGit.exec.mockReturnValue('');
 
     const result = getRelease(mockGit, TEST_COMMIT_HASH);
 

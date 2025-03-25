@@ -35,7 +35,7 @@ export const getCommits = (
 
   log('I', `getCommits :: Attempting to extract commits: ${command}`);
 
-  const result = git.exec(command).trim();
+  const result = git.exec(command);
 
   if (result.length === 0) {
     return [];

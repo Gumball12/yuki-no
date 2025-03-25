@@ -27,7 +27,7 @@ export class Git {
   exec<T extends string>(command: NotStartsWithGit<T>): string {
     const repoDir = path.resolve(TEMP_DIR, this.#config.repoSpec.name);
     shell.cd(repoDir);
-    return shell.exec(`git ${command}`).stdout;
+    return shell.exec(`git ${command}`).stdout.trim();
   }
 
   clone(): void {

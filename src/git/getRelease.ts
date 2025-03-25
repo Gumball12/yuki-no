@@ -18,7 +18,7 @@ export const getRelease = (git: Git, commitHash: string): ReleaseInfo => {
   log('I', `getRelease :: Retrieving release list for commit ${commitHash}`);
   const result = git.exec(`tag --contains ${commitHash}`);
 
-  if (!result) {
+  if (!result.length) {
     log('I', 'getRelease :: Not released');
     return {
       prerelease: undefined,
