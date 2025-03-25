@@ -1,13 +1,14 @@
 import { isNotEmpty, log } from '../utils';
 
 import type { GitHub } from './core';
-import { extractHashFromIssue } from './utils';
+import { extractHashFromIssue, getISODate } from './utils';
 
 export type Issue = {
   number: number;
   body: string;
   labels: string[];
   hash: string;
+  isoDate: string;
 };
 
 export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
@@ -19,29 +20,28 @@ export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
   let totalIssuesChecked = 0;
 
   while (true) {
-    const resp = await github.api.issues.listForRepo({
+    const { data } = await github.api.issues.listForRepo({
       ...github.ownerAndRepo,
       state: 'open',
       per_page: 100,
       page,
     });
 
-    if (resp.data.length === 0) {
+    if (data.length === 0) {
       break;
     }
 
-    totalIssuesChecked += resp.data.length;
+    totalIssuesChecked += data.length;
 
-    const openedIssuesWithoutHash = resp.data.map<Omit<Issue, 'hash'>>(
-      item => ({
-        number: item.number,
-        body: item.body ?? '',
-        labels: item.labels
-          .map(convGithubIssueLabelToString)
-          .filter(isNotEmpty)
-          .sort(),
-      }),
-    );
+    const openedIssuesWithoutHash = data.map<Omit<Issue, 'hash'>>(item => ({
+      number: item.number,
+      body: item.body ?? '',
+      isoDate: getISODate(item.created_at),
+      labels: item.labels
+        .map(convGithubIssueLabelToString)
+        .filter(isNotEmpty)
+        .sort(),
+    }));
 
     const openedYukiNoIssues = openedIssuesWithoutHash
       .filter(issue => isYukiNoIssue(github.configuredLabels, issue))
@@ -52,7 +52,7 @@ export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
 
     page++;
 
-    if (resp.data.length < 100) {
+    if (data.length < 100) {
       break;
     }
   }
@@ -61,6 +61,8 @@ export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
     'I',
     `getOpenedIssues :: Completed: Found ${issues.length} Yuki-no issues out of ${totalIssuesChecked} total issues`,
   );
+
+  issues.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
 
   return issues;
 };
