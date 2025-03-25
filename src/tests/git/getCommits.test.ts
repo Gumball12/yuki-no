@@ -86,6 +86,14 @@ describe('getCommits - git log command creation', () => {
 });
 
 describe('getCommits - result verification', () => {
+  it('return an empty array when result is empty', () => {
+    mockGit.exec.mockReturnValue('     ');
+
+    const result = getCommits(MOCK_CONFIG, mockGit);
+
+    expect(result).toEqual([]);
+  });
+
   it('git log result should not contain COMMIT_SEP to throw an error', () => {
     mockGit.exec.mockReturnValue('invalid result');
 

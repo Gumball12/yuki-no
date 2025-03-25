@@ -13,7 +13,7 @@ const MOCK_HEAD_REPO_SPEC = {
 const MOCK_COMMIT = {
   hash: '0123456789abcdef',
   title: 'test commit msg',
-  isoDate: '2023-01-01T12:00:00Z',
+  isoDate: '2023-01-01T12:00:00',
   fileNames: ['test.ts'],
 };
 

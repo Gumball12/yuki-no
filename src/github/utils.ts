@@ -7,3 +7,6 @@ export const extractHashFromIssue = (issue: {
   const match = issue.body?.match(COMMIT_URL_REGEX);
   return match?.[1];
 };
+
+export const getISODate = (atOrDate: string | Date) =>
+  new Date(atOrDate).toISOString().replace(/Z$/, '');

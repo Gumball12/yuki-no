@@ -4,6 +4,7 @@ import { isNotEmpty, log, splitByNewline } from '../utils';
 import type { Git } from './core';
 
 import picomatch from 'picomatch';
+import { getISODate } from 'src/github/utils';
 
 export type Commit = {
   title: string;
@@ -34,7 +35,11 @@ export const getCommits = (
 
   log('I', `getCommits :: Attempting to extract commits: ${command}`);
 
-  const result = git.exec(command);
+  const result = git.exec(command).trim();
+
+  if (result.length === 0) {
+    return [];
+  }
 
   if (!result.includes(COMMIT_SEP)) {
     throw new Error(`Invalid trackFrom commit hash: ${config.trackFrom}`);
@@ -70,7 +75,7 @@ const createCommitFromLog = ([line, ...fileNames]: string[]):
   }
 
   const [hash, title, date] = parsed;
-  const isoDate = new Date(date).toISOString();
+  const isoDate = getISODate(date);
 
   return {
     title,
