@@ -40,9 +40,6 @@ it('Should return the last release tracking comment when release tracking commen
       // Invalid format
       { body: '- prerelease: [v6.2.0-beta.0]\n- release: [v6.1.1]' },
       {
-        body: '- pre-release: [v6-beta.0](https://github.com/test/repo/releases/tag/v6-beta.0)\n- release: [v6](https://github.com/test/repo/releases/tag/v6)\n- extra: something',
-      },
-      {
         body: '- release: [v6](https://github.com/test/repo/releases/tag/v6)',
       },
       {
@@ -98,4 +95,23 @@ it('Should ignore comments with undefined body', async () => {
   const result = await getLastIssueComment(mockGitHub, MOCK_ISSUE_NUMBER);
 
   expect(result).toBe(COMMENT);
+});
+
+it('', async () => {
+  const RELEASE_AVAILABLE_CONTENT = `> This comment and the \`pending\` label appear because release-tracking is enabled.
+> To disable, remove the \`release-tracking\` option or set it to \`false\`.
+
+
+`;
+  const RELEASE_CONTENT = `- pre-release: [v6.1.0-beta.1](https://github.com/vitejs/vite/releases/tag/v6.1.0-beta.1)
+- release: [v6.1.0](https://github.com/vitejs/vite/releases/tag/v6.1.0)`;
+  const COMMENT = [RELEASE_AVAILABLE_CONTENT, RELEASE_CONTENT].join('\n');
+
+  (mockGitHub.api.issues.listComments as any).mockResolvedValue({
+    data: [{ body: COMMENT }],
+  });
+
+  const result = await getLastIssueComment(mockGitHub, MOCK_ISSUE_NUMBER);
+
+  expect(result).toBe(RELEASE_CONTENT);
 });

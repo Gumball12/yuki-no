@@ -17,7 +17,13 @@ export const getLastIssueComment = async (
     body: item.body,
   }));
 
-  return findLastReleaseComment(comments)?.body ?? '';
+  const lastReleaseComment = findLastReleaseComment(comments)?.body;
+
+  if (!lastReleaseComment) {
+    return '';
+  }
+
+  return extractReleaseComment(lastReleaseComment);
 };
 
 const findLastReleaseComment = (comments: Comment[]) =>
@@ -28,13 +34,22 @@ const isReleaseTrackingComment = ({ body }: Comment): boolean => {
     return false;
   }
 
-  const lines = body.split('\n');
+  const hasPrereleaseComment =
+    body.includes('- pre-release: none') ||
+    body.match(/- pre-release: \[.+?\]\(https:\/\/github\.com\/.+?\)/) !== null;
+  const hasReleaseComment =
+    body.includes('- release: none') ||
+    body.match(/- release: \[.+?\]\(https:\/\/github\.com\/.+?\)/) !== null;
 
-  return (
-    lines.length === 2 &&
-    lines[0].startsWith('- pre-release:') &&
-    lines[1].startsWith('- release:') &&
-    (lines[0].includes('none') || lines[0].includes('](https://')) &&
-    (lines[1].includes('none') || lines[1].includes('](https://'))
+  return hasPrereleaseComment && hasReleaseComment;
+};
+
+const extractReleaseComment = (body: string): string => {
+  const lines = body.split('\n');
+  const preReleaseComment = lines.find(line =>
+    line.startsWith('- pre-release: '),
   );
+  const releaseComment = lines.find(line => line.startsWith('- release: '));
+
+  return [preReleaseComment, releaseComment].join('\n');
 };

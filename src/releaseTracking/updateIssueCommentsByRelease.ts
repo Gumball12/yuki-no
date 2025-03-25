@@ -53,7 +53,7 @@ const createReleaseComment = (
   const relContent = `- release: ${release ? `[${release.version}](${release.url})` : 'none'}`;
 
   const releaseAvailableContent =
-    releasesAvailable &&
+    !releasesAvailable &&
     [
       `> This comment and the \`${github.releaseTrackingLabels.join(', ')}\` label appear because release-tracking is enabled.`,
       '> To disable, remove the `release-tracking` option or set it to `false`.',

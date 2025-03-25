@@ -72,7 +72,7 @@ it('Should not add a new comment if a release comment already exists', async () 
     mockGitHub,
     MOCK_ISSUE,
     MOCK_RELEASE_INFO,
-    false,
+    true,
   );
 
   expect(createIssueCommentMock).not.toHaveBeenCalled();
@@ -90,7 +90,7 @@ it('Should create a correct comment', async () => {
     mockGitHub,
     MOCK_ISSUE,
     preReleaseOnly,
-    false,
+    true,
   );
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
@@ -107,7 +107,7 @@ it('Should create a correct comment', async () => {
     },
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseOnly, false);
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseOnly, true);
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -120,7 +120,7 @@ it('Should create a correct comment', async () => {
     release: undefined,
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, noRelease, false);
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, noRelease, true);
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
@@ -146,7 +146,7 @@ it('Should not add a new comment if the same content already exists', async () =
     mockGitHub,
     MOCK_ISSUE,
     prereleaseOnly,
-    false,
+    true,
   );
 
   expect(createIssueCommentMock).not.toHaveBeenCalled();
@@ -160,7 +160,7 @@ it('Adds an informational comment when no releases exist', async () => {
     release: undefined,
   };
 
-  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseInfo, true);
+  await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseInfo, false);
 
   expect(createIssueCommentMock).toHaveBeenCalledWith(
     mockGitHub,
