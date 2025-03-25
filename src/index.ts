@@ -35,7 +35,7 @@ const start = async () => {
   await syncCommits(github, git, config);
 
   if (config.releaseTracking) {
-    await releaseTracking(github, git, config);
+    await releaseTracking(github, git);
   }
 
   const endTime = new Date();
@@ -68,7 +68,7 @@ const syncCommits = async (github: GitHub, git: Git, config: Config) => {
   );
 };
 
-const releaseTracking = async (github: GitHub, git: Git, config: Config) => {
+const releaseTracking = async (github: GitHub, git: Git) => {
   log('I', '=== Release tracking started ===');
 
   const openedIssues = await getOpenedIssues(github);
