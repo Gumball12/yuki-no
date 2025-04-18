@@ -1,4 +1,3 @@
-import { name as ACTION_NAME } from '../../../package.json';
 import { GitHub } from '../../github/core';
 import * as GetLatestModule from '../../github/getLatestSuccessfulRunISODate';
 
@@ -30,16 +29,24 @@ it('Should return undefined when there are no successful workflow runs', async (
   expect(result).toBeUndefined();
 });
 
-it('Should return the last execution time when an action with the matching workflow name exists', async () => {
+it('Should return the last execution time when an action with the matching workflow path exists', async () => {
   const EXPECTED_LAST_CREATED_AT = '2023-01-04T12:00:00';
+  const LAST_CREATED_AT_WITH_MARGIN = GetLatestModule.getSinceTimestamp({
+    run_started_at: EXPECTED_LAST_CREATED_AT,
+  } as any);
+  const PATH = 'my-path';
+
+  Object.defineProperty(mockGitHub, 'workflowPath', {
+    get: vi.fn().mockReturnValue(PATH),
+  });
 
   (mockGitHub.api.actions.listWorkflowRunsForRepo as any).mockResolvedValue({
     data: {
       workflow_runs: [
-        { name: ACTION_NAME, created_at: '2023-01-03T12:00:00' },
-        { name: 'other-action', created_at: '2023-01-03T12:00:00' },
-        { name: 'another-action', created_at: '2023-01-02T12:00:00' },
-        { name: ACTION_NAME, created_at: EXPECTED_LAST_CREATED_AT },
+        { path: PATH, created_at: '2023-01-03T12:00:00' },
+        { path: 'other-action', created_at: '2023-01-03T12:00:00' },
+        { path: 'another-action', created_at: '2023-01-02T12:00:00' },
+        { path: PATH, created_at: EXPECTED_LAST_CREATED_AT },
       ],
     },
   });
@@ -47,5 +54,5 @@ it('Should return the last execution time when an action with the matching workf
   const result =
     await GetLatestModule.getLatestSuccessfulRunISODate(mockGitHub);
 
-  expect(result).toBe(getISODate(EXPECTED_LAST_CREATED_AT));
+  expect(result).toBe(getISODate(LAST_CREATED_AT_WITH_MARGIN));
 });

@@ -19,38 +19,25 @@ const TEST_CONFIG = {
   },
   labels: ['label1', 'label2'],
   releaseTrackingLabels: ['pending'],
+  workflowPath: 'my-path',
 };
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('getter methods', () => {
-  it('ownerAndRepo should return the correct format', () => {
-    const github = new GitHub(TEST_CONFIG);
+it('getter methods', () => {
+  const github = new GitHub(TEST_CONFIG);
+  // expect(github.repoSpec).toEqual(TEST_CONFIG.repoSpec);
 
-    expect(github.ownerAndRepo).toEqual({
-      owner: TEST_CONFIG.repoSpec.owner,
-      repo: TEST_CONFIG.repoSpec.name,
-    });
-  });
-
-  it('repoSpec should return the correct value', () => {
-    const github = new GitHub(TEST_CONFIG);
-    expect(github.repoSpec).toEqual(TEST_CONFIG.repoSpec);
-  });
-
-  it('configuredLabels should return the correct value', () => {
-    const github = new GitHub(TEST_CONFIG);
-    expect(github.configuredLabels).toEqual(TEST_CONFIG.labels);
-  });
-
-  it('releaseTrackingLabels should return the correct value', () => {
-    const github = new GitHub(TEST_CONFIG);
-    expect(github.releaseTrackingLabels).toEqual(
-      TEST_CONFIG.releaseTrackingLabels,
-    );
-  });
+  expect(github.ownerAndRepo.owner).toEqual(TEST_CONFIG.repoSpec.owner);
+  expect(github.ownerAndRepo.repo).toEqual(TEST_CONFIG.repoSpec.name);
+  expect(github.repoSpec).toEqual(TEST_CONFIG.repoSpec);
+  expect(github.configuredLabels).toEqual(TEST_CONFIG.labels);
+  expect(github.releaseTrackingLabels).toEqual(
+    TEST_CONFIG.releaseTrackingLabels,
+  );
+  expect(github.workflowPath).toEqual(TEST_CONFIG.workflowPath);
 });
 
 describe('Octokit API', () => {

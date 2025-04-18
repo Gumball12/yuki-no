@@ -7,7 +7,7 @@ import { Octokit } from '@octokit/rest';
 
 type GitHubConfig = Pick<
   Config,
-  'accessToken' | 'labels' | 'releaseTrackingLabels'
+  'accessToken' | 'labels' | 'releaseTrackingLabels' | 'workflowPath'
 > & {
   repoSpec: RepoSpec;
 };
@@ -112,5 +112,9 @@ export class GitHub {
 
   get releaseTrackingLabels(): string[] {
     return this.#config.releaseTrackingLabels;
+  }
+
+  get workflowPath(): string {
+    return this.#config.workflowPath;
   }
 }

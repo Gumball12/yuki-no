@@ -31,6 +31,8 @@ export type Config = Readonly<{
   releaseTracking: boolean;
   releaseTrackingLabels: string[];
   verbose: boolean;
+
+  workflowPath: string;
 }>;
 
 export type RepoSpec = {
@@ -79,6 +81,7 @@ export const createConfig = (): Config => {
   );
 
   const verbose = rawConfig.verbose?.toLowerCase() === 'true';
+  const workflowPath = getWorkflowPath();
 
   return {
     accessToken,
@@ -93,6 +96,7 @@ export const createConfig = (): Config => {
     releaseTracking,
     releaseTrackingLabels,
     verbose,
+    workflowPath,
   };
 };
 
@@ -152,3 +156,17 @@ const extractRepoOwner = (url: string): string => {
 };
 
 const extractRepoName = (url: string): string => path.basename(url, '.git');
+
+/**
+ * Extracts workflow file path - used to filter runs from this specific workflow
+ */
+const getWorkflowPath = () => {
+  const workflowRef = process.env.GITHUB_WORKFLOW_REF;
+
+  if (!workflowRef) {
+    return '';
+  }
+
+  const workflowPath = workflowRef.split('@')[0].split('/').slice(2).join('/');
+  return workflowPath;
+};

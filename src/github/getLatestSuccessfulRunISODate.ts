@@ -1,8 +1,9 @@
-import { name } from '../../package.json';
 import { log } from '../utils';
 
 import type { GitHub } from './core';
 import { getISODate } from './utils';
+
+import type { RestEndpointMethodTypes } from '@octokit/rest';
 
 export const getLatestSuccessfulRunISODate = async (
   github: GitHub,
@@ -13,12 +14,14 @@ export const getLatestSuccessfulRunISODate = async (
   );
   const { data } = await github.api.actions.listWorkflowRunsForRepo({
     ...github.ownerAndRepo,
+    per_page: 100,
     status: 'success',
   });
 
   const latestSuccessfulRun = data.workflow_runs
+    .filter(run => run.path === github.workflowPath)
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .findLast(run => run.name === name);
+    .at(-1);
 
   if (!latestSuccessfulRun) {
     log(
@@ -28,7 +31,9 @@ export const getLatestSuccessfulRunISODate = async (
     return;
   }
 
-  const latestSuccessfulRunDate = getISODate(latestSuccessfulRun.created_at);
+  const latestSuccessfulRunDate = getISODate(
+    getSinceTimestamp(latestSuccessfulRun),
+  );
 
   log(
     'I',
@@ -36,4 +41,16 @@ export const getLatestSuccessfulRunISODate = async (
   );
 
   return latestSuccessfulRunDate;
+};
+
+type WorkflowRun =
+  RestEndpointMethodTypes['actions']['listWorkflowRunsForRepo']['response']['data']['workflow_runs'][number];
+
+export const getSinceTimestamp = (
+  run: Pick<WorkflowRun, 'run_started_at' | 'created_at'>,
+  marginSec = 30,
+): Date => {
+  const base = run.run_started_at ?? run.created_at;
+  const time = Date.parse(base) - marginSec * 1000;
+  return new Date(time);
 };

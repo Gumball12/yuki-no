@@ -49,6 +49,7 @@ describe('Basic configuration creation', () => {
       releaseTracking: false,
       releaseTrackingLabels: [yukiNoDefaults.releaseTrackingLabel],
       verbose: false,
+      workflowPath: '',
     });
   });
 
@@ -76,6 +77,8 @@ describe('Custom envs processing', () => {
       RELEASE_TRACKING: 'true',
       RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
       VERBOSE: 'true',
+      GITHUB_WORKFLOW_REF:
+        'custom-user/upstream-repo/.github/workflows/yuki-no.yml@refs/heads/main',
     };
 
     process.env = { ...process.env, ...LOCAL_TEST_ENV };
@@ -103,6 +106,7 @@ describe('Custom envs processing', () => {
       releaseTracking: true,
       releaseTrackingLabels: ['pending-release', 'released'],
       verbose: true,
+      workflowPath: '.github/workflows/yuki-no.yml',
     });
   });
 });
