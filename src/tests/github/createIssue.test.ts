@@ -56,13 +56,9 @@ it('Should create issue correctly', async () => {
     },
   });
 
-  const issueNumber = await createIssue(
-    mockGitHub,
-    MOCK_HEAD_REPO_SPEC,
-    MOCK_COMMIT,
-  );
+  const issue = await createIssue(mockGitHub, MOCK_HEAD_REPO_SPEC, MOCK_COMMIT);
 
-  expect(issueNumber).toBe(ISSUE_NUM);
+  expect(issue.number).toBe(ISSUE_NUM);
   expect(createRepoUrl).toHaveBeenCalledWith(MOCK_HEAD_REPO_SPEC);
   expect(mockGitHub.api.issues.create).toHaveBeenCalledWith({
     owner: MOCK_HEAD_REPO_SPEC.owner,

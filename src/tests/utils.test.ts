@@ -4,8 +4,10 @@ import {
   excludeFrom,
   isNotEmpty,
   log,
+  mergeArray,
   splitByNewline,
   unique,
+  uniqueWith,
 } from '../utils';
 
 import colors from 'colors/safe';
@@ -190,5 +192,96 @@ describe('unique', () => {
     const obj1 = { id: 1 };
     const obj2 = { id: 2 };
     expect(unique([obj1, obj2, obj1])).toEqual([obj1, obj2]);
+  });
+});
+
+describe('uniqueWith', () => {
+  it('Should remove duplicates from string array based on specific criteria', () => {
+    const fruits = ['apple', 'Apple', 'APPLE', 'banana', 'Banana'];
+    expect(uniqueWith(fruits, v => v.toLowerCase())).toEqual([
+      'apple',
+      'banana',
+    ]);
+  });
+
+  it('Should remove duplicates from object array based on specific property', () => {
+    const users = [
+      { id: 1, name: 'Kim' },
+      { id: 2, name: 'Lee' },
+      { id: 3, name: 'kim' },
+      { id: 4, name: 'Park' },
+    ];
+    expect(uniqueWith(users, v => v.name.toLowerCase())).toEqual([
+      { id: 1, name: 'Kim' },
+      { id: 2, name: 'Lee' },
+      { id: 4, name: 'Park' },
+    ]);
+  });
+
+  it('Should return an empty array for an empty input array', () => {
+    expect(uniqueWith<string>([], v => v)).toEqual([]);
+  });
+
+  it('Should preserve original order when there are no duplicates', () => {
+    const numbers = [3, 1, 2];
+    expect(uniqueWith(numbers, v => v.toString())).toEqual([3, 1, 2]);
+  });
+
+  it('Should keep only the first occurrence of items with the same mapped value', () => {
+    const items = [
+      { id: 1, category: 'A' },
+      { id: 2, category: 'B' },
+      { id: 3, category: 'a' },
+      { id: 4, category: 'b' },
+    ];
+    const result = uniqueWith(items, v => v.category.toLowerCase());
+    expect(result.length).toBe(2);
+    expect(result).toEqual([
+      { id: 1, category: 'A' },
+      { id: 2, category: 'B' },
+    ]);
+  });
+});
+
+describe('mergeArray', () => {
+  it('Should return a new array when the first array is empty', () => {
+    const a: number[] = [];
+    const b = [1, 2, 3];
+    const result = mergeArray(a, b);
+    expect(result).toEqual([1, 2, 3]);
+  });
+
+  it('Should return a new array when the second array is empty', () => {
+    const a = ['a', 'b', 'c'];
+    const b: string[] = [];
+    const result = mergeArray(a, b);
+    expect(result).toEqual(['a', 'b', 'c']);
+  });
+
+  it('Should merge both arrays when neither is empty', () => {
+    const a = [1, 2];
+    const b = [3, 4];
+    expect(mergeArray(a, b)).toEqual([1, 2, 3, 4]);
+  });
+
+  it('Should handle arrays of different types with proper typing', () => {
+    interface User {
+      id: number;
+      name: string;
+    }
+    const users: User[] = [{ id: 1, name: 'Kim' }];
+    const newUsers: User[] = [{ id: 2, name: 'Lee' }];
+    const result = mergeArray(users, newUsers);
+
+    expect(result).toEqual([
+      { id: 1, name: 'Kim' },
+      { id: 2, name: 'Lee' },
+    ]);
+  });
+
+  it('Should return an empty array when both inputs are empty', () => {
+    const a: string[] = [];
+    const b: string[] = [];
+    expect(mergeArray(a, b)).toEqual([]);
   });
 });

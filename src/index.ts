@@ -6,11 +6,11 @@ import { hasAnyRelease } from './git/hasAnyRelease';
 import { GitHub } from './github/core';
 import { createIssue } from './github/createIssue';
 import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
-import { getOpenedIssues } from './github/getOpenedIssues';
+import { getOpenedIssues, type Issue } from './github/getOpenedIssues';
 import { lookupCommitsInIssues } from './github/lookupCommitsInIssues';
 import { updateIssueCommentByRelease } from './releaseTracking/updateIssueCommentsByRelease';
 import { updateIssueLabelsByRelease } from './releaseTracking/updateIssueLabelsByRelease';
-import { log } from './utils';
+import { log, mergeArray, uniqueWith } from './utils';
 
 import shell from 'shelljs';
 
@@ -32,10 +32,10 @@ const start = async () => {
   const github = new GitHub({ ...config, repoSpec: config.upstreamRepoSpec });
   log('S', 'GitHub initialized');
 
-  await syncCommits(github, git, config);
+  const createdIssues = await syncCommits(github, git, config);
 
   if (config.releaseTracking) {
-    await releaseTracking(github, git);
+    await releaseTracking(github, git, createdIssues);
   }
 
   const endTime = new Date();
@@ -46,7 +46,11 @@ const start = async () => {
   );
 };
 
-const syncCommits = async (github: GitHub, git: Git, config: Config) => {
+const syncCommits = async (
+  github: GitHub,
+  git: Git,
+  config: Config,
+): Promise<Issue[]> => {
   log('I', '=== Synchronization started ===');
 
   const latestSuccessfulRun = await getLatestSuccessfulRunISODate(github);
@@ -58,26 +62,47 @@ const syncCommits = async (github: GitHub, git: Git, config: Config) => {
     `syncCommits :: Number of commits to create as issues: ${notCreatedCommits.length}`,
   );
 
+  const createdIssues: Issue[] = [];
+
   for (const notCreatedCommit of notCreatedCommits) {
-    await createIssue(github, config.headRepoSpec, notCreatedCommit);
+    const issue = await createIssue(
+      github,
+      config.headRepoSpec,
+      notCreatedCommit,
+    );
+    createdIssues.push(issue);
   }
 
   log(
     'S',
-    `syncCommits :: ${notCreatedCommits.length} issues created successfully`,
+    `syncCommits :: ${createdIssues.length} issues created successfully`,
   );
+
+  return createdIssues;
 };
 
-const releaseTracking = async (github: GitHub, git: Git) => {
+const releaseTracking = async (
+  github: GitHub,
+  git: Git,
+  createdIssues: Issue[],
+) => {
   log('I', '=== Release tracking started ===');
 
   const openedIssues = await getOpenedIssues(github);
-  const releaseInfos = openedIssues.map(issue => getRelease(git, issue.hash));
+  const releaseTrackingIssues = uniqueWith(
+    mergeArray(openedIssues, createdIssues),
+    ({ hash }) => hash,
+  );
+
+  const releaseInfos = releaseTrackingIssues.map(issue =>
+    getRelease(git, issue.hash),
+  );
   const releasesAvailable = hasAnyRelease(git);
 
   for (let ind = 0; ind < releaseInfos.length; ind++) {
     const releaseInfo = releaseInfos[ind];
-    const openedIssue = openedIssues[ind];
+    const openedIssue = releaseTrackingIssues[ind];
+
     await updateIssueLabelsByRelease(github, openedIssue, releaseInfo);
     await updateIssueCommentByRelease(
       github,
@@ -89,7 +114,7 @@ const releaseTracking = async (github: GitHub, git: Git) => {
 
   log(
     'S',
-    `releaseTracking :: Release information updated for ${openedIssues.length} issues`,
+    `releaseTracking :: Release information updated for ${releaseTrackingIssues.length} issues`,
   );
 };
 
