@@ -5,7 +5,6 @@ import { log } from '../utils';
 
 import type { GitHub } from './core';
 import type { Issue } from './getOpenedIssues';
-import { getISODate } from './utils';
 
 export const createIssue = async (
   github: GitHub,
@@ -29,7 +28,7 @@ export const createIssue = async (
   });
 
   const issueNum = data.number;
-  const isoDate = getISODate(new Date());
+  const isoDate = data.created_at;
 
   log('S', `createIssue :: Issue #${issueNum} created (${isoDate})`);
 

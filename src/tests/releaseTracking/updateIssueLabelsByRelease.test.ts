@@ -31,7 +31,7 @@ const MOCK_ISSUE: Issue = {
   body: 'Issue body',
   labels: ['bug', 'enhancement'],
   hash: 'abc123',
-  isoDate: '2023-01-01T12:00:00',
+  isoDate: '2023-01-01T12:00:00Z',
 };
 
 const MOCK_RELEASE_INFO: ReleaseInfo = {

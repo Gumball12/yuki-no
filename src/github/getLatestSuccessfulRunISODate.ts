@@ -2,7 +2,6 @@ import { name } from '../../package.json';
 import { log } from '../utils';
 
 import type { GitHub } from './core';
-import { getISODate } from './utils';
 
 export const getLatestSuccessfulRunISODate = async (
   github: GitHub,
@@ -28,7 +27,7 @@ export const getLatestSuccessfulRunISODate = async (
     return;
   }
 
-  const latestSuccessfulRunDate = getISODate(latestSuccessfulRun.created_at);
+  const latestSuccessfulRunDate = latestSuccessfulRun.created_at;
 
   log(
     'I',

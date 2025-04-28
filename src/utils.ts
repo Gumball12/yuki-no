@@ -74,7 +74,7 @@ export const isNotEmpty = <T>(value: T | undefined | null): value is T => {
   const isNotNullable = value !== undefined && value !== null;
 
   if (typeof value === 'string') {
-    return isNotNullable && value.length > 0;
+    return value.length > 0;
   }
 
   return isNotNullable;

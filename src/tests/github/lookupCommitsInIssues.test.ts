@@ -17,7 +17,7 @@ const createMockCommit = (len: number): Commit[] =>
   [...Array(len)].map((_, ind) => ({
     hash: `aaaa${ind}`.padEnd(7, '0'),
     title: `Commit ${ind}`,
-    isoDate: '2023-01-01T00:00:00',
+    isoDate: '2023-01-01T00:00:00Z',
     fileNames: [`file1-${ind}.ts`, `file2-${ind}.ts`],
   }));
 

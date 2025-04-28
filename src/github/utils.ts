@@ -9,4 +9,4 @@ export const extractHashFromIssue = (issue: {
 };
 
 export const getISODate = (atOrDate: string | Date) =>
-  new Date(atOrDate).toISOString().replace(/Z$/, '');
+  new Date(atOrDate).toISOString().replace(/\.\d{3}Z$/, 'Z');

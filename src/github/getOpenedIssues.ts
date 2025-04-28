@@ -1,7 +1,7 @@
 import { isNotEmpty, log } from '../utils';
 
 import type { GitHub } from './core';
-import { extractHashFromIssue, getISODate } from './utils';
+import { extractHashFromIssue } from './utils';
 
 export type Issue = {
   number: number;
@@ -36,7 +36,7 @@ export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
     const openedIssuesWithoutHash = data.map<Omit<Issue, 'hash'>>(item => ({
       number: item.number,
       body: item.body ?? '',
-      isoDate: getISODate(item.created_at),
+      isoDate: item.created_at,
       labels: item.labels
         .map(convGithubIssueLabelToString)
         .filter(isNotEmpty)
