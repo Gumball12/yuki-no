@@ -54,6 +54,14 @@ The entire process runs safely without affecting your local environment or git c
    ```yml
    name: yuki-no
 
+   permissions:
+     # Read external repo changes
+     contents: read
+     # Create and update issues for tracked changes
+     issues: write
+     # Get last workflow run info
+     actions: read
+
    on:
      schedule:
        - cron: '0 * * * *' # Every hour
