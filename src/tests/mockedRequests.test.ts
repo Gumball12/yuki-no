@@ -86,6 +86,20 @@ describe('GitHub API Integration Tests', () => {
         ),
       );
     });
+
+    it('Should return created_at as valid ISO date string format in issues', async () => {
+      const { data } = await octokit.issues.listForRepo({
+        ...TEST_REPO,
+        per_page: 1,
+      });
+
+      const [head] = data;
+
+      if (head) {
+        expect(head.created_at).toBeDefined();
+        expect(isValidISODateString(head.created_at)).toBe(true);
+      }
+    });
   });
 
   describe('Search API', () => {
@@ -133,5 +147,53 @@ describe('GitHub API Integration Tests', () => {
         });
       }
     });
+
+    it('Should return created_at as valid ISO date string format in workflow runs', async () => {
+      const { data } = await octokit.actions.listWorkflowRunsForRepo({
+        ...TEST_REPO,
+        status: 'success',
+        per_page: 1,
+      });
+
+      const [head] = data.workflow_runs;
+
+      if (head) {
+        expect(head.created_at).toBeDefined();
+        expect(isValidISODateString(head.created_at)).toBeTruthy();
+      }
+    });
+  });
+
+  describe('Date Format Verification', () => {
+    it('Should verify all GitHub API date formats match ISO 8601 standard (seconds precision with Z)', async () => {
+      const issuesResponse = await octokit.issues.listForRepo({
+        ...TEST_REPO,
+        per_page: 1,
+      });
+
+      const [issueHead] = issuesResponse.data;
+
+      if (issueHead) {
+        expect(isValidISODateString(issueHead.created_at)).toBe(true);
+        expect(isValidISODateString(issueHead.updated_at)).toBe(true);
+      }
+
+      const workflowsResponse = await octokit.actions.listWorkflowRunsForRepo({
+        ...TEST_REPO,
+        per_page: 1,
+      });
+
+      const [workflowHead] = workflowsResponse.data.workflow_runs;
+
+      if (workflowHead) {
+        expect(isValidISODateString(workflowHead.created_at)).toBe(true);
+        expect(isValidISODateString(workflowHead.updated_at)).toBe(true);
+      }
+    });
   });
 });
+
+const isValidISODateString = (dateString: string): boolean => {
+  const isoFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/;
+  return isoFormat.test(dateString);
+};
