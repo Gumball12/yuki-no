@@ -126,6 +126,30 @@ The entire process runs safely without affecting your local environment or git c
 | `release-tracking`        | No       | `false`                    | When enabled, Yuki-no will track releases for each commit and add comments about release status.                                |
 | `release-tracking-labels` | No       | `pending`                  | Labels for unreleased changes. Added to issues until changes are released. (newline separated)                                  |
 | `verbose`                 | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
+| `plugins`                 | No       | See below                  | YAML string to configure and enable plugins. Allows extending Yuki-no's functionality. Core plugins `core:issue-creator` and `core:release-tracker` are enabled by default. Specifying them in this list allows overriding their default options. |
+
+#### Plugin Configuration Example
+
+```yaml
+# In your .github/workflows/yuki-no.yml
+# ...
+    with:
+      # ... other inputs ...
+      plugins: |
+        - name: core:issue-creator # Default plugin, options can be overridden
+          options:
+            # customLabelPrefix: "Track:" # Example: customize issue titles or labels
+        - name: core:release-tracker # Default plugin, options can be overridden
+          options:
+            # releaseCommentHeader: "Version Info:" # Example: customize release comment
+        - name: yuki-plugin-custom-feature # Example community plugin from node_modules
+          options:
+            someKey: someValue
+            anotherKey: true
+# ...
+```
+
+More details about plugins can befound in the [Plugins section](#plugins) below and in the [Plugin Development Guide](./docs/plugins.md).
 
 #### File Pattern Examples
 
@@ -142,6 +166,22 @@ exclude: |
 ```
 
 For more information on Glob Patterns, see [Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
+
+## Plugins
+
+Yuki-no features a plugin system that allows for extending and customizing its core functionality. Plugins can hook into various stages of the synchronization and release tracking processes.
+
+There are two types of plugins:
+
+-   **Core Plugins**: These are bundled directly with Yuki-no and provide its fundamental features. Examples include `core:issue-creator` (responsible for creating issues from commits) and `core:release-tracker` (handles release tracking logic). These core plugins are enabled by default. If you list them in the `plugins` input in your workflow file, you can provide custom `options` to override their default behavior.
+-   **Community Plugins**: These are external plugins that can be developed by the community and installed in your repository (typically via npm/yarn as `node_modules`). Yuki-no can load these plugins by their package name (e.g., `yuki-plugin-my-custom-feature`).
+
+Plugins allow you to:
+- Modify existing behaviors (e.g., change how issue titles are generated).
+- Add new functionalities (e.g., send notifications to a chat service).
+- Integrate with other tools and services.
+
+For detailed information on how to develop your own plugins or understand the plugin lifecycle in depth, please refer to the [Plugin Development Guide](./docs/plugins.md).
 
 ## Contributing
 

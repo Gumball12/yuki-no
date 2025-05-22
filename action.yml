@@ -49,6 +49,16 @@ inputs:
     description: 'When enabled, Yuki-no will show all log messages including info and success messages. This is useful for debugging.'
     required: false
     default: true
+  plugins:
+    description: |
+      YAML string to configure plugins.
+      Example:
+      plugins: |
+        - name: core:issue-creator
+          options:
+            label: i18n
+        - name: yuki-plugin-some-feature
+    required: false
 
 runs:
   using: 'composite'
@@ -79,6 +89,7 @@ runs:
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
         VERBOSE: ${{ inputs.verbose }}
+        PLUGINS: ${{ inputs.plugins }}
       run: |
         cd yuki-no
         yarn install

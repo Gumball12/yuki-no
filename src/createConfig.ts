@@ -1,5 +1,5 @@
 import { assert, excludeFrom, log, splitByNewline } from './utils';
-
+import { load } from 'js-yaml';
 import path from 'node:path';
 
 type RawConfig = Readonly<{
@@ -16,6 +16,7 @@ type RawConfig = Readonly<{
   releaseTracking?: string;
   releaseTrackingLabels?: string;
   verbose?: string;
+  plugins?: string;
 }>;
 
 export type Config = Readonly<{
@@ -31,7 +32,13 @@ export type Config = Readonly<{
   releaseTracking: boolean;
   releaseTrackingLabels: string[];
   verbose: boolean;
+  plugins: PluginConfig[];
 }>;
+
+export interface PluginConfig {
+  name: string;
+  options?: { [key: string]: any };
+}
 
 export type RepoSpec = {
   owner: string;
@@ -80,6 +87,20 @@ export const createConfig = (): Config => {
 
   const verbose = rawConfig.verbose?.toLowerCase() === 'true';
 
+  let plugins: PluginConfig[] = [];
+  if (rawConfig.plugins) {
+    try {
+      const parsedPlugins = load(rawConfig.plugins);
+      if (Array.isArray(parsedPlugins) && parsedPlugins.every(isValidPluginConfig)) {
+        plugins = parsedPlugins as PluginConfig[];
+      } else {
+        log('E', 'Invalid plugin configuration. Expected an array of PluginConfig.');
+      }
+    } catch (error) {
+      log('E', `Error parsing plugin configuration: ${error instanceof Error ? error.message : error}`);
+    }
+  }
+
   return {
     accessToken,
     userName,
@@ -93,7 +114,12 @@ export const createConfig = (): Config => {
     releaseTracking,
     releaseTrackingLabels,
     verbose,
+    plugins,
   };
+};
+
+const isValidPluginConfig = (item: any): item is PluginConfig => {
+  return typeof item === 'object' && item !== null && typeof item.name === 'string';
 };
 
 const createRawConfig = (): RawConfig => {
@@ -115,6 +141,7 @@ const createRawConfig = (): RawConfig => {
     releaseTracking: process.env.RELEASE_TRACKING,
     releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
     verbose: process.env.VERBOSE,
+    plugins: process.env.PLUGINS,
   };
 };
 

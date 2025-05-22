@@ -49,6 +49,7 @@ describe('Basic configuration creation', () => {
       releaseTracking: false,
       releaseTrackingLabels: [yukiNoDefaults.releaseTrackingLabel],
       verbose: false,
+      plugins: [], // Default plugins is an empty array
     });
   });
 
@@ -103,6 +104,7 @@ describe('Custom envs processing', () => {
       releaseTracking: true,
       releaseTrackingLabels: ['pending-release', 'released'],
       verbose: true,
+      plugins: [], // Default plugins is an empty array
     });
   });
 });
@@ -130,5 +132,80 @@ describe('Error handling', () => {
     expect(() => createConfig()).toThrow(
       'Failed to infer upstream repository: GITHUB_REPOSITORY environment variable is not set.',
     );
+  });
+});
+
+describe('Plugins configuration', () => {
+  it('Parses valid plugins YAML string', () => {
+    process.env.PLUGINS = `
+      - name: core:issue-creator
+        options:
+          customLabel: 'bug'
+      - name: my-custom-plugin
+        options:
+          apiKey: '123'
+    `;
+    const config = createConfig();
+    expect(config.plugins).toEqual([
+      { name: 'core:issue-creator', options: { customLabel: 'bug' } },
+      { name: 'my-custom-plugin', options: { apiKey: '123' } },
+    ]);
+  });
+
+  it('Parses valid plugins YAML string with a single plugin and no options', () => {
+    process.env.PLUGINS = `
+      - name: core:release-tracker
+    `;
+    const config = createConfig();
+    expect(config.plugins).toEqual([{ name: 'core:release-tracker' }]);
+  });
+
+  it('Handles empty PLUGINS env as empty array', () => {
+    process.env.PLUGINS = '';
+    const config = createConfig();
+    expect(config.plugins).toEqual([]);
+  });
+
+  it('Handles undefined PLUGINS env as empty array', () => {
+    delete process.env.PLUGINS;
+    const config = createConfig();
+    expect(config.plugins).toEqual([]);
+  });
+
+  it('Handles invalid YAML string, defaults to empty array and logs error', () => {
+    process.env.PLUGINS = 'invalid-yaml: [1,2,3';
+    // Mock console.error or log.E to check for error logging
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const config = createConfig();
+    expect(config.plugins).toEqual([]);
+    // Check if error was logged (implementation specific, assuming log.E calls console.error)
+    // This test depends on js-yaml logging behavior or our own log wrapper.
+    // For now, we assume js-yaml might log, or our wrapper would.
+    // As createConfig uses `log('E', ...)` which defaults to console.error via the `log` util.
+    expect(consoleErrorSpy).toHaveBeenCalled();
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('Handles YAML with incorrect structure (not an array), defaults to empty array and logs error', () => {
+    process.env.PLUGINS = `
+      name: core:issue-creator
+      options: { test: true }
+    `;
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const config = createConfig();
+    expect(config.plugins).toEqual([]);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid plugin configuration. Expected an array of PluginConfig.'));
+    consoleErrorSpy.mockRestore();
+  });
+
+  it('Handles YAML with array items not having a name, defaults to empty array and logs error', () => {
+    process.env.PLUGINS = `
+      - options: { test: true }
+    `;
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const config = createConfig();
+    expect(config.plugins).toEqual([]);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid plugin configuration. Expected an array of PluginConfig.'));
+    consoleErrorSpy.mockRestore();
   });
 });

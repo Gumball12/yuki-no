@@ -117,50 +117,65 @@ If you find bugs not covered here, please [open an issue](https://github.com/Gum
 
 ```
 src/
-├── index.ts           # Entry point
-├── createConfig.ts    # Configuration setup and validation
-├── utils.ts           # Utility functions
-├── git/               # Git operations
-├── github/            # GitHub API interactions
-├── releaseTracking/   # Release tracking functionality
-└── tests/             # Unit tests
+├── index.ts                # Entry point, main workflow orchestration
+├── createConfig.ts         # Configuration setup and validation
+├── utils.ts                # Utility functions
+├── git/                    # Git operations
+├── github/                 # GitHub API interactions
+├── plugins/                # Plugin system
+│   ├── loader.ts           # Logic for loading core and community plugins
+│   ├── plugin.types.ts     # TypeScript interfaces for plugins
+│   └── core/               # Core plugins shipped with Yuki-no
+│       ├── issue-creator.ts  # Default issue creation logic
+│       └── release-tracker.ts # Default release tracking logic
+│           └── lib/          # Helper functions for release-tracker
+└── tests/                  # Unit tests
 ```
 
 ### Flow
 
-The diagram below shows the execution flow of Yuki-no:
+The diagram below shows the execution flow of Yuki-no, including plugin hooks:
 
 ```mermaid
-stateDiagram-v2
-  state "syncCommits" as sc
-  state "releaseTracking" as rt
-
-  state Initialize {
-    direction LR
-
-    state "createConfig" as cf
-    state "Git" as g
-    state "GitHub" as gh
-
-    cf --> g
-    g --> gh
-  }
-
-  state if_rt <<choice>>
-
-  [*] --> Initialize
-  Initialize --> sc
-
-  sc --> if_rt
-  if_rt --> [*]: releaseTracking == false
-  if_rt --> rt: releaseTracking == true
-
-  rt --> [*]
+graph TD
+    A[Start] --> B(Load Config);
+    B --> C(Load Plugins);
+    C --> D{Initialize Plugins};
+    D -- For each plugin --> E(plugin.initialize());
+    E --> F(Setup Git & GitHub);
+    F --> G{PreSync Hooks};
+    G -- For each plugin --> H(plugin.preSync());
+    H --> I{OnSync Hooks};
+    I -- For each plugin --> J(plugin.onSync());
+    J --> K[Collect Issues];
+    K --> L{PostSync Hooks};
+    L -- For each plugin --> M(plugin.postSync());
+    M --> N{Release Tracking Enabled?};
+    N -- Yes --> O{PreReleaseTracking Hooks};
+    O -- For each plugin --> P(plugin.preReleaseTracking());
+    P --> Q{OnReleaseTracking Hooks};
+    Q -- For each plugin --> R(plugin.onReleaseTracking());
+    R --> S{PostReleaseTracking Hooks};
+    S -- For each plugin --> T(plugin.postReleaseTracking());
+    T --> U;
+    N -- No --> U;
+    U{OnEnd Hooks} -- For each plugin --> V(plugin.onEnd());
+    V --> W[End];
 ```
 
-1. **Initialize**: Sets up the configuration and initializes Git and GitHub clients
-2. **syncCommits**: Synchronizes commits from the head repository to issues
-3. **releaseTracking**: When enabled, updates issues with release information
+1. **Load Config**: Yuki-no starts by loading its configuration from environment variables and workflow inputs.
+2. **Load Plugins**: It then loads all configured plugins (both core and community) using `src/plugins/loader.ts`.
+3. **Initialize Plugins**: Each loaded plugin's `initialize` hook is called.
+4. **Git & GitHub Setup**: Git and GitHub clients are initialized.
+5. **`preSync` Hooks**: Each plugin's `preSync` hook is called.
+6. **`onSync` Hooks**: Each plugin's `onSync` hook is called. The results (arrays of `Issue` objects) are collected. This is where `core:issue-creator` does its main work.
+7. **`postSync` Hooks**: Each plugin's `postSync` hook is called, receiving all issues created in the `onSync` phase.
+8. **Release Tracking Phase** (if `release-tracking` is enabled):
+    a. **`preReleaseTracking` Hooks**: Each plugin's `preReleaseTracking` hook is called.
+    b. **`onReleaseTracking` Hooks**: Each plugin's `onReleaseTracking` hook is called. This is where `core:release-tracker` does its main work.
+    c. **`postReleaseTracking` Hooks**: Each plugin's `postReleaseTracking` hook is called.
+9. **`onEnd` Hooks**: Finally, each plugin's `onEnd` hook is called.
+10. **End**: The process completes.
 
 ## Testing
 
@@ -198,6 +213,29 @@ If you need help:
 
 1. Check existing issues and docs
 2. Open a new issue with a clear description
+
+## Contributing to the Plugin System
+
+We welcome contributions to enhance Yuki-no's plugin system and its core plugins!
+
+### Developing New Core Plugins
+
+If you have an idea for a new feature that could be a core plugin:
+1.  Please open an issue first to discuss your idea and how it fits into the Yuki-no ecosystem.
+2.  Follow the general development workflow outlined above.
+3.  Place new core plugin code within the `src/plugins/core/` directory.
+4.  Ensure your plugin adheres to the `Plugin` interface and best practices described in the [Plugin Development Guide](./docs/plugins.md).
+5.  Add appropriate tests for your new plugin.
+
+### Improving Existing Plugins or the Plugin Loader
+
+Improvements to existing core plugins or the plugin loading mechanism (`src/plugins/loader.ts`) are also welcome.
+1.  For significant changes, consider opening an issue to discuss the proposed changes.
+2.  Follow the standard development and testing procedures.
+
+### Developing Community Plugins
+
+While community plugins are not part of the core Yuki-no repository, if you develop a useful plugin, please let us know! We might consider listing it in our documentation or linking to it if it provides significant value to users.
 
 ## License
 
