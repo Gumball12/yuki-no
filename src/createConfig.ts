@@ -15,6 +15,7 @@ type RawConfig = Readonly<{
   labels?: string;
   releaseTracking?: string;
   releaseTrackingLabels?: string;
+  plugins?: string;
   verbose?: string;
 }>;
 
@@ -30,6 +31,7 @@ export type Config = Readonly<{
   labels: string[];
   releaseTracking: boolean;
   releaseTrackingLabels: string[];
+  plugins: string[];
   verbose: boolean;
 }>;
 
@@ -70,6 +72,8 @@ export const createConfig = (): Config => {
   const exclude = splitByNewline(rawConfig.exclude);
   const labels = splitByNewline(rawConfig.labels ?? defaults.label).sort();
 
+  const plugins = splitByNewline(rawConfig.plugins);
+
   const releaseTracking = rawConfig.releaseTracking?.toLowerCase() === 'true';
   const releaseTrackingLabels = excludeFrom(
     splitByNewline(
@@ -92,6 +96,7 @@ export const createConfig = (): Config => {
     labels,
     releaseTracking,
     releaseTrackingLabels,
+    plugins,
     verbose,
   };
 };
@@ -114,6 +119,7 @@ const createRawConfig = (): RawConfig => {
     labels: process.env.LABELS,
     releaseTracking: process.env.RELEASE_TRACKING,
     releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
+    plugins: process.env.PLUGINS,
     verbose: process.env.VERBOSE,
   };
 };

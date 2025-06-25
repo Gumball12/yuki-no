@@ -17,6 +17,7 @@
     "@octokit/plugin-retry": "^7.2.0",
     "@octokit/plugin-throttling": "^9.6.0",
     "@octokit/rest": "^21.0.2",
+    "@actions/github": "^6.1.0",
     "colors": "^1.4.0",
     "picomatch": "^4.0.2",
     "queue": "^7.0.0",

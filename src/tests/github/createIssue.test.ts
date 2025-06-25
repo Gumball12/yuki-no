@@ -1,4 +1,3 @@
-import { createRepoUrl } from '../../git/utils';
 import { GitHub } from '../../github/core';
 import { createIssue } from '../../github/createIssue';
 
@@ -33,13 +32,6 @@ vi.mock('../../github/core', () => ({
     },
   })),
 }));
-vi.mock('../../git/utils', () => ({
-  createRepoUrl: vi
-    .fn()
-    .mockImplementation(
-      repoSpec => `https://github.com/${repoSpec.owner}/${repoSpec.name}`,
-    ),
-}));
 
 const mockGitHub = new GitHub({} as any);
 
@@ -56,20 +48,20 @@ it('Should create issue correctly', async () => {
     },
   });
 
-  const issue = await createIssue(mockGitHub, MOCK_HEAD_REPO_SPEC, MOCK_COMMIT);
+  const meta = {
+    title: MOCK_COMMIT.title,
+    body: `body`,
+    labels: MOCK_LABELS,
+  };
+
+  const issue = await createIssue(mockGitHub, MOCK_COMMIT, meta);
 
   expect(issue.number).toBe(ISSUE_NUM);
-  expect(createRepoUrl).toHaveBeenCalledWith(MOCK_HEAD_REPO_SPEC);
   expect(mockGitHub.api.issues.create).toHaveBeenCalledWith({
     owner: MOCK_HEAD_REPO_SPEC.owner,
     repo: MOCK_HEAD_REPO_SPEC.name,
-    title: MOCK_COMMIT.title,
-    body: expect.stringContaining(
-      [
-        `New updates on head repo.`,
-        `https://github.com/${MOCK_HEAD_REPO_SPEC.owner}/${MOCK_HEAD_REPO_SPEC.name}/commit/${MOCK_COMMIT.hash}`,
-      ].join('\r\n'),
-    ),
-    labels: MOCK_LABELS,
+    title: meta.title,
+    body: meta.body,
+    labels: meta.labels,
   });
 });

@@ -1,30 +1,25 @@
-import type { RepoSpec } from '../createConfig';
 import type { Commit } from '../git/getCommits';
-import { createRepoUrl } from '../git/utils';
 import { log } from '../utils';
+import type { IssueMeta } from '../plugins/core';
 
 import type { GitHub } from './core';
 import type { Issue } from './getOpenedIssues';
 
 export const createIssue = async (
   github: GitHub,
-  headRepoSpec: RepoSpec,
   commit: Commit,
+  meta: IssueMeta,
 ): Promise<Issue> => {
   log(
     'I',
     `createIssue :: Attempting to create issue (${commit.hash.substring(0, 7)})`,
   );
 
-  const commitUrl = `${createRepoUrl(headRepoSpec)}/commit/${commit.hash}`;
-  const body = `New updates on head repo.\r\n${commitUrl}`;
-  const labels = github.configuredLabels;
-
   const { data } = await github.api.issues.create({
     ...github.ownerAndRepo,
-    title: commit.title,
-    body,
-    labels,
+    title: meta.title,
+    body: meta.body,
+    labels: meta.labels,
   });
 
   const issueNum = data.number;
@@ -33,10 +28,10 @@ export const createIssue = async (
   log('S', `createIssue :: Issue #${issueNum} created (${isoDate})`);
 
   return {
-    body,
+    body: meta.body,
     hash: commit.hash,
     isoDate,
-    labels,
+    labels: meta.labels,
     number: issueNum,
   };
 };

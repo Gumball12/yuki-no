@@ -18,7 +18,8 @@
 
     "baseUrl": ".",
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "yuki-no-plugin-example": ["src/plugins/example/index.ts"]
     }
   },
   "include": ["src", "tests"]

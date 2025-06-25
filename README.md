@@ -146,6 +146,7 @@ For more information on Glob Patterns, see [Picomatch docs](https://github.com/m
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
+For plugin development, see [PLUGINS.md](PLUGINS.md).
 
 ## License
 
