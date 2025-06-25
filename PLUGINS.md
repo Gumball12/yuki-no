@@ -14,27 +14,35 @@ flowchart TD
 ```
 
 ### `function onInit(ctx: YukiNoContext): Promise<void> | void`
+
 Called when the action starts.
 
 ### `function onBeforeCompare(ctx: YukiNoContext): Promise<void> | void`
+
 Runs before commit comparison.
 
 ### `function onAfterCompare(ctx: YukiNoContext & { commits: Commit[] }): Promise<void> | void`
+
 Called after comparing commits with the list of new commits.
 
 ### `function onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta }): Promise<void> | void`
+
 Invoked before each issue is created. Plugins may mutate `meta` to customize the issue.
 
 ### `function onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult }): Promise<void> | void`
+
 Runs after each issue is created.
 
 ### `function onExit(ctx: YukiNoContext & { success: boolean }): Promise<void> | void`
+
 Called before the action exits.
 
 ### `function onError(ctx: YukiNoContext & { error: Error }): Promise<void> | void`
+
 Called whenever an error occurs.
 
 ### `YukiNoContext`
+
 ```ts
 {
   octokit: Octokit;

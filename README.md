@@ -42,7 +42,6 @@ The entire process runs safely without affecting your local environment or git c
 1. **Required**: Configure workflow permissions
 
    ![settings](./docs/settings.webp)
-
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
    - Save the changes
