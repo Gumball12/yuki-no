@@ -15,7 +15,7 @@ Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes b
 - Automatically tracks commits from a head repository
 - Creates issues for new changes
 - Filters changes based on file paths (`include` and `exclude` options)
-- Supports custom labels for issues (`label` option)
+- Supports custom labels for issues (`labels` option)
 - Tracks release status with pre-release and release information (`release-tracking` option)
 - Manages release tracking labels for unreleased changes (`release-tracking-labels` option)
 
