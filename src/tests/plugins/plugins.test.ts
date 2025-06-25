@@ -38,4 +38,17 @@ describe('plugin loading and hooks', () => {
     expect(spies.onAfterCreateIssue).toHaveBeenCalled();
     expect(spies.onExit).toHaveBeenCalled();
   });
+
+  it('throws error for plugin without default export', async () => {
+    vi.doMock('test-invalid-plugin', () => ({
+      default: undefined,
+      someOtherExport: 'test',
+    }));
+
+    await expect(loadPlugins(['test-invalid-plugin'])).rejects.toThrow(
+      'Invalid plugin',
+    );
+
+    vi.doUnmock('test-invalid-plugin');
+  });
 });

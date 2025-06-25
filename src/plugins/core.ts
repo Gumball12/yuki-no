@@ -42,16 +42,14 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   const plugins: YukiNoPlugin[] = [];
 
   for (const name of names) {
-    try {
-      const mod = await import(name);
-      const plugin = mod.default as YukiNoPlugin | undefined;
-      if (!plugin) {
-        throw new Error('Invalid plugin');
-      }
-      plugins.push(plugin);
-    } catch {
-      throw new Error(`Failed to load plugin: ${name}`);
+    const mod = await import(name);
+    const plugin = mod.default as YukiNoPlugin | undefined;
+
+    if (!plugin) {
+      throw new Error('Invalid plugin');
     }
+
+    plugins.push(plugin);
   }
 
   return plugins;
