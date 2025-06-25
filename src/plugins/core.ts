@@ -1,6 +1,8 @@
-import type { Octokit, Context } from '@actions/github';
 import type { Commit } from '../git/getCommits';
 import type { Issue } from '../github/getOpenedIssues';
+
+import type { Context } from '@actions/github/lib/context';
+import type { Octokit } from '@octokit/rest';
 
 export type YukiNoContext = {
   octokit: Octokit;
