@@ -78,6 +78,21 @@ it('Should not add a new comment if a release comment already exists', async () 
   expect(createIssueCommentMock).not.toHaveBeenCalled();
 });
 
+it('Should handle release comment without version prefix', async () => {
+  getLastIssueCommentMock.mockResolvedValue(
+    '- release: [0.9.0](https://github.com/...)',
+  );
+
+  await updateIssueCommentByRelease(
+    mockGitHub,
+    MOCK_ISSUE,
+    MOCK_RELEASE_INFO,
+    true,
+  );
+
+  expect(createIssueCommentMock).not.toHaveBeenCalled();
+});
+
 it('Should create a correct comment', async () => {
   getLastIssueCommentMock.mockResolvedValue('');
 

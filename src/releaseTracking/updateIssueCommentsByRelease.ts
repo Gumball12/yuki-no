@@ -12,7 +12,7 @@ export const updateIssueCommentByRelease = async (
   releasesAvailable: boolean,
 ): Promise<void> => {
   const comment = await getLastIssueComment(github, issue.number);
-  const isReleased = comment.includes('- release: [v');
+  const isReleased = comment.includes('- release: [');
 
   log(
     'I',
