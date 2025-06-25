@@ -1,6 +1,6 @@
 import type { Commit } from '../git/getCommits';
-import { log } from '../utils';
 import type { IssueMeta } from '../plugins/core';
+import { log } from '../utils';
 
 import type { GitHub } from './core';
 import type { Issue } from './getOpenedIssues';

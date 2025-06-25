@@ -1,5 +1,6 @@
 import { loadPlugins } from '../../plugins/core';
-import { describe, it, expect, vi } from 'vitest';
+
+import { describe, expect, it, vi } from 'vitest';
 
 describe('plugin loading and hooks', () => {
   it('loads plugin and calls hooks', async () => {
@@ -18,8 +19,16 @@ describe('plugin loading and hooks', () => {
     await plugin.onInit?.(ctx);
     await plugin.onBeforeCompare?.(ctx);
     await plugin.onAfterCompare?.({ ...ctx, commits: [] });
-    await plugin.onBeforeCreateIssue?.({ ...ctx, commit: {} as any, meta: {} as any });
-    await plugin.onAfterCreateIssue?.({ ...ctx, commit: {} as any, result: {} as any });
+    await plugin.onBeforeCreateIssue?.({
+      ...ctx,
+      commit: {} as any,
+      meta: {} as any,
+    });
+    await plugin.onAfterCreateIssue?.({
+      ...ctx,
+      commit: {} as any,
+      result: {} as any,
+    });
     await plugin.onExit?.({ ...ctx, success: true });
 
     expect(spies.onInit).toHaveBeenCalled();

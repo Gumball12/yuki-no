@@ -21,9 +21,15 @@ export type IssueResult = Issue;
 export interface YukiNoPluginHooks {
   onInit?(ctx: YukiNoContext): Promise<void> | void;
   onBeforeCompare?(ctx: YukiNoContext): Promise<void> | void;
-  onAfterCompare?(ctx: YukiNoContext & { commits: Commit[] }): Promise<void> | void;
-  onBeforeCreateIssue?(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta }): Promise<void> | void;
-  onAfterCreateIssue?(ctx: YukiNoContext & { commit: Commit; result: IssueResult }): Promise<void> | void;
+  onAfterCompare?(
+    ctx: YukiNoContext & { commits: Commit[] },
+  ): Promise<void> | void;
+  onBeforeCreateIssue?(
+    ctx: YukiNoContext & { commit: Commit; meta: IssueMeta },
+  ): Promise<void> | void;
+  onAfterCreateIssue?(
+    ctx: YukiNoContext & { commit: Commit; result: IssueResult },
+  ): Promise<void> | void;
   onExit?(ctx: YukiNoContext & { success: boolean }): Promise<void> | void;
   onError?(ctx: YukiNoContext & { error: Error }): Promise<void> | void;
 }
@@ -43,7 +49,7 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
         throw new Error('Invalid plugin');
       }
       plugins.push(plugin);
-    } catch (e) {
+    } catch {
       throw new Error(`Failed to load plugin: ${name}`);
     }
   }

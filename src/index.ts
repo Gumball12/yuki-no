@@ -3,23 +3,23 @@ import { Git } from './git/core';
 import { getCommits } from './git/getCommits';
 import { getRelease } from './git/getRelease';
 import { hasAnyRelease } from './git/hasAnyRelease';
+import { createRepoUrl } from './git/utils';
 import { GitHub } from './github/core';
 import { createIssue } from './github/createIssue';
-import { createRepoUrl } from './git/utils';
 import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
 import { getOpenedIssues, type Issue } from './github/getOpenedIssues';
 import { lookupCommitsInIssues } from './github/lookupCommitsInIssues';
+import {
+  type IssueMeta,
+  loadPlugins,
+  type YukiNoContext,
+  type YukiNoPlugin,
+} from './plugins/core';
 import { updateIssueCommentByRelease } from './releaseTracking/updateIssueCommentsByRelease';
 import { updateIssueLabelsByRelease } from './releaseTracking/updateIssueLabelsByRelease';
 import { log, mergeArray, uniqueWith } from './utils';
-import {
-  loadPlugins,
-  type YukiNoPlugin,
-  type YukiNoContext,
-  type IssueMeta,
-} from './plugins/core';
-import { context as actionsContext } from '@actions/github';
 
+import { context as actionsContext } from '@actions/github';
 import shell from 'shelljs';
 
 shell.config.silent = true;

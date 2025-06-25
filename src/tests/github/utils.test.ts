@@ -113,7 +113,6 @@ describe('getISODate', () => {
     const originalDate = new Date(Date.UTC(2025, 3, 28, 12, 30, 45));
     const dateString = originalDate.toISOString().replace('Z', '');
 
-
     expect(getISODate(dateString)).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
     );
