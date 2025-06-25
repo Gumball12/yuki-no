@@ -113,9 +113,6 @@ describe('getISODate', () => {
     const originalDate = new Date(Date.UTC(2025, 3, 28, 12, 30, 45));
     const dateString = originalDate.toISOString().replace('Z', '');
 
-    console.log('Date string:', dateString);
-    console.log('Result:', getISODate(dateString));
-    console.log('Timezone offset (minutes):', new Date().getTimezoneOffset());
 
     expect(getISODate(dateString)).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/,
