@@ -7,7 +7,6 @@
     "verbatimModuleSyntax": true,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true,
     "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,
