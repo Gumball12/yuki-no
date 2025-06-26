@@ -17,8 +17,8 @@
   },
   "homepage": "https://github.com/Gumball12/yuki-no#readme",
   "type": "module",
-  "main": "dist/types.d.ts",
-  "types": "dist/types.d.ts",
+  "main": "dist/public.d.ts",
+  "types": "dist/public.d.ts",
   "files": [
     "dist"
   ],

@@ -14,6 +14,6 @@
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true
   },
-  "include": ["src/types.ts"],
+  "include": ["src/public.ts"],
   "exclude": ["src/tests/**/*", "**/*.test.ts"]
 }

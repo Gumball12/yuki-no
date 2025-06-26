@@ -41,10 +41,11 @@ const start = async () => {
   log('S', 'GitHub initialized');
 
   const plugins = await loadPlugins(config.plugins);
+  const rawInputsEnv = process.env.RAW_INPUTS || '{}';
   const pluginCtx: YukiNoContext = {
     octokit: github.api,
     context: actionsContext,
-    inputs: process.env as Record<string, string>,
+    inputs: JSON.parse(rawInputsEnv) as Record<string, string>,
   };
 
   let success = false;
