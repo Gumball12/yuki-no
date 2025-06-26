@@ -93,7 +93,9 @@ type IssueMeta = {
 
 ### Installing Types
 
-Install yuki-no as a dependency to get TypeScript types:
+[![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@gumball12/yuki-no)
+
+Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a dependency to get TypeScript types:
 
 ```bash
 npm install @gumball12/yuki-no
