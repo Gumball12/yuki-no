@@ -49,6 +49,7 @@ it('Should return an empty array when all commits are already registered in issu
   expect(result).toEqual([]);
   expect(mockGitHub.api.search.issuesAndPullRequests).toHaveBeenCalledWith({
     q: `repo:test-owner/test-repo type:issue (${commits[0].hash} in:body OR ${commits[1].hash} in:body)`,
+    advanced_search: true,
   });
 });
 
@@ -73,5 +74,6 @@ it('Should return only unregistered commits', async () => {
 
   expect(mockGitHub.api.search.issuesAndPullRequests).toHaveBeenCalledWith({
     q: `repo:test-owner/test-repo type:issue (${commits[0].hash} in:body OR ${commits[1].hash} in:body OR ${commits[2].hash} in:body)`,
+    advanced_search: true,
   });
 });

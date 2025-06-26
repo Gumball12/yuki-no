@@ -109,9 +109,14 @@ describe('GitHub API Integration Tests', () => {
 
   describe('Search API', () => {
     it('Should search issues with the expected structure', async () => {
+      // Using search.issuesAndPullRequests for testing GitHub's search functionality
+      // This API is more efficient for finding specific issues based on content/metadata
+      // rather than listing all issues and filtering client-side
+      // Using advanced_search: true to prepare for 2025-09-04 API changes
       const { data } = await octokit.search.issuesAndPullRequests({
         q: `repo:${TEST_REPO.owner}/${TEST_REPO.repo} type:issue`,
         per_page: 1,
+        advanced_search: true,
       });
 
       expect(data).toMatchObject({

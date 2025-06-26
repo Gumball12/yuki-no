@@ -31,7 +31,17 @@ export const lookupCommitsInIssues = async (
   // For-loop to prevent parallel API calls
   for (let ind = 0; ind < searchQueries.length; ind++) {
     const q = searchQueries[ind];
-    const { data } = await github.api.search.issuesAndPullRequests({ q });
+
+    // Using search.issuesAndPullRequests instead of issues.listForRepo for performance:
+    // - Server-side filtering: only returns issues that contain specific commit hashes in their body
+    // - Avoids downloading thousands of irrelevant issues when we only need a few matches
+    // - Much more efficient than client-side filtering of all repository issues
+    // Using advanced_search: true to prepare for 2025-09-04 API deprecation
+    const { data } = await github.api.search.issuesAndPullRequests({
+      q,
+      advanced_search: true,
+    });
+
     const findHashes = unique(
       data.items.map(extractHashFromIssue).filter(isNotEmpty),
     );
