@@ -69,6 +69,7 @@ runs:
 
     - name: Run Yuki-no
       env:
+        RAW_INPUTS: ${{ toJson(inputs) }}
         ACCESS_TOKEN: ${{ inputs.access-token }}
         USER_NAME: ${{ inputs.username }}
         EMAIL: ${{ inputs.email }}

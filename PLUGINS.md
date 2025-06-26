@@ -43,6 +43,40 @@ graph TD
     style N fill:#fff3e0
 ```
 
+### Input Helpers
+
+Yuki-no exposes simple helpers for parsing raw inputs in your plugin:
+
+```ts
+import { getInput, getBooleanInput, getMultilineInput } from 'yuki-no';
+
+const token = getInput(ctx.inputs, 'my-token');
+const debug = getBooleanInput(ctx.inputs, 'debug');
+const paths = getMultilineInput(ctx.inputs, 'paths');
+```
+
+### Passing Inputs to Plugins
+
+Plugins can receive custom values using the action's `with` block just like any other GitHub Action input. These raw values are exposed on `ctx.inputs` for each plugin. Use the helpers above to parse them as needed.
+
+Example workflow configuration:
+
+```yaml
+- uses: Gumball12/yuki-no@v1
+  with:
+    plugins: |
+      ./plugins/example/index.js
+    my-plugin-input: ${{ secrets.EXAMPLE_TOKEN }}
+```
+
+Inside your plugin you can access the value:
+
+```ts
+import { getInput } from 'yuki-no';
+
+const token = getInput(ctx.inputs, 'my-plugin-input');
+```
+
 ### Hook Reference
 
 #### `onInit(ctx: YukiNoContext)`
@@ -79,7 +113,7 @@ Called when any error occurs during execution.
 type YukiNoContext = {
   octokit: Octokit; // GitHub API client (@octokit/rest)
   context: Context; // GitHub Actions context (@actions/github/lib/context)
-  inputs: Record<string, string>; // Action input parameters
+  inputs: Record<string, string>; // Raw `with` values from the workflow
 };
 
 type IssueMeta = {
