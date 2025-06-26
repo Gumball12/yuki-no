@@ -103,7 +103,7 @@ yarn add yuki-no
 
 ### Creating a Plugin
 
-> [!INFO]
+> [!NOTE]
 > Every plugin **must** export a default object implementing any of the lifecycle hooks below.
 
 Create a plugin by implementing the `YukiNoPlugin` interface:
