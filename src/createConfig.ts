@@ -1,5 +1,5 @@
-import { assert, excludeFrom, log } from './utils';
 import { getBooleanInput, getMultilineInput } from './inputUtils';
+import { assert, excludeFrom, log } from './utils';
 
 import path from 'node:path';
 

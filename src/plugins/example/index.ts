@@ -1,5 +1,5 @@
-import type { YukiNoPlugin } from '../core';
 import { getInput } from '../../inputUtils';
+import type { YukiNoPlugin } from '../core';
 
 const plugin: YukiNoPlugin = {
   name: 'yuki-no-example',

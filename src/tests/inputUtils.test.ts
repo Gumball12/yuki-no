@@ -1,9 +1,6 @@
-import { describe, it, expect } from 'vitest';
-import {
-  getInput,
-  getBooleanInput,
-  getMultilineInput,
-} from '../inputUtils';
+import { getBooleanInput, getInput, getMultilineInput } from '../inputUtils';
+
+import { describe, expect, it } from 'vitest';
 
 const INPUTS = {
   token: 'abc123',
