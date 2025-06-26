@@ -48,7 +48,7 @@ graph TD
 Yuki-no exposes simple helpers for parsing raw inputs in your plugin:
 
 ```ts
-import { getInput, getBooleanInput, getMultilineInput } from 'yuki-no';
+import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
 
 const token = getInput(ctx.inputs, 'my-token');
 const debug = getBooleanInput(ctx.inputs, 'debug');
@@ -76,6 +76,8 @@ import { getInput } from 'yuki-no';
 
 const token = getInput(ctx.inputs, 'my-plugin-input');
 ```
+
+For usage reference, see the [example plugin](./src/plugins/example/index.ts).
 
 ### Hook Reference
 
