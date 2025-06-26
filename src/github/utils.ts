@@ -1,5 +1,5 @@
 const COMMIT_URL_REGEX =
-  /https:\/\/github\.com\/[^\/]+\/[^\/]+\/commit\/([a-f0-9]{7,40})/;
+  /https:\/\/github\.com\/[^/]+\/[^/]+\/commit\/([a-f0-9]{7,40})/;
 
 export const extractHashFromIssue = (issue: {
   body?: string;

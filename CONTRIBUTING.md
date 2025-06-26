@@ -199,6 +199,33 @@ If you need help:
 1. Check existing issues and docs
 2. Open a new issue with a clear description
 
+## Publishing (Maintainers Only)
+
+This project serves dual purposes: a GitHub Action and an npm package for TypeScript types.
+
+### Release Types
+
+For publishing TypeScript types to npm:
+
+1. Update version in `package.json`
+2. Commit and push changes
+3. Create GitHub Release with tag `npm-v1.x.x` (e.g., `npm-v1.0.0`)
+4. GitHub Actions automatically builds types and publishes to npm
+5. Plugin developers can install: `npm install yuki-no`
+
+### Manual Publishing
+
+If automatic publishing fails, you can manually publish:
+
+```bash
+npm publish
+```
+
+**Prerequisites:**
+
+- `NPM_TOKEN` secret configured in GitHub repository settings
+- npm publishing permissions for the `yuki-no` package
+
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.

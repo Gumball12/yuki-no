@@ -30,7 +30,6 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 1. Add Labels to Translation Issues for Yuki-no Tracking
 
    <img width="400" src="./docs/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
-
    - Yuki-no identifies which issues it manages through labels
    - Go to GitHub and create labels like `sync`
    - Add these labels to your existing translation issues
@@ -39,13 +38,11 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 2. Create Yuki-no Action Configuration File
 
    <img width="350" src="./docs/create-an-action.webp" title="Create an Action" alt="Create an Action">
-
    - Remove any existing sync action files (like Ryu-Cho)
    - Create a new Yuki-no config file by following the [Usage](https://github.com/Gumball12/yuki-no?tab=readme-ov-file#usage) section
    - If moving from Ryu-Cho, check the [Yuki-no Options vs Ryu-Cho Options](#yuki-no-options-vs-ryu-cho-options) section below
 
 3. Run the Action
-
    - Wait for the next scheduled run, or trigger it manually if you enabled `on.workflow_dispatch` (see [GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow))
    - The first run may take some time as it processes all commits after the `track-from` hash
    - Check your translation issues after it finishes

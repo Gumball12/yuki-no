@@ -1,19 +1,29 @@
 {
   "name": "yuki-no",
+  "version": "1.0.0",
   "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
   "repository": {
     "url": "https://github.com/Gumball12/yuki-no.git",
     "type": "git"
   },
+  "type": "module",
+  "main": "dist/types.d.ts",
+  "types": "dist/types.d.ts",
+  "files": [
+    "dist/**/*.d.ts"
+  ],
   "packageManager": "yarn@1.22.22",
   "scripts": {
     "start": "tsx src/index.ts",
     "start:dev": "tsx --env-file=.env src/index.ts",
+    "build:types": "rm -rf dist && tsc -p tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "lint": "yarn type-check && prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "yarn lint && vitest --coverage --run"
+    "test": "yarn lint && vitest --coverage --run",
+    "prepublishOnly": "yarn build:types && cp README.npm.md README.md"
   },
   "dependencies": {
+    "@actions/github": "^6.0.1",
     "@octokit/plugin-retry": "^7.2.0",
     "@octokit/plugin-throttling": "^9.6.0",
     "@octokit/rest": "^21.0.2",
@@ -34,6 +44,7 @@
     "@vitest/coverage-v8": "2.1.8",
     "@vitest/ui": "^2.1.8",
     "prettier": "^3.4.2",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8"
   }
 }

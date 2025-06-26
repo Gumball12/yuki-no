@@ -3,23 +3,17 @@
     "lib": ["ESNext"],
     "module": "ESNext",
     "target": "ESNext",
-
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-    "noEmit": true,
-
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
-
-    "esModuleInterop": true,
-    "noUnusedLocals": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "yuki-no-plugin-example": ["src/plugins/example/index.ts"]
-    }
+    "esModuleInterop": true
   },
-  "include": ["src", "tests"]
+  "include": ["src/types.ts"],
+  "exclude": ["src/tests/**/*", "**/*.test.ts"]
 }

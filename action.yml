@@ -32,6 +32,9 @@ inputs:
   exclude:
     description: 'Glob patterns for files to exclude. Take precedence over include patterns.'
     required: false
+  plugins:
+    description: 'Names of Yuki-no plugins to load (newline separated).'
+    required: false
   labels:
     description: 'Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. Defaults to "sync".'
     required: false
@@ -75,6 +78,7 @@ runs:
         TRACK_FROM: ${{ inputs.track-from }}
         INCLUDE: ${{ inputs.include }}
         EXCLUDE: ${{ inputs.exclude }}
+        PLUGINS: ${{ inputs.plugins }}
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}

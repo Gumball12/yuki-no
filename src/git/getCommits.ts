@@ -1,10 +1,10 @@
 import type { Config } from '../createConfig';
+import { getISODate } from '../github/utils';
 import { isNotEmpty, log, splitByNewline } from '../utils';
 
 import type { Git } from './core';
 
 import picomatch from 'picomatch';
-import { getISODate } from 'src/github/utils';
 
 export type Commit = {
   title: string;
