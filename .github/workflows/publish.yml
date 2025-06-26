@@ -42,6 +42,6 @@ jobs:
         run: yarn test
 
       - name: Publish to NPM
-        run: npm publish --provenance
+        run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

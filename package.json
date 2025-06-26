@@ -1,16 +1,26 @@
 {
   "name": "yuki-no",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
   "repository": {
-    "url": "https://github.com/Gumball12/yuki-no.git",
-    "type": "git"
+    "type": "git",
+    "url": "git+https://github.com/Gumball12/yuki-no.git"
   },
+  "author": {
+    "name": "Gumball12",
+    "email": "to@shj.rip",
+    "url": "https://github.com/Gumball12"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gumball12/yuki-no/issues"
+  },
+  "homepage": "https://github.com/Gumball12/yuki-no#readme",
   "type": "module",
   "main": "dist/types.d.ts",
   "types": "dist/types.d.ts",
   "files": [
-    "dist/**/*.d.ts"
+    "dist"
   ],
   "packageManager": "yarn@1.22.22",
   "scripts": {
