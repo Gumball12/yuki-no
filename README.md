@@ -42,6 +42,7 @@ The entire process runs safely without affecting your local environment or git c
 1. **Required**: Configure workflow permissions
 
    ![settings](./docs/settings.webp)
+
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
    - Save the changes
@@ -141,6 +142,28 @@ exclude: |
 ```
 
 For more information on Glob Patterns, see [Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
+
+## Plugins
+
+Yuki-no supports a plugin system that allows you to extend its functionality with custom logic during various stages of the tracking process.
+
+### Using Plugins
+
+Add the `plugins` option to your workflow configuration:
+
+```yml
+- uses: Gumball12/yuki-no@v1
+  with:
+    # ... other options ...
+
+    # [Optional]
+    # List of plugin package names to load
+    plugins: |
+      yuki-no-plugin-do-something
+      @org/yuki-no-plugin-another
+```
+
+Also you can create custom plugins to hook into Yuki-no's execution lifecycle. See [PLUGINS.md](PLUGINS.md).
 
 ## Contributing
 

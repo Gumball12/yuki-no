@@ -40,15 +40,32 @@ describe('plugin loading and hooks', () => {
   });
 
   it('throws error for plugin without default export', async () => {
-    vi.doMock('test-invalid-plugin', () => ({
+    const INVALID_PLUGIN_NAME = 'test-invalid-plugin';
+
+    vi.doMock(INVALID_PLUGIN_NAME, () => ({
       default: undefined,
       someOtherExport: 'test',
     }));
 
-    await expect(loadPlugins(['test-invalid-plugin'])).rejects.toThrow(
-      'Invalid plugin',
+    await expect(loadPlugins([INVALID_PLUGIN_NAME])).rejects.toThrow(
+      `Plugin "${INVALID_PLUGIN_NAME}" does not export a default plugin object`,
     );
 
-    vi.doUnmock('test-invalid-plugin');
+    vi.doUnmock(INVALID_PLUGIN_NAME);
+  });
+
+  it('throws error for plugin without plugin name', async () => {
+    const INVALID_PLUGIN_NAME = 'test-invalid-plugin';
+
+    vi.doMock(INVALID_PLUGIN_NAME, () => ({
+      default: {},
+      someOtherExport: 'test',
+    }));
+
+    await expect(loadPlugins([INVALID_PLUGIN_NAME])).rejects.toThrow(
+      `Plugin "${INVALID_PLUGIN_NAME}" must have a "name" property`,
+    );
+
+    vi.doUnmock(INVALID_PLUGIN_NAME);
   });
 });

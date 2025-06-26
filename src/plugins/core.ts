@@ -4,17 +4,17 @@ import type { Issue } from '../github/getOpenedIssues';
 import type { Context } from '@actions/github/lib/context';
 import type { Octokit } from '@octokit/rest';
 
-export type YukiNoContext = {
+export type YukiNoContext = Readonly<{
   octokit: Octokit;
   context: Context;
   inputs: Record<string, string>;
-};
+}>;
 
-export type IssueMeta = {
+export type IssueMeta = Readonly<{
   title: string;
   body: string;
   labels: string[];
-};
+}>;
 
 export type IssueResult = Issue;
 
@@ -42,14 +42,25 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   const plugins: YukiNoPlugin[] = [];
 
   for (const name of names) {
-    const mod = await import(name);
-    const plugin = mod.default as YukiNoPlugin | undefined;
+    try {
+      const mod = await import(name);
+      const plugin = mod.default as YukiNoPlugin | undefined;
 
-    if (!plugin) {
-      throw new Error('Invalid plugin');
+      if (!plugin) {
+        throw new Error(
+          `Plugin "${name}" does not export a default plugin object`,
+        );
+      }
+
+      if (!plugin.name) {
+        throw new Error(`Plugin "${name}" must have a "name" property`);
+      }
+
+      plugins.push(plugin);
+    } catch (error) {
+      const err = error as Error;
+      throw new Error(`Failed to load plugin "${name}": ${err.message}`);
     }
-
-    plugins.push(plugin);
   }
 
   return plugins;
