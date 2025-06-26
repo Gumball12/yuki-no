@@ -1,6 +1,6 @@
 {
   "name": "@gumball12/yuki-no",
-  "version": "1.0.3",
+  "version": "1.1.0",
   "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
   "repository": {
     "type": "git",
