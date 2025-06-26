@@ -39,6 +39,42 @@ describe('plugin loading and hooks', () => {
     expect(spies.onExit).toHaveBeenCalled();
   });
 
+  it('example plugin logs token when provided', async () => {
+    const plugins = await loadPlugins(['yuki-no-plugin-example']);
+    const plugin = plugins[0];
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const ctx: any = {
+      octokit: {},
+      context: {},
+      inputs: { 'my-plugin-input': 'test-token' },
+    };
+
+    await plugin.onInit?.(ctx);
+
+    expect(consoleSpy).toHaveBeenCalledWith('my-plugin-input: test-token');
+
+    consoleSpy.mockRestore();
+  });
+
+  it('example plugin does not log when token is not provided', async () => {
+    const plugins = await loadPlugins(['yuki-no-plugin-example']);
+    const plugin = plugins[0];
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const ctx: any = {
+      octokit: {},
+      context: {},
+      inputs: {},
+    };
+
+    await plugin.onInit?.(ctx);
+
+    expect(consoleSpy).not.toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
   it('throws error for plugin without default export', async () => {
     const INVALID_PLUGIN_NAME = 'test-invalid-plugin';
 
