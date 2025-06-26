@@ -35,6 +35,9 @@ jobs:
       - if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
+      - name: Set environment variables
+        run: echo "MOCKED_REQUEST_TEST=${{ secrets.MOCKED_REQUEST_TEST }}" >> $GITHUB_ENV
+
       - name: Run tests
         run: yarn test
 
