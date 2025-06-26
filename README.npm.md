@@ -5,7 +5,7 @@ TypeScript types for developing [Yuki-no](https://github.com/Gumball12/yuki-no) 
 ## Quick Start
 
 ```bash
-npm install yuki-no
+npm install @gumball12/yuki-no # You can use Yarn, PNPM, ...
 ```
 
 ```ts

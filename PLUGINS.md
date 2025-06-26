@@ -96,9 +96,10 @@ type IssueMeta = {
 Install yuki-no as a dependency to get TypeScript types:
 
 ```bash
-npm install yuki-no
+npm install @gumball12/yuki-no
 # or
-yarn add yuki-no
+yarn add @gumball12/yuki-no
+# or PNPM, ...
 ```
 
 ### Creating a Plugin

@@ -211,7 +211,7 @@ For publishing TypeScript types to npm:
 2. Commit and push changes
 3. Create GitHub Release with tag `npm-v1.x.x` (e.g., `npm-v1.0.0`)
 4. GitHub Actions automatically builds types and publishes to npm
-5. Plugin developers can install: `npm install yuki-no`
+5. Plugin developers can install: `npm install @gumball12/yuki-no`
 
 ### Manual Publishing
 
@@ -224,7 +224,7 @@ npm publish
 **Prerequisites:**
 
 - `NPM_TOKEN` secret configured in GitHub repository settings
-- npm publishing permissions for the `yuki-no` package
+- npm publishing permissions for the `@gumball12/yuki-no` package
 
 ## License
 
