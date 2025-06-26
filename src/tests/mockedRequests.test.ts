@@ -59,6 +59,7 @@ describe('GitHub API Integration Tests', () => {
       const { data: comments } = await octokit.issues.listComments({
         ...TEST_REPO,
         issue_number: TEST_ISSUE_NUM,
+        per_page: 10,
       });
 
       expect(Array.isArray(comments)).toBe(true);
@@ -68,6 +69,11 @@ describe('GitHub API Integration Tests', () => {
           body: commentBody,
         }),
       );
+
+      await octokit.issues.deleteComment({
+        ...TEST_REPO,
+        comment_id: createdComment.id,
+      });
     });
 
     it('Should set and get issue labels with the expected structure', async () => {
