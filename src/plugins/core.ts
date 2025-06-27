@@ -44,8 +44,8 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
 
   for (const name of names) {
     try {
-      const packageName = extractPackageName(name);
-      const mod = await import(packageName);
+      const id = getResolveId(name);
+      const mod = await import(id);
       const plugin = mod.default as YukiNoPlugin | undefined;
 
       if (!plugin) {
@@ -68,7 +68,7 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   return plugins;
 };
 
-export const extractPackageName = (name: string): string => {
+export const getResolveId = (name: string): string => {
   const isScopedPackage = name.startsWith('@');
 
   if (isScopedPackage) {

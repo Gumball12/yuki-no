@@ -1,4 +1,4 @@
-import { extractPackageName } from '../../plugins/core';
+import { getResolveId } from '../../plugins/core';
 
 import { describe, expect, it } from 'vitest';
 
@@ -23,27 +23,21 @@ describe('Plugin version validation', () => {
     expect('plugin@1.0.0.0').not.toMatch(exactVersionPattern);
   });
 
-  it('extracts package name from version specification', () => {
+  it('extracts resolve id', () => {
     // Regular packages
-    expect(extractPackageName('plugin@1.0.0')).toBe('plugin');
-    expect(extractPackageName('yuki-no-plugin-test@2.1.0')).toBe(
+    expect(getResolveId('plugin@1.0.0')).toBe('plugin');
+    expect(getResolveId('yuki-no-plugin-test@2.1.0')).toBe(
       'yuki-no-plugin-test',
     );
 
     // Scoped packages
-    expect(extractPackageName('@gumball12/yuki-no-plugin-test@1.0.0')).toBe(
+    expect(getResolveId('@gumball12/yuki-no-plugin-test@1.0.0')).toBe(
       '@gumball12/yuki-no-plugin-test',
     );
-    expect(extractPackageName('@org/plugin@2.1.3')).toBe('@org/plugin');
-
-    // Local files (no version)
-    expect(extractPackageName('./local-plugin.js')).toBe('./local-plugin.js');
-    expect(extractPackageName('../plugins/custom.js')).toBe(
-      '../plugins/custom.js',
-    );
+    expect(getResolveId('@org/plugin@2.1.3')).toBe('@org/plugin');
 
     // Edge cases
-    expect(extractPackageName('plugin')).toBe('plugin');
-    expect(extractPackageName('@scoped/package')).toBe('@scoped/package');
+    expect(getResolveId('plugin')).toBe('plugin');
+    expect(getResolveId('@scoped/package')).toBe('@scoped/package');
   });
 });

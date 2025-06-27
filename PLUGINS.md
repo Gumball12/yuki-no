@@ -196,10 +196,6 @@ type IssueMeta = {
 
 > [!NOTE] > **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
 
-You can use plugins in two ways:
-
-### 1. npm Package (Recommended)
-
 Specify published npm packages with exact version:
 
 ```yaml
@@ -216,21 +212,3 @@ Specify published npm packages with exact version:
 ```
 
 Plugins are automatically installed by Yuki-no during GitHub Actions execution. You only need to specify them in your workflow configuration.
-
-### 2. Local File Path
-
-Use a local plugin file. The path is relative to your **repository root**:
-
-```yaml
-# .github/workflows/sync.yml
-- uses: Gumball12/yuki-no@v1
-  with:
-    # ... other options ...
-
-    # [Optional]
-    # List of plugin package names to load
-    plugins: |
-      ./plugins/my-custom-plugin.js
-      ./scripts/yuki-plugins/slack-notifier.js
-      ./.github/plugins/custom-labeler.js
-```

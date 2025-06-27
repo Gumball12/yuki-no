@@ -1,11 +1,10 @@
 import { splitByNewline } from './utils';
 
-export const getInput = (
-  name: string,
-  defaultValue?: string,
-): string | undefined => {
+export function getInput(name: string): string | undefined;
+export function getInput(name: string, defaultValue: string): string;
+export function getInput(name: string, defaultValue?: string | undefined) {
   return process.env[name] ?? defaultValue;
-};
+}
 
 export const getBooleanInput = (
   name: string,

@@ -30,12 +30,6 @@ if [ ! -z "${PLUGINS:-}" ]; then
     # Skip empty lines
     [[ -z "$plugin" ]] && continue
     
-    # Skip local file plugins (relative paths)
-    if [[ "$plugin" =~ ^\./ ]]; then
-      echo "📁 Local plugin detected: $plugin"
-      continue
-    fi
-    
     # Check if npm plugin has exact version specified
     if [[ ! "$plugin" =~ @[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
       echo "❌ Plugin must specify exact version (e.g., plugin@1.0.0): $plugin"
