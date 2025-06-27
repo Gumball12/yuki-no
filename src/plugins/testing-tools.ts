@@ -1,8 +1,8 @@
-import type { Context } from '@actions/github/lib/context';
-import type { Octokit } from '@octokit/rest';
-
 import type { YukiNoContext, YukiNoPlugin } from './core';
 import { loadPlugins } from './core';
+
+import type { Context } from '@actions/github/lib/context';
+import type { Octokit } from '@octokit/rest';
 
 export const createTestContext = (
   inputs: Record<string, string> = {},

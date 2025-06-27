@@ -1,7 +1,10 @@
+import {
+  createTestContext,
+  loadPluginForTesting,
+  runHook,
+} from '../../plugins/testing-tools';
+
 import { describe, expect, it, vi } from 'vitest';
-
-import { createTestContext, loadPluginForTesting, runHook } from '../../plugins/testing-tools';
-
 
 describe('plugin testing tools', () => {
   it('loads plugin for testing', async () => {

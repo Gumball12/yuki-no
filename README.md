@@ -164,12 +164,10 @@ Add the `plugins` option to your workflow configuration:
 ```
 
 Also you can create custom plugins to hook into Yuki-no's execution lifecycle. See [PLUGINS.md](PLUGINS.md).
-For details on testing your plugins locally, see the [Testing Plugins Locally](PLUGINS.md#testing-plugins-locally) section in the plugin documentation.
 
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
-For plugin development, see [PLUGINS.md](PLUGINS.md).
 
 ## License
 

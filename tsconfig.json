@@ -14,12 +14,7 @@
     "noFallthroughCasesInSwitch": true,
 
     "esModuleInterop": true,
-    "noUnusedLocals": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "yuki-no-plugin-example": ["src/plugins/example/index.ts"]
-    }
+    "noUnusedLocals": true
   },
   "include": ["src", "tests"]
 }
