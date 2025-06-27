@@ -60,7 +60,10 @@ runs:
       shell: bash
       run: |
         echo "YUKI_NO_VERSION=${action_ref}" >> $GITHUB_ENV
-        echo "PLUGINS=${plugins}" >> $GITHUB_ENV
+
+        echo "PLUGINS<<EOF" >> $GITHUB_ENV
+        echo "${plugins}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
       env:
         action_ref: ${{ github.action_ref }}
         plugins: ${{ inputs.plugins }}
