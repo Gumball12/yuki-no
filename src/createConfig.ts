@@ -1,23 +1,7 @@
-import { assert, excludeFrom, log, splitByNewline } from './utils';
+import { getBooleanInput, getInput, getMultilineInput } from './inputUtils';
+import { assert, excludeFrom, log } from './utils';
 
 import path from 'node:path';
-
-type RawConfig = Readonly<{
-  accessToken: string;
-  userName?: string;
-  email?: string;
-  upstreamRepo?: string;
-  headRepo: string;
-  headRepoBranch?: string;
-  trackFrom: string;
-  include?: string;
-  exclude?: string;
-  labels?: string;
-  releaseTracking?: string;
-  releaseTrackingLabels?: string;
-  plugins?: string;
-  verbose?: string;
-}>;
 
 export type Config = Readonly<{
   accessToken: string;
@@ -52,48 +36,48 @@ export const defaults = {
 export const createConfig = (): Config => {
   log('I', 'createConfig :: Parsing configuration values');
 
-  const rawConfig = createRawConfig();
+  // Required values validation
+  const accessToken = getInput('ACCESS_TOKEN');
+  const headRepo = getInput('HEAD_REPO');
+  const trackFrom = getInput('TRACK_FROM');
 
-  const accessToken = rawConfig.accessToken;
-  const userName = rawConfig.userName || defaults.userName;
-  const email = rawConfig.email || defaults.email;
+  assert(!!accessToken, '`accessToken` is required.');
+  assert(!!headRepo, '`headRepo` is required.');
+  assert(!!trackFrom, '`trackFrom` is required.');
+
+  // Optional values with defaults
+  const userName = getInput('USER_NAME', defaults.userName);
+  const email = getInput('EMAIL', defaults.email);
+  const upstreamRepo = getInput('UPSTREAM_REPO');
+  const headRepoBranch = getInput('HEAD_REPO_BRANCH', defaults.branch);
 
   const upstreamRepoSpec = createRepoSpec(
-    rawConfig.upstreamRepo || inferUpstreamRepo(),
+    upstreamRepo || inferUpstreamRepo(),
     defaults.branch,
   );
-  const headRepoSpec = createRepoSpec(
-    rawConfig.headRepo,
-    rawConfig.headRepoBranch || defaults.branch,
-  );
-  const trackFrom = rawConfig.trackFrom;
+  const headRepoSpec = createRepoSpec(headRepo!, headRepoBranch!);
 
-  const include = splitByNewline(rawConfig.include);
-  const exclude = splitByNewline(rawConfig.exclude);
+  const include = getMultilineInput('INCLUDE');
+  const exclude = getMultilineInput('EXCLUDE');
+  const labels = getMultilineInput('LABELS', [defaults.label]);
+  const sortedLabels = labels.sort();
+  const plugins = getMultilineInput('PLUGINS');
 
-  const labels = splitByNewline(rawConfig.labels);
-  const sortedLabels = (labels.length ? labels : [defaults.label]).sort();
+  const releaseTracking = getBooleanInput('RELEASE_TRACKING');
+  const rawReleaseLabels = getMultilineInput('RELEASE_TRACKING_LABELS', [
+    defaults.releaseTrackingLabel,
+  ]);
+  const releaseTrackingLabels = excludeFrom(rawReleaseLabels, sortedLabels);
 
-  const plugins = splitByNewline(rawConfig.plugins);
-
-  const releaseTracking = rawConfig.releaseTracking === 'true';
-  const rawReleaseLabels = splitByNewline(rawConfig.releaseTrackingLabels);
-  const releaseTrackingLabels = excludeFrom(
-    rawReleaseLabels.length
-      ? rawReleaseLabels
-      : [defaults.releaseTrackingLabel],
-    sortedLabels,
-  );
-
-  const verbose = rawConfig.verbose === 'true';
+  const verbose = getBooleanInput('VERBOSE');
 
   return {
-    accessToken,
-    userName,
-    email,
+    accessToken: accessToken!,
+    userName: userName!,
+    email: email!,
     upstreamRepoSpec,
     headRepoSpec,
-    trackFrom,
+    trackFrom: trackFrom!,
     include,
     exclude,
     labels: sortedLabels,
@@ -104,32 +88,9 @@ export const createConfig = (): Config => {
   };
 };
 
-const createRawConfig = (): RawConfig => {
-  assert(!!process.env.ACCESS_TOKEN, '`accessToken` is required.');
-  assert(!!process.env.HEAD_REPO, '`headRepo` is required.');
-  assert(!!process.env.TRACK_FROM, '`trackFrom` is required.');
-
-  return {
-    accessToken: process.env.ACCESS_TOKEN!,
-    userName: process.env.USER_NAME,
-    email: process.env.EMAIL,
-    upstreamRepo: process.env.UPSTREAM_REPO,
-    headRepo: process.env.HEAD_REPO!,
-    headRepoBranch: process.env.HEAD_REPO_BRANCH,
-    trackFrom: process.env.TRACK_FROM!,
-    include: process.env.INCLUDE,
-    exclude: process.env.EXCLUDE,
-    labels: process.env.LABELS,
-    releaseTracking: process.env.RELEASE_TRACKING,
-    releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
-    plugins: process.env.PLUGINS,
-    verbose: process.env.VERBOSE,
-  };
-};
-
 export const inferUpstreamRepo = (): string => {
-  const serverUrl = process.env.GITHUB_SERVER_URL || 'https://github.com';
-  const repository = process.env.GITHUB_REPOSITORY;
+  const serverUrl = getInput('GITHUB_SERVER_URL', 'https://github.com');
+  const repository = getInput('GITHUB_REPOSITORY');
 
   if (!repository) {
     throw new Error(
