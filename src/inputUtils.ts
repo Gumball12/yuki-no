@@ -1,24 +1,15 @@
 import { splitByNewline } from './utils';
 
-export const getInput = (
-  inputs: Record<string, string | undefined>,
-  name: string,
-): string | undefined => {
-  return inputs[name];
+export const getInput = (name: string): string | undefined => {
+  return process.env[name];
 };
 
-export const getBooleanInput = (
-  inputs: Record<string, string | undefined>,
-  name: string,
-): boolean => {
-  const value = getInput(inputs, name);
+export const getBooleanInput = (name: string): boolean => {
+  const value = getInput(name);
   return value?.toLowerCase() === 'true';
 };
 
-export const getMultilineInput = (
-  inputs: Record<string, string | undefined>,
-  name: string,
-): string[] => {
-  const value = getInput(inputs, name);
+export const getMultilineInput = (name: string): string[] => {
+  const value = getInput(name);
   return splitByNewline(value);
 };

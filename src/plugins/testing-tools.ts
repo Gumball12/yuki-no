@@ -5,14 +5,20 @@ import type { Context } from '@actions/github/lib/context';
 import type { Octokit } from '@octokit/rest';
 
 export const createTestContext = (
-  inputs: Record<string, string> = {},
+  envVars: Record<string, string> = {},
   octokit: Octokit = {} as Octokit,
   context: Context = {} as Context,
-): YukiNoContext => ({
-  octokit,
-  context,
-  inputs,
-});
+): YukiNoContext => {
+  // Set environment variables for testing
+  Object.entries(envVars).forEach(([key, value]) => {
+    process.env[key] = value;
+  });
+
+  return {
+    octokit,
+    context,
+  };
+};
 
 export const loadPluginForTesting = async (
   path: string,

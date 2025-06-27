@@ -120,26 +120,33 @@ See [@gumball12/yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin
 
 ### Passing Inputs to Plugins
 
-Plugins can receive custom values using the action's `with` block just like any other GitHub Action input. These raw values are exposed on `ctx.inputs` for each plugin. Yuki-no exposes simple helpers for parsing raw inputs in your plugin:
+Plugins can receive custom values using environment variables instead [`with`](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith). This approach avoids IDE warnings about undefined inputs and follows GitHub Actions best practices. Use the `env` block to pass custom values to your plugins:
 
 ```yaml
 - uses: Gumball12/yuki-no@v1
-  with:
-    # ...
-    custom-message: ${{ secrets.CUSTOM_MESSAGE }}
-    is-true: true
-    my-values: |
+  env:
+    PLUGIN_CUSTOM_MESSAGE: ${{ secrets.CUSTOM_MESSAGE }}
+    PLUGIN_IS_TRUE: true
+    PLUGIN_MY_VALUES: |
       value 1
       value 2
+  with:
+    # ... standard yuki-no inputs only ...
+    access-token: ${{ secrets.GITHUB_TOKEN }}
+    head-repo: https://github.com/vitejs/vite.git
+    track-from: abc123
 ```
 
 ```ts
 import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
 
-const customMessage = getInput(ctx.inputs, 'custom-message');
-const isTrue = getBooleanInput(ctx.inputs, 'is-true');
-const myValues = getMultilineInput(ctx.inputs, 'my-values');
+const customMessage = getInput('PLUGIN_CUSTOM_MESSAGE');
+const isTrue = getBooleanInput('PLUGIN_IS_TRUE');
+const myValues = getMultilineInput('PLUGIN_MY_VALUES');
 ```
+
+> [!TIP]
+> We recommend prefixing your environment variables with `PLUGIN_` to avoid conflicts with system variables.
 
 ### Context Types
 
@@ -147,7 +154,6 @@ const myValues = getMultilineInput(ctx.inputs, 'my-values');
 type YukiNoContext = {
   octokit: Octokit; // GitHub API client (@octokit/rest)
   context: Context; // GitHub Actions context (@actions/github/lib/context)
-  inputs: Record<string, string>; // Raw `with` values from the workflow
 };
 
 type IssueMeta = {
@@ -186,7 +192,7 @@ import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
 describe('my plugin', () => {
   it('calls onInit', async () => {
     const plugin = await loadPluginForTesting('@gumball12/yuki-no-plugin-test');
-    const ctx = createTestContext({ 'plugin-message': 'test message' });
+    const ctx = createTestContext({ PLUGIN_MESSAGE: 'test message' });
     await runHook(plugin, 'onInit', ctx);
     // add your expectations
   });

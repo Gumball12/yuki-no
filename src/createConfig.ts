@@ -1,5 +1,4 @@
-import { getBooleanInput, getMultilineInput } from './inputUtils';
-import { assert, excludeFrom, log } from './utils';
+import { assert, excludeFrom, log, splitByNewline } from './utils';
 
 import path from 'node:path';
 
@@ -69,19 +68,16 @@ export const createConfig = (): Config => {
   );
   const trackFrom = rawConfig.trackFrom;
 
-  const include = getMultilineInput(rawConfig, 'include');
-  const exclude = getMultilineInput(rawConfig, 'exclude');
+  const include = splitByNewline(rawConfig.include);
+  const exclude = splitByNewline(rawConfig.exclude);
 
-  const labels = getMultilineInput(rawConfig, 'labels');
+  const labels = splitByNewline(rawConfig.labels);
   const sortedLabels = (labels.length ? labels : [defaults.label]).sort();
 
-  const plugins = getMultilineInput(rawConfig, 'plugins');
+  const plugins = splitByNewline(rawConfig.plugins);
 
-  const releaseTracking = getBooleanInput(rawConfig, 'releaseTracking');
-  const rawReleaseLabels = getMultilineInput(
-    rawConfig,
-    'releaseTrackingLabels',
-  );
+  const releaseTracking = rawConfig.releaseTracking === 'true';
+  const rawReleaseLabels = splitByNewline(rawConfig.releaseTrackingLabels);
   const releaseTrackingLabels = excludeFrom(
     rawReleaseLabels.length
       ? rawReleaseLabels
@@ -89,7 +85,7 @@ export const createConfig = (): Config => {
     sortedLabels,
   );
 
-  const verbose = getBooleanInput(rawConfig, 'verbose');
+  const verbose = rawConfig.verbose === 'true';
 
   return {
     accessToken,

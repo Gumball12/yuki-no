@@ -7,7 +7,6 @@ import type { Octokit } from '@octokit/rest';
 export type YukiNoContext = Readonly<{
   octokit: Octokit;
   context: Context;
-  inputs: Record<string, string>;
 }>;
 
 export type IssueMeta = Readonly<{

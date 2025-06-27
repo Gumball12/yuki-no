@@ -1,24 +1,37 @@
 import { getBooleanInput, getInput, getMultilineInput } from '../inputUtils';
 
-import { describe, expect, it } from 'vitest';
-
-const INPUTS = {
-  token: 'abc123',
-  enabled: 'true',
-  paths: 'a\nb\nc',
-};
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('plugin input helpers', () => {
+  beforeEach(() => {
+    process.env.TEST_TOKEN = 'abc123';
+    process.env.TEST_ENABLED = 'true';
+    process.env.TEST_PATHS = 'a\nb\nc';
+  });
+
+  afterEach(() => {
+    delete process.env.TEST_TOKEN;
+    delete process.env.TEST_ENABLED;
+    delete process.env.TEST_PATHS;
+  });
+
   it('getInput returns raw string', () => {
-    expect(getInput(INPUTS, 'token')).toBe('abc123');
+    expect(getInput('TEST_TOKEN')).toBe('abc123');
+    expect(getInput('NON_EXISTENT')).toBeUndefined();
   });
 
   it('getBooleanInput parses booleans', () => {
-    expect(getBooleanInput(INPUTS, 'enabled')).toBe(true);
-    expect(getBooleanInput({ enabled: 'false' }, 'enabled')).toBe(false);
+    expect(getBooleanInput('TEST_ENABLED')).toBe(true);
+
+    process.env.TEST_FALSE = 'false';
+    expect(getBooleanInput('TEST_FALSE')).toBe(false);
+    delete process.env.TEST_FALSE;
+
+    expect(getBooleanInput('NON_EXISTENT')).toBe(false);
   });
 
   it('getMultilineInput splits lines', () => {
-    expect(getMultilineInput(INPUTS, 'paths')).toEqual(['a', 'b', 'c']);
+    expect(getMultilineInput('TEST_PATHS')).toEqual(['a', 'b', 'c']);
+    expect(getMultilineInput('NON_EXISTENT')).toEqual([]);
   });
 });

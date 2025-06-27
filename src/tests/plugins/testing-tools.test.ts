@@ -1,13 +1,12 @@
-import type { YukiNoPlugin } from '../../plugins/core';
 import {
   createTestContext,
   loadPluginForTesting,
   runHook,
 } from '../../plugins/testing-tools';
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const mockExamplePlugin: YukiNoPlugin = {
+const mockExamplePlugin = {
   name: 'yuki-no-test-plugin',
   async onInit() {},
   async onBeforeCompare() {},
@@ -23,19 +22,27 @@ vi.doMock('yuki-no-test-plugin', () => ({
 }));
 
 describe('plugin testing tools', () => {
+  beforeEach(() => {
+    // Clean up environment variables before each test
+    delete process.env.TEST_TOKEN;
+    delete process.env.PLUGIN_MESSAGE;
+  });
+
   it('loads plugin for testing', async () => {
     const plugin = await loadPluginForTesting('yuki-no-test-plugin');
     expect(plugin.name).toBe('yuki-no-test-plugin');
   });
 
-  it('creates test context', () => {
-    const ctx = createTestContext({ token: 'value' });
-    expect(ctx.inputs.token).toBe('value');
+  it('creates test context with environment variables', () => {
+    const ctx = createTestContext({ TEST_TOKEN: 'value' });
+    expect(process.env.TEST_TOKEN).toBe('value');
+    expect(ctx.octokit).toBeDefined();
+    expect(ctx.context).toBeDefined();
   });
 
   it('runHook executes specified hook', async () => {
     const plugin = await loadPluginForTesting('yuki-no-test-plugin');
-    const ctx = createTestContext();
+    const ctx = createTestContext({ PLUGIN_MESSAGE: 'test message' });
 
     const spy = vi.spyOn(plugin, 'onInit' as any);
     await runHook(plugin, 'onInit', ctx);

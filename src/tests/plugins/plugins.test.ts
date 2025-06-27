@@ -1,12 +1,14 @@
+import { getInput } from '../../inputUtils';
 import { loadPlugins } from '../../plugins/core';
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockExamplePlugin = {
   name: 'yuki-no-plugin-example',
-  async onInit(ctx: any) {
-    if (ctx.inputs['my-plugin-input']) {
-      console.log(`my-plugin-input: ${ctx.inputs['my-plugin-input']}`);
+  async onInit() {
+    const myPluginInput = getInput('MY_PLUGIN_INPUT');
+    if (myPluginInput) {
+      console.log(`my-plugin-input: ${myPluginInput}`);
     }
   },
   async onBeforeCompare() {},
@@ -22,10 +24,14 @@ vi.doMock('yuki-no-plugin-example', () => ({
 }));
 
 describe('plugin loading and hooks', () => {
+  beforeEach(() => {
+    delete process.env.MY_PLUGIN_INPUT;
+  });
+
   it('loads plugin and calls hooks', async () => {
     const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
-    const ctx: any = { octokit: {}, context: {}, inputs: {} };
+    const ctx: any = { octokit: {}, context: {} };
     const spies = {
       onInit: vi.spyOn(plugin, 'onInit'),
       onBeforeCompare: vi.spyOn(plugin, 'onBeforeCompare'),
@@ -58,7 +64,9 @@ describe('plugin loading and hooks', () => {
     expect(spies.onExit).toHaveBeenCalled();
   });
 
-  it('example plugin logs token when provided', async () => {
+  it('example plugin logs token when provided via environment variable', async () => {
+    process.env.MY_PLUGIN_INPUT = 'test-token';
+
     const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -66,7 +74,6 @@ describe('plugin loading and hooks', () => {
     const ctx: any = {
       octokit: {},
       context: {},
-      inputs: { 'my-plugin-input': 'test-token' },
     };
 
     await plugin.onInit?.(ctx);
@@ -76,7 +83,7 @@ describe('plugin loading and hooks', () => {
     consoleSpy.mockRestore();
   });
 
-  it('example plugin does not log when token is not provided', async () => {
+  it('example plugin does not log when environment variable is not provided', async () => {
     const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
     const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -84,7 +91,6 @@ describe('plugin loading and hooks', () => {
     const ctx: any = {
       octokit: {},
       context: {},
-      inputs: {},
     };
 
     await plugin.onInit?.(ctx);
