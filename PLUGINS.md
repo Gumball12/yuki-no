@@ -194,7 +194,8 @@ type IssueMeta = {
 
 ## Using Plugins
 
-> [!NOTE] > **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
+> [!NOTE]
+> **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
 
 You can use plugins in two ways:
 
