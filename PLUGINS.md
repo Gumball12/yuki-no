@@ -197,6 +197,43 @@ export default myPlugin;
 
 See [`src/plugins/example`](./src/plugins/example) for a minimal plugin template that demonstrates the basic structure.
 
+### Testing Plugins Locally
+
+Use the built-in helpers to test your plugins without running the full action. These helpers are exported from the main package.
+
+```ts
+import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
+```
+
+1. **createTestContext** – Builds a `YukiNoContext` object with optional inputs or mocked dependencies.
+2. **loadPluginForTesting** – Loads a plugin from a file path or package name.
+3. **runHook** – Executes a specific lifecycle hook of a plugin.
+
+
+#### Example
+
+```ts
+import { describe, it, expect } from 'vitest';
+import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
+
+describe('my plugin', () => {
+  it('calls onInit', async () => {
+    const plugin = await loadPluginForTesting('./src/index.ts');
+    const ctx = createTestContext({ token: 'demo' });
+    await runHook(plugin, 'onInit', ctx);
+    // add your expectations
+  });
+});
+```
+
+Run your tests with your preferred test runner. The repository uses `vitest` in its examples:
+
+```bash
+yarn test
+```
+
+Keep in mind that running the full test suite may require installing dependencies.
+
 ### Using Plugins
 
 You can use plugins in two ways:

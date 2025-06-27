@@ -35,4 +35,5 @@ describe('public module exports', () => {
       'line3',
     ]);
   });
+
 });
