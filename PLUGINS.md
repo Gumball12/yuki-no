@@ -142,9 +142,12 @@ Plugins can receive custom values using environment variables instead [`with`](h
 ```ts
 import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
 
-const customMessage = getInput('PLUGIN_CUSTOM_MESSAGE');
-const isTrue = getBooleanInput('PLUGIN_IS_TRUE');
-const myValues = getMultilineInput('PLUGIN_MY_VALUES');
+const customMessage = getInput('PLUGIN_CUSTOM_MESSAGE', 'default message'); // default value is optional
+const isTrue = getBooleanInput('PLUGIN_IS_TRUE', false);
+const myValues = getMultilineInput('PLUGIN_MY_VALUES', [
+  'default1',
+  'default2',
+]);
 ```
 
 > [!TIP]
