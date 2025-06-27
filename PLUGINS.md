@@ -171,36 +171,6 @@ type IssueMeta = {
 4. **Install**: Users can install it in their repositories or reference it directly in workflows
 5. **Configure**: Add the package name to the `plugins` option in your workflow
 
-### Testing Plugins Locally
-
-Use the built-in helpers to test your plugins without running the full action. These helpers are exported from the main package.
-
-```ts
-import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
-```
-
-1. **createTestContext** – Builds a `YukiNoContext` object with optional inputs or mocked dependencies.
-2. **loadPluginForTesting** – Loads a plugin from a file path or package name.
-3. **runHook** – Executes a specific lifecycle hook of a plugin.
-
-#### Testing Example
-
-```ts
-import { describe, expect, it } from 'vitest';
-import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
-
-describe('my plugin', () => {
-  it('calls onInit', async () => {
-    const plugin = await loadPluginForTesting('@gumball12/yuki-no-plugin-test');
-    const ctx = createTestContext({ PLUGIN_MESSAGE: 'test message' });
-    await runHook(plugin, 'onInit', ctx);
-    // add your expectations
-  });
-});
-```
-
-Run your tests with your preferred test runner, like `vitest`.
-
 ## Using Plugins
 
 You can use plugins in two ways:
