@@ -44,7 +44,8 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
 
   for (const name of names) {
     try {
-      const mod = await import(name);
+      const packageName = extractPackageName(name);
+      const mod = await import(packageName);
       const plugin = mod.default as YukiNoPlugin | undefined;
 
       if (!plugin) {
@@ -65,4 +66,18 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   }
 
   return plugins;
+};
+
+export const extractPackageName = (name: string): string => {
+  const isScopedPackage = name.startsWith('@');
+
+  if (isScopedPackage) {
+    return name.split('@').slice(0, 2).join('@');
+  }
+
+  if (name.includes('@')) {
+    return name.split('@')[0];
+  }
+
+  return name;
 };

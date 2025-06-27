@@ -157,10 +157,11 @@ Add the `plugins` option to your workflow configuration:
     # ... other options ...
 
     # [Optional]
-    # List of plugin package names to load
+    # List of plugin package names with exact versions (required)
     plugins: |
-      yuki-no-plugin-do-something
-      @org/yuki-no-plugin-another
+      @gumball12/yuki-no-plugin-test@0.0.1
+      yuki-no-plugin-slack@2.1.0
+      @org/yuki-no-plugin-another@1.5.0
 ```
 
 Also you can create custom plugins to hook into Yuki-no's execution lifecycle. See [PLUGINS.md](PLUGINS.md).

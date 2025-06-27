@@ -33,7 +33,7 @@ inputs:
     description: 'Glob patterns for files to exclude. Take precedence over include patterns.'
     required: false
   plugins:
-    description: 'Names of Yuki-no plugins to load (newline separated).'
+    description: 'Names of Yuki-no plugins to load with exact version specification (newline separated). Format: plugin-name@1.0.0 (exact version required).'
     required: false
   labels:
     description: 'Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. Defaults to "sync".'
@@ -60,8 +60,10 @@ runs:
       shell: bash
       run: |
         echo "YUKI_NO_VERSION=${action_ref}" >> $GITHUB_ENV
+        echo "PLUGINS=${plugins}" >> $GITHUB_ENV
       env:
         action_ref: ${{ github.action_ref }}
+        plugins: ${{ inputs.plugins }}
 
     - name: Checkout Yuki-no
       run: ${{ github.action_path }}/scripts/checkout.sh
@@ -69,7 +71,6 @@ runs:
 
     - name: Run Yuki-no
       env:
-        RAW_INPUTS: ${{ toJson(inputs) }}
         ACCESS_TOKEN: ${{ inputs.access-token }}
         USER_NAME: ${{ inputs.username }}
         EMAIL: ${{ inputs.email }}
@@ -86,6 +87,5 @@ runs:
         VERBOSE: ${{ inputs.verbose }}
       run: |
         cd yuki-no
-        yarn install
         yarn start
       shell: bash

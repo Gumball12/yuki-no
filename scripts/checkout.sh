@@ -1,6 +1,9 @@
 #!/bin/bash
+set -euo pipefail
 
-# Clone the repository
+echo "🚀 Setting up Yuki-no..."
+
+# Clone Yuki-no repository
 git clone https://github.com/Gumball12/yuki-no.git
 
 cd yuki-no
@@ -14,3 +17,44 @@ git checkout "${YUKI_NO_VERSION:-main}" || {
   echo "Falling back to main branch"
   git checkout main
 }
+
+# Install base dependencies
+echo "📦 Installing base dependencies..."
+yarn install
+
+# Install plugins with exact version requirement
+if [ ! -z "${PLUGINS:-}" ]; then
+  echo "🔌 Installing plugins with exact version requirement..."
+  
+  while IFS= read -r plugin; do
+    # Skip empty lines
+    [[ -z "$plugin" ]] && continue
+    
+    # Skip local file plugins (relative paths)
+    if [[ "$plugin" =~ ^\./ ]]; then
+      echo "📁 Local plugin detected: $plugin"
+      continue
+    fi
+    
+    # Check if npm plugin has exact version specified
+    if [[ ! "$plugin" =~ @[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+      echo "❌ Plugin must specify exact version (e.g., plugin@1.0.0): $plugin"
+      echo "   Range versions (^, ~) and latest are not allowed for security and reproducibility"
+      exit 1
+    fi
+    
+    # Install npm package plugins with exact version
+    echo "📦 Installing: $plugin"
+    if yarn add "$plugin"; then
+      echo "✅ Successfully installed: $plugin"
+    else
+      echo "❌ Failed to install plugin: $plugin"
+      exit 1
+    fi
+    
+  done <<< "$PLUGINS"
+  
+  echo "🎉 All plugins installed successfully!"
+else
+  echo "📝 No plugins specified - using base Yuki-no only"
+fi

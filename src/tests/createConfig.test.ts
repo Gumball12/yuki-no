@@ -77,7 +77,7 @@ describe('Custom envs processing', () => {
       RELEASE_TRACKING: 'true',
       RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
       VERBOSE: 'true',
-      PLUGINS: 'yuki-no-plugin-example',
+      PLUGINS: 'yuki-no-plugin-example@1.0.0',
     };
 
     process.env = { ...process.env, ...LOCAL_TEST_ENV };
@@ -104,7 +104,7 @@ describe('Custom envs processing', () => {
       labels: ['label1', 'label2'].sort(),
       releaseTracking: true,
       releaseTrackingLabels: ['pending-release', 'released'],
-      plugins: ['yuki-no-plugin-example'],
+      plugins: ['yuki-no-plugin-example@1.0.0'],
       verbose: true,
     });
   });

@@ -49,10 +49,10 @@ graph TD
 
 [![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@gumball12/yuki-no)
 
-Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a dependency to get TypeScript types, input helpers, and testing utilities:
+Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a development dependency to get TypeScript types, input helpers, and testing utilities:
 
 ```bash
-npm install @gumball12/yuki-no
+npm install --save-dev @gumball12/yuki-no
 ```
 
 ### Creating a Plugin
@@ -190,16 +190,17 @@ type IssueMeta = {
 1. **Create Package**: Create a package named like `yuki-no-plugin-<name>`
 2. **Export Plugin**: Export the plugin as `default` from your entry file
 3. **Publish**: Publish the package to npm
-4. **Install**: Users can install it in their repositories or reference it directly in workflows
-5. **Configure**: Add the package name to the `plugins` option in your workflow
+4. **Configure**: Users add the package name with exact version to the `plugins` option in their workflow
 
 ## Using Plugins
+
+> [!NOTE] > **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
 
 You can use plugins in two ways:
 
 ### 1. npm Package (Recommended)
 
-Install a published npm package:
+Specify published npm packages with exact version:
 
 ```yaml
 - uses: Gumball12/yuki-no@v1
@@ -207,11 +208,14 @@ Install a published npm package:
     # ... other options ...
 
     # [Optional]
-    # List of plugin package names to load
+    # List of plugin package names with exact versions
     plugins: |
-      yuki-no-plugin-slack
-      @my-org/yuki-no-plugin-teams
+      @gumball12/yuki-no-plugin-test@0.0.1
+      yuki-no-plugin-slack@2.1.0
+      @my-org/yuki-no-plugin-teams@1.5.2
 ```
+
+Plugins are automatically installed by Yuki-no during GitHub Actions execution. You only need to specify them in your workflow configuration.
 
 ### 2. Local File Path
 
