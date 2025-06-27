@@ -43,101 +43,16 @@ graph TD
     style N fill:#fff3e0
 ```
 
-### Input Helpers
-
-Yuki-no exposes simple helpers for parsing raw inputs in your plugin:
-
-```ts
-import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
-
-const token = getInput(ctx.inputs, 'my-token');
-const debug = getBooleanInput(ctx.inputs, 'debug');
-const paths = getMultilineInput(ctx.inputs, 'paths');
-```
-
-### Passing Inputs to Plugins
-
-Plugins can receive custom values using the action's `with` block just like any other GitHub Action input. These raw values are exposed on `ctx.inputs` for each plugin. Use the helpers above to parse them as needed.
-
-Example workflow configuration:
-
-```yaml
-- uses: Gumball12/yuki-no@v1
-  with:
-    plugins: |
-      ./plugins/example/index.js
-    my-plugin-input: ${{ secrets.EXAMPLE_TOKEN }}
-```
-
-Inside your plugin you can access the value:
-
-```ts
-import { getInput } from 'yuki-no';
-
-const token = getInput(ctx.inputs, 'my-plugin-input');
-```
-
-For usage reference, see the [example plugin](./src/plugins/example/index.ts).
-
-### Hook Reference
-
-#### `onInit(ctx: YukiNoContext)`
-
-Called when the action starts, after configuration is loaded.
-
-#### `onBeforeCompare(ctx: YukiNoContext)`
-
-Called before comparing commits between repositories.
-
-#### `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`
-
-Called after commit comparison, with the list of new commits.
-
-#### `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`
-
-Called before each issue is created. The `meta` object is read-only for inspection purposes.
-
-#### `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`
-
-Called after each issue is created.
-
-#### `onExit(ctx: YukiNoContext & { success: boolean })`
-
-Called before the action exits (success or failure).
-
-#### `onError(ctx: YukiNoContext & { error: Error })`
-
-Called when any error occurs during execution.
-
-### Context Types
-
-```ts
-type YukiNoContext = {
-  octokit: Octokit; // GitHub API client (@octokit/rest)
-  context: Context; // GitHub Actions context (@actions/github/lib/context)
-  inputs: Record<string, string>; // Raw `with` values from the workflow
-};
-
-type IssueMeta = {
-  title: string; // Issue title (read-only)
-  body: string; // Issue body (read-only)
-  labels: string[]; // Issue labels (read-only)
-};
-```
-
 ## Plugin Development
 
-### Installing Types
+### Installing Dependencies
 
 [![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@gumball12/yuki-no)
 
-Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a dependency to get TypeScript types:
+Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a dependency to get TypeScript types, input helpers, and testing utilities:
 
 ```bash
 npm install @gumball12/yuki-no
-# or
-yarn add @gumball12/yuki-no
-# or PNPM, ...
 ```
 
 ### Creating a Plugin
@@ -193,15 +108,100 @@ const myPlugin: YukiNoPlugin = {
 export default myPlugin;
 ```
 
-### Example Plugin
+See [@gumball12/yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin-test) for a plugin example.
 
-See [`src/plugins/example`](./src/plugins/example) for a minimal plugin template that demonstrates the basic structure.
+### Passing Inputs to Plugins
 
-### Using Plugins
+Plugins can receive custom values using the action's `with` block just like any other GitHub Action input. These raw values are exposed on `ctx.inputs` for each plugin. Yuki-no exposes simple helpers for parsing raw inputs in your plugin:
+
+```yaml
+- uses: Gumball12/yuki-no@v1
+  with:
+    # ...
+    custom-message: ${{ secrets.CUSTOM_MESSAGE }}
+    is-true: true
+    my-values: |
+      value 1
+      value 2
+```
+
+```ts
+import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
+
+const customMessage = getInput(ctx.inputs, 'custom-message');
+const isTrue = getBooleanInput(ctx.inputs, 'is-true');
+const myValues = getMultilineInput(ctx.inputs, 'my-values');
+```
+
+### Hook Reference
+
+- `onInit(ctx: YukiNoContext)`: Called when the action starts, after configuration is loaded.
+- `onBeforeCompare(ctx: YukiNoContext)`: Called before comparing commits between repositories.
+- `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`: Called after commit comparison, with the list of new commits.
+- `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`: Called before each issue is created. The `meta` object is read-only for inspection purposes.
+- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`: Called after each issue is created.
+- `onExit(ctx: YukiNoContext & { success: boolean })`: Called before the action exits (success or failure).
+- `onError(ctx: YukiNoContext & { error: Error })`: Called when any error occurs during execution.
+
+### Context Types
+
+```ts
+type YukiNoContext = {
+  octokit: Octokit; // GitHub API client (@octokit/rest)
+  context: Context; // GitHub Actions context (@actions/github/lib/context)
+  inputs: Record<string, string>; // Raw `with` values from the workflow
+};
+
+type IssueMeta = {
+  title: string; // Issue title
+  body: string; // Issue body
+  labels: string[]; // Issue labels
+};
+```
+
+### Publishing
+
+1. **Create Package**: Create a package named like `yuki-no-plugin-<name>`
+2. **Export Plugin**: Export the plugin as `default` from your entry file
+3. **Publish**: Publish the package to npm
+4. **Install**: Users can install it in their repositories or reference it directly in workflows
+5. **Configure**: Add the package name to the `plugins` option in your workflow
+
+### Testing Plugins Locally
+
+Use the built-in helpers to test your plugins without running the full action. These helpers are exported from the main package.
+
+```ts
+import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
+```
+
+1. **createTestContext** – Builds a `YukiNoContext` object with optional inputs or mocked dependencies.
+2. **loadPluginForTesting** – Loads a plugin from a file path or package name.
+3. **runHook** – Executes a specific lifecycle hook of a plugin.
+
+#### Testing Example
+
+```ts
+import { describe, expect, it } from 'vitest';
+import { createTestContext, loadPluginForTesting, runHook } from 'yuki-no';
+
+describe('my plugin', () => {
+  it('calls onInit', async () => {
+    const plugin = await loadPluginForTesting('@gumball12/yuki-no-plugin-test');
+    const ctx = createTestContext({ 'plugin-message': 'test message' });
+    await runHook(plugin, 'onInit', ctx);
+    // add your expectations
+  });
+});
+```
+
+Run your tests with your preferred test runner, like `vitest`.
+
+## Using Plugins
 
 You can use plugins in two ways:
 
-#### 1. npm Package (Recommended)
+### 1. npm Package (Recommended)
 
 Install a published npm package:
 
@@ -217,7 +217,7 @@ Install a published npm package:
       @my-org/yuki-no-plugin-teams
 ```
 
-#### 2. Local File Path
+### 2. Local File Path
 
 Use a local plugin file. The path is relative to your **repository root**:
 
@@ -233,32 +233,4 @@ Use a local plugin file. The path is relative to your **repository root**:
       ./plugins/my-custom-plugin.js
       ./scripts/yuki-plugins/slack-notifier.js
       ./.github/plugins/custom-labeler.js
-```
-
-### Publishing
-
-1. **Create Package**: Create a package named like `yuki-no-plugin-<name>`
-2. **Export Plugin**: Export the plugin as `default` from your entry file
-3. **Publish**: Publish the package to npm
-4. **Install**: Install it in your repository where you use Yuki-no
-5. **Configure**: Add the package name to the `plugins` option in your workflow
-
-Example package structure:
-
-```
-yuki-no-plugin-example/
-├── package.json
-├── index.js (or index.ts)
-└── README.md
-```
-
-Your `index.js` should export the plugin as default:
-
-```javascript
-export default {
-  name: 'example-plugin',
-  async onInit(ctx) {
-    // Plugin implementation
-  },
-};
 ```

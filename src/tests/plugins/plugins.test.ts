@@ -2,6 +2,25 @@ import { loadPlugins } from '../../plugins/core';
 
 import { describe, expect, it, vi } from 'vitest';
 
+const mockExamplePlugin = {
+  name: 'yuki-no-plugin-example',
+  async onInit(ctx: any) {
+    if (ctx.inputs['my-plugin-input']) {
+      console.log(`my-plugin-input: ${ctx.inputs['my-plugin-input']}`);
+    }
+  },
+  async onBeforeCompare() {},
+  async onAfterCompare() {},
+  async onBeforeCreateIssue() {},
+  async onAfterCreateIssue() {},
+  async onExit() {},
+  async onError() {},
+};
+
+vi.doMock('yuki-no-plugin-example', () => ({
+  default: mockExamplePlugin,
+}));
+
 describe('plugin loading and hooks', () => {
   it('loads plugin and calls hooks', async () => {
     const plugins = await loadPlugins(['yuki-no-plugin-example']);

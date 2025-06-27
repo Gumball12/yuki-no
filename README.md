@@ -168,7 +168,6 @@ Also you can create custom plugins to hook into Yuki-no's execution lifecycle. S
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and contribution guidelines.
-For plugin development, see [PLUGINS.md](PLUGINS.md).
 
 ## License
 
