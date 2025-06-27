@@ -108,6 +108,14 @@ const myPlugin: YukiNoPlugin = {
 export default myPlugin;
 ```
 
+- `onInit(ctx: YukiNoContext)`: Called when the action starts, after configuration is loaded.
+- `onBeforeCompare(ctx: YukiNoContext)`: Called before comparing commits between repositories.
+- `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`: Called after commit comparison, with the list of new commits.
+- `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`: Called before each issue is created. The `meta` object is read-only for inspection purposes.
+- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`: Called after each issue is created.
+- `onExit(ctx: YukiNoContext & { success: boolean })`: Called before the action exits (success or failure).
+- `onError(ctx: YukiNoContext & { error: Error })`: Called when any error occurs during execution.
+
 See [@gumball12/yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin-test) for a plugin example.
 
 ### Passing Inputs to Plugins
@@ -132,16 +140,6 @@ const customMessage = getInput(ctx.inputs, 'custom-message');
 const isTrue = getBooleanInput(ctx.inputs, 'is-true');
 const myValues = getMultilineInput(ctx.inputs, 'my-values');
 ```
-
-### Hook Reference
-
-- `onInit(ctx: YukiNoContext)`: Called when the action starts, after configuration is loaded.
-- `onBeforeCompare(ctx: YukiNoContext)`: Called before comparing commits between repositories.
-- `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`: Called after commit comparison, with the list of new commits.
-- `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`: Called before each issue is created. The `meta` object is read-only for inspection purposes.
-- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`: Called after each issue is created.
-- `onExit(ctx: YukiNoContext & { success: boolean })`: Called before the action exits (success or failure).
-- `onError(ctx: YukiNoContext & { error: Error })`: Called when any error occurs during execution.
 
 ### Context Types
 
