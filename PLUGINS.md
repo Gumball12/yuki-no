@@ -70,6 +70,8 @@ const myPlugin: YukiNoPlugin = {
 
   async onInit(ctx) {
     console.log('Plugin initialized!');
+    console.log(`Tracking from: ${ctx.config.trackFrom}`);
+    console.log(`Release tracking: ${ctx.config.releaseTracking}`);
     // Initialize plugin state, validate configuration
   },
 
@@ -154,6 +156,23 @@ const myValues = getMultilineInput('PLUGIN_MY_VALUES');
 type YukiNoContext = {
   octokit: Octokit; // GitHub API client (@octokit/rest)
   context: Context; // GitHub Actions context (@actions/github/lib/context)
+  config: Config; // Yuki-no configuration settings
+};
+
+type Config = {
+  accessToken: string;
+  userName: string;
+  email: string;
+  upstreamRepoSpec: RepoSpec;
+  headRepoSpec: RepoSpec;
+  trackFrom: string;
+  include: string[];
+  exclude: string[];
+  labels: string[];
+  releaseTracking: boolean;
+  releaseTrackingLabels: string[];
+  plugins: string[];
+  verbose: boolean;
 };
 
 type IssueMeta = {

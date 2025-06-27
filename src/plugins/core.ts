@@ -1,3 +1,4 @@
+import type { Config } from '../createConfig';
 import type { Commit } from '../git/getCommits';
 import type { Issue } from '../github/getOpenedIssues';
 
@@ -7,6 +8,7 @@ import type { Octokit } from '@octokit/rest';
 export type YukiNoContext = Readonly<{
   octokit: Octokit;
   context: Context;
+  config: Config;
 }>;
 
 export type IssueMeta = Readonly<{

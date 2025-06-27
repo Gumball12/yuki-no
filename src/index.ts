@@ -44,6 +44,7 @@ const start = async () => {
   const pluginCtx: YukiNoContext = {
     octokit: github.api,
     context: actionsContext,
+    config,
   };
 
   let success = false;

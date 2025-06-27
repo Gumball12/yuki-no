@@ -31,7 +31,7 @@ describe('plugin loading and hooks', () => {
   it('loads plugin and calls hooks', async () => {
     const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
-    const ctx: any = { octokit: {}, context: {} };
+    const ctx: any = { octokit: {}, context: {}, config: {} };
     const spies = {
       onInit: vi.spyOn(plugin, 'onInit'),
       onBeforeCompare: vi.spyOn(plugin, 'onBeforeCompare'),
@@ -74,6 +74,7 @@ describe('plugin loading and hooks', () => {
     const ctx: any = {
       octokit: {},
       context: {},
+      config: {},
     };
 
     await plugin.onInit?.(ctx);
@@ -91,6 +92,7 @@ describe('plugin loading and hooks', () => {
     const ctx: any = {
       octokit: {},
       context: {},
+      config: {},
     };
 
     await plugin.onInit?.(ctx);
