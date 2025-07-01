@@ -18,7 +18,6 @@ const TEST_CONFIG = {
     branch: 'main',
   },
   labels: ['label1', 'label2'],
-  releaseTrackingLabels: ['pending'],
 };
 
 beforeEach(() => {
@@ -43,13 +42,6 @@ describe('getter methods', () => {
   it('configuredLabels should return the correct value', () => {
     const github = new GitHub(TEST_CONFIG);
     expect(github.configuredLabels).toEqual(TEST_CONFIG.labels);
-  });
-
-  it('releaseTrackingLabels should return the correct value', () => {
-    const github = new GitHub(TEST_CONFIG);
-    expect(github.releaseTrackingLabels).toEqual(
-      TEST_CONFIG.releaseTrackingLabels,
-    );
   });
 });
 

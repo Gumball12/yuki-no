@@ -1,5 +1,5 @@
 import { getBooleanInput, getInput, getMultilineInput } from './inputUtils';
-import { assert, excludeFrom, log } from './utils';
+import { assert, log } from './utils';
 
 import path from 'node:path';
 
@@ -14,7 +14,6 @@ export type Config = Readonly<{
   exclude: string[];
   labels: string[];
   releaseTracking: boolean;
-  releaseTrackingLabels: string[];
   plugins: string[];
   verbose: boolean;
 }>;
@@ -30,7 +29,6 @@ export const defaults = {
   email: 'action@github.com',
   branch: 'main',
   label: 'sync',
-  releaseTrackingLabel: 'pending',
 } as const;
 
 export const createConfig = (): Config => {
@@ -64,12 +62,14 @@ export const createConfig = (): Config => {
   const plugins = getMultilineInput('PLUGINS');
 
   const releaseTracking = getBooleanInput('RELEASE_TRACKING');
-  const rawReleaseLabels = getMultilineInput('RELEASE_TRACKING_LABELS', [
-    defaults.releaseTrackingLabel,
-  ]);
-  const releaseTrackingLabels = excludeFrom(rawReleaseLabels, sortedLabels);
 
   const verbose = getBooleanInput('VERBOSE');
+
+  // Compatibility layer: automatically add core plugin when release-tracking is enabled
+  const finalPlugins = [...plugins];
+  if (releaseTracking && !finalPlugins.includes('core:release-tracking')) {
+    finalPlugins.push('core:release-tracking');
+  }
 
   return {
     accessToken: accessToken!,
@@ -82,8 +82,7 @@ export const createConfig = (): Config => {
     exclude,
     labels: sortedLabels,
     releaseTracking,
-    releaseTrackingLabels,
-    plugins,
+    plugins: finalPlugins,
     verbose,
   };
 };

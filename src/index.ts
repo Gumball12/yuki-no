@@ -1,13 +1,11 @@
 import { type Config, createConfig } from './createConfig';
 import { Git } from './git/core';
 import { getCommits } from './git/getCommits';
-import { getRelease } from './git/getRelease';
-import { hasAnyRelease } from './git/hasAnyRelease';
 import { createRepoUrl } from './git/utils';
 import { GitHub } from './github/core';
 import { createIssue } from './github/createIssue';
 import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
-import { getOpenedIssues, type Issue } from './github/getOpenedIssues';
+import { type Issue } from './github/getOpenedIssues';
 import { lookupCommitsInIssues } from './github/lookupCommitsInIssues';
 import {
   type IssueMeta,
@@ -15,9 +13,7 @@ import {
   type YukiNoContext,
   type YukiNoPlugin,
 } from './plugins/core';
-import { updateIssueCommentByRelease } from './releaseTracking/updateIssueCommentsByRelease';
-import { updateIssueLabelsByRelease } from './releaseTracking/updateIssueLabelsByRelease';
-import { log, mergeArray, uniqueWith } from './utils';
+import { log } from './utils';
 
 import { context as actionsContext } from '@actions/github';
 import shell from 'shelljs';
@@ -53,17 +49,7 @@ const start = async () => {
       await plugin.onInit?.({ ...pluginCtx });
     }
 
-    const createdIssues = await syncCommits(
-      github,
-      git,
-      config,
-      plugins,
-      pluginCtx,
-    );
-
-    if (config.releaseTracking) {
-      await releaseTracking(github, git, createdIssues);
-    }
+    await syncCommits(github, git, config, plugins, pluginCtx);
 
     const endTime = new Date();
     const duration = (endTime.getTime() - startTime.getTime()) / 1000;
@@ -143,43 +129,6 @@ const syncCommits = async (
   );
 
   return createdIssues;
-};
-
-const releaseTracking = async (
-  github: GitHub,
-  git: Git,
-  createdIssues: Issue[],
-) => {
-  log('I', '=== Release tracking started ===');
-
-  const openedIssues = await getOpenedIssues(github);
-  const releaseTrackingIssues = uniqueWith(
-    mergeArray(openedIssues, createdIssues),
-    ({ hash }) => hash,
-  );
-
-  const releaseInfos = releaseTrackingIssues.map(issue =>
-    getRelease(git, issue.hash),
-  );
-  const releasesAvailable = hasAnyRelease(git);
-
-  for (let ind = 0; ind < releaseInfos.length; ind++) {
-    const releaseInfo = releaseInfos[ind];
-    const openedIssue = releaseTrackingIssues[ind];
-
-    await updateIssueLabelsByRelease(github, openedIssue, releaseInfo);
-    await updateIssueCommentByRelease(
-      github,
-      openedIssue,
-      releaseInfo,
-      releasesAvailable,
-    );
-  }
-
-  log(
-    'S',
-    `releaseTracking :: Release information updated for ${releaseTrackingIssues.length} issues`,
-  );
 };
 
 start();

@@ -10,7 +10,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['src/*'],
-      exclude: ['src/tests/*', 'src/index.ts', '*.config.ts'],
+      exclude: [
+        'src/tests/*',
+        '*.config.ts',
+
+        // orchestration
+        'src/index.ts',
+        'src/plugins/**/index.ts',
+      ],
     },
   },
 });

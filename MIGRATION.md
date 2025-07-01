@@ -76,7 +76,7 @@ For detailed option descriptions, see [README](./README.md#configuration).
 
 - `include`, `exclude`: Filter files to track using Glob patterns
 - `labels`: Labels to add to issues (default: `sync`)
-- `release-tracking`, `release-tracking-labels`: Track release status (`release-tracking-labels` default: `pending`)
+- `plugins`: Load additional functionality. See [PLUGINS.md](./PLUGINS.md) for details.
 - `verbose`: Show detailed logs (default: `true`)
 
 #### Important Notes

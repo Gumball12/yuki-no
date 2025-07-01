@@ -1,29 +1,39 @@
-import type { ReleaseInfo } from '../../git/getRelease';
-import { GitHub } from '../../github/core';
-import * as CreateIssueCommentModule from '../../github/createIssueComment';
-import * as GetLastIssueCommentsModule from '../../github/getLastIssueComments';
-import type { Issue } from '../../github/getOpenedIssues';
-import { updateIssueCommentByRelease } from '../../releaseTracking/updateIssueCommentsByRelease';
+import type { ReleaseInfo } from '../../../git/getRelease';
+import { GitHub } from '../../../github/core';
+import * as CreateIssueCommentModule from '../../../github/createIssueComment';
+import * as GetLastIssueCommentsModule from '../../../github/getLastIssueComments';
+import type { Issue } from '../../../github/getOpenedIssues';
+import { updateIssueCommentByRelease } from '../../../plugins/release-tracking/updateIssueCommentsByRelease';
 
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['pending'];
 
 // Mocking to bypass network requests
-vi.mock('../../github/core', () => ({
+vi.mock('../../../github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
-    releaseTrackingLabels: MOCK_RELEASE_TRACKING_LABELS,
+    configuredLabels: [],
   })),
 }));
 
-vi.mock('../../github/getLastIssueComments', () => ({
+vi.mock('../../../github/getLastIssueComments', () => ({
   getLastIssueComment: vi.fn(),
 }));
 
-vi.mock('../../github/createIssueComment', () => ({
+vi.mock('../../../github/createIssueComment', () => ({
   createIssueComment: vi.fn(),
+}));
+
+// Mock environment variables
+vi.mock('../../../inputUtils', () => ({
+  getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
+    if (key === 'RELEASE_TRACKING_LABELS') {
+      return MOCK_RELEASE_TRACKING_LABELS;
+    }
+    return defaultValue;
+  }),
 }));
 
 const mockGitHub = new GitHub({} as any);
@@ -182,7 +192,7 @@ it('Adds an informational comment when no releases exist', async () => {
     MOCK_ISSUE.number,
     [
       '> This comment and the `pending` label appear because release-tracking is enabled.',
-      '> To disable, remove the `release-tracking` option or set it to `false`.',
+      '> To disable, remove `core:release-tracking` from the plugins list.',
       '\n',
       '- pre-release: none',
       '- release: none',

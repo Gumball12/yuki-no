@@ -41,26 +41,31 @@ Yuki-no improves on existing solutions with several reliability enhancements:
 
 These improvements ensure no commits are missed, even in challenging situations like Action failures or API rate limits. By tracking only successful Action runs as checkpoints, Yuki-no prevents losing commits during temporary failures. It automatically resumes from the last successful point. This makes it especially reliable for projects with frequent documentation updates.
 
-### 2. Release Status Tracking
+### 2. Extensible Plugin System
 
-Release status tracking is vital for documentation translation. Users expect documentation to match released software versions. Translators need to know which content is released and which isn't.
+Yuki-no features a powerful plugin system that allows teams to customize their translation workflows according to their specific needs. This extensibility sets it apart from other tools that offer only fixed functionality.
 
-While existing tools focus mainly on detecting changes, Yuki-no adds comprehensive release tracking. This feature helps translation teams prioritize their work and keep documentation in sync with official releases.
+The plugin architecture enables:
+
+- **Custom Workflow Integration**: Hook into various stages of the tracking process
+- **Modular Functionality**: Enable only the features you need
+- **Community Contributions**: Develop and share plugins with the community
 
 <p align="center">
 
-<img width="350" src="./docs/release-tracking-example.webp" title="Release Tracking Example" alt="Release Tracking Example">
+<img width="350" src="./docs/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
 
-_Example: Yuki-no tracks release status and updates issue comments accordingly_
+_Example: The core:release-tracking plugin automatically manages release status_
 
 </p>
 
-Through the `release-tracking` and `release-tracking-labels` options, Yuki-no provides:
+For instance, the built-in `core:release-tracking` plugin provides:
 
 - Automated release status tracking using Issue Comments
 - Issue Labels for better organization
+- Pre-release and release monitoring
 
-This systematic approach helps teams prioritize translation based on release status and avoid translating unreleased features too early. It also maintains clear visibility of content readiness and streamlines the translation workflow.
+This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
 
 ### 3. Work Status Tracking
 

@@ -39,5 +39,13 @@ describe('Plugin version validation', () => {
     // Edge cases
     expect(getResolveId('plugin')).toBe('plugin');
     expect(getResolveId('@scoped/package')).toBe('@scoped/package');
+
+    // Core plugins
+    expect(getResolveId('core:release-tracking')).toBe(
+      './plugins/release-tracking',
+    );
+    expect(getResolveId('core:example-plugin')).toBe(
+      './plugins/example-plugin',
+    );
   });
 });

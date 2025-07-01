@@ -69,6 +69,13 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
 };
 
 export const getResolveId = (name: string): string => {
+  const isCorePlugin = name.startsWith('core:');
+
+  if (isCorePlugin) {
+    const pluginName = name.slice(5); // Remove 'core:' prefix
+    return `./plugins/${pluginName}`;
+  }
+
   const isScopedPackage = name.startsWith('@');
 
   if (isScopedPackage) {

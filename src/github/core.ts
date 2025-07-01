@@ -5,10 +5,7 @@ import { retry } from '@octokit/plugin-retry';
 import { throttling } from '@octokit/plugin-throttling';
 import { Octokit } from '@octokit/rest';
 
-type GitHubConfig = Pick<
-  Config,
-  'accessToken' | 'labels' | 'releaseTrackingLabels'
-> & {
+type GitHubConfig = Pick<Config, 'accessToken' | 'labels'> & {
   repoSpec: RepoSpec;
 };
 
@@ -108,9 +105,5 @@ export class GitHub {
 
   get configuredLabels(): string[] {
     return this.#config.labels;
-  }
-
-  get releaseTrackingLabels(): string[] {
-    return this.#config.releaseTrackingLabels;
   }
 }

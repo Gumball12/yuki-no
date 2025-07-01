@@ -1,24 +1,34 @@
-import type { ReleaseInfo } from '../../git/getRelease';
-import { GitHub } from '../../github/core';
-import type { Issue } from '../../github/getOpenedIssues';
-import * as SetIssueLabelsModule from '../../github/setIssueLabels';
-import { updateIssueLabelsByRelease } from '../../releaseTracking/updateIssueLabelsByRelease';
+import type { ReleaseInfo } from '../../../git/getRelease';
+import { GitHub } from '../../../github/core';
+import type { Issue } from '../../../github/getOpenedIssues';
+import * as SetIssueLabelsModule from '../../../github/setIssueLabels';
+import { updateIssueLabelsByRelease } from '../../../plugins/release-tracking/updateIssueLabelsByRelease';
 
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['needs-release', 'in-next-release'];
 
 // Mocking to avoid network requests
-vi.mock('../../github/core', () => ({
+vi.mock('../../../github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
-    releaseTrackingLabels: MOCK_RELEASE_TRACKING_LABELS,
+    configuredLabels: [],
   })),
 }));
 
-vi.mock('../../github/setIssueLabels', () => ({
+vi.mock('../../../github/setIssueLabels', () => ({
   setIssueLabels: vi.fn(),
+}));
+
+// Mock environment variables
+vi.mock('../../../inputUtils', () => ({
+  getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
+    if (key === 'RELEASE_TRACKING_LABELS') {
+      return MOCK_RELEASE_TRACKING_LABELS;
+    }
+    return defaultValue;
+  }),
 }));
 
 const mockGitHub = new GitHub({} as any);

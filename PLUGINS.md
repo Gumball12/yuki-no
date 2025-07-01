@@ -8,39 +8,60 @@ Yuki-no executes plugins through a well-defined lifecycle that corresponds to th
 
 ### Lifecycle Flow
 
-```mermaid
-graph TD
-    A[🚀 Action Start] --> B[onInit]
-    B --> C[🔍 Before Compare Commits]
-    C --> D[onBeforeCompare]
-    D --> E[📊 Compare Commits]
-    E --> F[onAfterCompare]
-    F --> G{Any New Commits?}
-
-    G -->|Yes| H[📝 For Each Commit]
-    G -->|No| P[🏁 Action End]
-
-    H --> I[onBeforeCreateIssue]
-    I --> J[🎫 Create GitHub Issue]
-    J --> K[onAfterCreateIssue]
-    K --> L{More Commits?}
-
-    L -->|Yes| H
-    L -->|No| M[🔄 Release Tracking]
-    M --> P
-
-    P --> N[onExit]
-    N --> O[✅ Complete]
-
-
-    style A fill:#e1f5fe
-    style O fill:#e8f5e8
-    style B fill:#fff3e0
-    style D fill:#fff3e0
-    style F fill:#fff3e0
-    style I fill:#fff3e0
-    style K fill:#fff3e0
-    style N fill:#fff3e0
+```
+🚀 Action Start
+      │
+      ▼
+  ┌─────────────┐
+  │  onInit()   │ ← Plugin initialization
+  └─────┬───────┘
+        │
+        ▼
+  ┌─────────────┐
+  │onBefore     │ ← Before comparing commits
+  │Compare()    │
+  └─────┬───────┘
+        │
+        ▼
+    📊 Compare Commits & Find New Changes
+        │
+        ▼
+  ┌─────────────┐
+  │ onAfter     │ ← After comparing commits
+  │ Compare()   │
+  └─────┬───────┘
+        │
+        ▼
+  ┌─────────────┐     No commits
+  │New Commits? ├─────────────┐
+  └─────┬───────┘             │
+        │ Yes                 │
+        ▼                     │
+   For each commit:           │
+        │                     │
+        ▼                     │
+  ┌─────────────┐             │
+  │onBefore     │             │
+  │CreateIssue()│ ← Before creating issue
+  └─────┬───────┘             │
+        │                     │
+        ▼                     │
+    🎫 Create GitHub Issue    │
+        │                     │
+        ▼                     │
+  ┌─────────────┐             │
+  │ onAfter     │             │
+  │CreateIssue()│ ← After creating issue
+  └─────┬───────┘             │
+        │                     │
+        └─────────────────────┤
+                              ▼
+                        ┌─────────────┐
+                        │  onExit()   │ ← Cleanup & finalization
+                        └─────┬───────┘
+                              │
+                              ▼
+                          ✅ Complete
 ```
 
 ## Plugin Development
@@ -173,7 +194,6 @@ type Config = {
   exclude: string[];
   labels: string[];
   releaseTracking: boolean;
-  releaseTrackingLabels: string[];
   plugins: string[];
   verbose: boolean;
 };
@@ -194,7 +214,9 @@ type IssueMeta = {
 
 ## Using Plugins
 
-> [!NOTE] > **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
+> [!NOTE]
+>
+> **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
 
 Specify published npm packages with exact version:
 

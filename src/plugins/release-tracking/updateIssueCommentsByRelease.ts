@@ -1,9 +1,11 @@
-import type { ReleaseInfo } from '../git/getRelease';
-import type { GitHub } from '../github/core';
-import { createIssueComment } from '../github/createIssueComment';
-import { getLastIssueComment } from '../github/getLastIssueComments';
-import type { Issue } from '../github/getOpenedIssues';
-import { log } from '../utils';
+import type { ReleaseInfo } from '../../git/getRelease';
+import type { GitHub } from '../../github/core';
+import { createIssueComment } from '../../github/createIssueComment';
+import { getLastIssueComment } from '../../github/getLastIssueComments';
+import type { Issue } from '../../github/getOpenedIssues';
+import { log } from '../../utils';
+
+import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 
 export const updateIssueCommentByRelease = async (
   github: GitHub,
@@ -52,11 +54,12 @@ const createReleaseComment = (
   const pRelContent = `- pre-release: ${prerelease ? `[${prerelease.version}](${prerelease.url})` : 'none'}`;
   const relContent = `- release: ${release ? `[${release.version}](${release.url})` : 'none'}`;
 
+  const releaseTrackingLabels = getReleaseTrackingLabels(github);
   const releaseAvailableContent =
     !releasesAvailable &&
     [
-      `> This comment and the \`${github.releaseTrackingLabels.join(', ')}\` label appear because release-tracking is enabled.`,
-      '> To disable, remove the `release-tracking` option or set it to `false`.',
+      `> This comment and the \`${releaseTrackingLabels.join(', ')}\` label appear because release-tracking is enabled.`,
+      '> To disable, remove `core:release-tracking` from the plugins list.',
       '\n',
     ].join('\n');
 

@@ -1,15 +1,17 @@
-import type { ReleaseInfo } from '../git/getRelease';
-import type { GitHub } from '../github/core';
-import type { Issue } from '../github/getOpenedIssues';
-import { setIssueLabels } from '../github/setIssueLabels';
-import { log, unique } from '../utils';
+import type { ReleaseInfo } from '../../git/getRelease';
+import type { GitHub } from '../../github/core';
+import type { Issue } from '../../github/getOpenedIssues';
+import { setIssueLabels } from '../../github/setIssueLabels';
+import { log, unique } from '../../utils';
+
+import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 
 export const updateIssueLabelsByRelease = async (
   github: GitHub,
   issue: Issue,
   releaseInfo: ReleaseInfo,
 ): Promise<void> => {
-  const releaseTrackingLabels = github.releaseTrackingLabels;
+  const releaseTrackingLabels = getReleaseTrackingLabels(github);
   const isReleased = releaseInfo.release !== undefined;
   const nextLabels = isReleased
     ? issue.labels.filter(label => !releaseTrackingLabels.includes(label))

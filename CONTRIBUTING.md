@@ -122,7 +122,8 @@ src/
 ├── utils.ts           # Utility functions
 ├── git/               # Git operations
 ├── github/            # GitHub API interactions
-├── releaseTracking/   # Release tracking functionality
+├── plugins/           # Plugin system and core plugins
+│   └── release-tracking/  # Core release tracking plugin
 └── tests/             # Unit tests
 ```
 

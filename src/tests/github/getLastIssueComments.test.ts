@@ -97,15 +97,21 @@ it('Should ignore comments with undefined body', async () => {
   expect(result).toBe(COMMENT);
 });
 
-it('', async () => {
-  const RELEASE_AVAILABLE_CONTENT = `> This comment and the \`pending\` label appear because release-tracking is enabled.
-> To disable, remove the \`release-tracking\` option or set it to \`false\`.
+it('Should extract release content from comment with release available warning', async () => {
+  const INFO_CONTENT = [
+    '> This comment and the `pending` label appear because release-tracking is enabled.',
+    '> To disable, remove the `release-tracking` option or set it to `false`.',
+    '',
+    '',
+    '',
+  ].join('\n');
 
+  const RELEASE_CONTENT = [
+    '- pre-release: [v6.1.0-beta.1](https://github.com/vitejs/vite/releases/tag/v6.1.0-beta.1)',
+    '- release: [v6.1.0](https://github.com/vitejs/vite/releases/tag/v6.1.0)',
+  ].join('\n');
 
-`;
-  const RELEASE_CONTENT = `- pre-release: [v6.1.0-beta.1](https://github.com/vitejs/vite/releases/tag/v6.1.0-beta.1)
-- release: [v6.1.0](https://github.com/vitejs/vite/releases/tag/v6.1.0)`;
-  const COMMENT = [RELEASE_AVAILABLE_CONTENT, RELEASE_CONTENT].join('\n');
+  const COMMENT = [INFO_CONTENT, RELEASE_CONTENT].join('\n');
 
   (mockGitHub.api.issues.listComments as any).mockResolvedValue({
     data: [{ body: COMMENT }],

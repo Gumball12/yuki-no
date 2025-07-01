@@ -41,11 +41,13 @@ inputs:
     default: |
       sync
   release-tracking:
-    description: 'Whether to enable release tracking. When enabled, Yuki-no will track releases for each issue and add comments about release status.'
+    description: '(Deprecated) Whether to enable release tracking. Use plugins: ["core:release-tracking"] instead.'
     required: false
+    deprecationMessage: 'release-tracking option is deprecated. Use plugins: ["core:release-tracking"] instead. See documentation for migration guide.'
   release-tracking-labels:
-    description: 'Labels for unreleased changes. Added to issues until changes are released. If empty string is provided, no labels will be added. Defaults to "pending". (newline separated)'
+    description: '(Deprecated) Labels for unreleased changes. Use env.RELEASE_TRACKING_LABELS instead.'
     required: false
+    deprecationMessage: 'release-tracking-labels option is deprecated. Set RELEASE_TRACKING_LABELS in env block instead.'
     default: |
       pending
   verbose:
