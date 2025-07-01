@@ -4,6 +4,8 @@ import type { Issue } from '../github/getOpenedIssues';
 
 import type { Context } from '@actions/github/lib/context';
 import type { Octokit } from '@octokit/rest';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 export type YukiNoContext = Readonly<{
   octokit: Octokit;
@@ -68,12 +70,14 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   return plugins;
 };
 
+const CORE_PLUGIN_ROOT = path.dirname(fileURLToPath(import.meta.url));
+
 export const getResolveId = (name: string): string => {
   const isCorePlugin = name.startsWith('core:');
 
   if (isCorePlugin) {
     const pluginName = name.slice(5); // Remove 'core:' prefix
-    return `./plugins/${pluginName}`;
+    return path.resolve(CORE_PLUGIN_ROOT, pluginName);
   }
 
   const isScopedPackage = name.startsWith('@');

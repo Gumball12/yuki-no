@@ -41,11 +41,11 @@ describe('Plugin version validation', () => {
     expect(getResolveId('@scoped/package')).toBe('@scoped/package');
 
     // Core plugins
-    expect(getResolveId('core:release-tracking')).toBe(
-      './plugins/release-tracking',
-    );
-    expect(getResolveId('core:example-plugin')).toBe(
-      './plugins/example-plugin',
-    );
+    expect(
+      getResolveId('core:release-tracking').endsWith('/release-tracking'),
+    ).toBeTruthy();
+    expect(
+      getResolveId('core:example-plugin').endsWith('/example-plugin'),
+    ).toBeTruthy();
   });
 });
