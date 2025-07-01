@@ -29,7 +29,7 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 
 1. Add Labels to Translation Issues for Yuki-no Tracking
 
-   <img width="400" src="./docs/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
+   <img width="400" src="./assets/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
    - Yuki-no identifies which issues it manages through labels
    - Go to GitHub and create labels like `sync`
    - Add these labels to your existing translation issues
@@ -37,7 +37,7 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 
 2. Create Yuki-no Action Configuration File
 
-   <img width="350" src="./docs/create-an-action.webp" title="Create an Action" alt="Create an Action">
+   <img width="350" src="./assets/create-an-action.webp" title="Create an Action" alt="Create an Action">
    - Remove any existing sync action files (like Ryu-Cho)
    - Create a new Yuki-no config file by following the [Usage](https://github.com/Gumball12/yuki-no?tab=readme-ov-file#usage) section
    - If moving from Ryu-Cho, check the [Yuki-no Options vs Ryu-Cho Options](#yuki-no-options-vs-ryu-cho-options) section below
@@ -49,7 +49,7 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 
 #### Yuki-no Options vs Ryu-Cho Options
 
-For detailed option descriptions, see [README](./README.md#configuration).
+For detailed option descriptions, see [README](../README.md#configuration).
 
 **Options No Longer Required:**
 
@@ -83,7 +83,7 @@ For detailed option descriptions, see [README](./README.md#configuration).
 
 **If issues or comments aren't being created:**
 
-![settings](./docs/settings.webp)
+![settings](./assets/settings.webp)
 
 - Go to Settings > Actions > General > Workflow permissions
 - Select "Read and write permissions"

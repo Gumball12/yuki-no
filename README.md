@@ -1,4 +1,4 @@
-# <img width="35" src="docs/logo.webp" title="logo" alt="logo"> Yuki-no
+# <img width="35" src="./docs/assets/logo.webp" title="logo" alt="logo"> Yuki-no
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
 
@@ -6,9 +6,9 @@
 
 Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.
 
-> **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./WHY.md) might be the right choice for your project.
+> **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./docs/WHY.md) might be the right choice for your project.
 
-> Looking to migrate from a GitHub Issues-based translation project like Ryu-cho? Check out our [migration guide](./MIGRATION.md) for a seamless transition.
+> Looking to migrate from a GitHub Issues-based translation project like Ryu-cho? Check out our [migration guide](./docs/MIGRATION.md) for a seamless transition.
 
 ## Features
 
@@ -16,7 +16,7 @@ Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes b
 - Creates issues for new changes
 - Filters changes based on file paths (`include` and `exclude` options)
 - Supports custom labels for issues (`labels` option)
-- Extensible [plugin system](./PLUGINS.md) for custom functionality
+- Extensible [plugin system](./docs/PLUGINS.md) for custom functionality
 
 Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg"> [Vite Korean docs translation project](https://github.com/vitejs/docs-ko), <img width="20" src="https://vuejs.org/logo.svg"> [Korean translation for Vue docs](https://github.com/vuejs-translations/docs-ko), and <img width="20" src="https://vitejs.dev/logo.svg"> [Template for Vite.js docs translation repositories](https://github.com/tony19/vite-docs-template) demonstrating its effectiveness in real-world translation workflows.
 
@@ -31,7 +31,7 @@ Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg
    - Creates issues for new changes with your specified `labels`
 3. **Plugin Integration** (when configured)
    - Executes custom plugins during various lifecycle stages
-   - See [Plugin System](./PLUGINS.md) for available plugins, usage, and lifecycle details
+   - See [Plugin System](./docs/PLUGINS.md) for available plugins, usage, and lifecycle details
 
 The entire process runs safely without affecting your local environment or git configuration.
 
@@ -39,7 +39,7 @@ The entire process runs safely without affecting your local environment or git c
 
 1. **Required**: Configure workflow permissions
 
-   ![settings](./docs/settings.webp)
+   ![settings](./docs/assets/settings.webp)
 
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
@@ -99,9 +99,9 @@ The entire process runs safely without affecting your local environment or git c
                docs/**
 
              # [Optional]
-             # List of plugins to load. See PLUGINS.md for details.
+             # List of plugins to load. See ./docs/PLUGINS.md for details.
              # For example, core:release-tracking enables release status tracking
-             # (see: https://github.com/Gumball12/yuki-no/tree/main/src/plugins/release-tracking/README.md)
+             # (see: ./src/plugins/release-tracking/README.md)
              plugins: |
                core:release-tracking
    ```
@@ -122,7 +122,7 @@ The entire process runs safely without affecting your local environment or git c
 | `include`          | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked.                                                  |
 | `exclude`          | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns.                                                      |
 | `labels`           | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. |
-| `plugins`          | No       | -                          | List of plugins to load. See [PLUGINS.md](./PLUGINS.md) for details. (newline separated)                                        |
+| `plugins`          | No       | -                          | List of plugins to load. See [PLUGINS.md](./docs/PLUGINS.md) for details. (newline separated)                                   |
 | `verbose`          | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
 
 #### File Pattern Examples
@@ -143,7 +143,7 @@ For more information on Glob Patterns, see [Picomatch docs](https://github.com/m
 
 ## Plugins
 
-Yuki-no supports a plugin system for extending functionality. For detailed information about plugin development, lifecycle, and usage examples, see [PLUGINS.md](./PLUGINS.md).
+Yuki-no supports a plugin system for extending functionality. For detailed information about plugin development, lifecycle, and usage examples, see [PLUGINS.md](./docs/PLUGINS.md).
 
 ### Core Plugins
 
@@ -155,7 +155,7 @@ Yuki-no includes built-in core plugins:
 
 ## Compatibility
 
-Yuki-no maintains backward compatibility for all existing workflows. See [COMPATIBILITY.md](./COMPATIBILITY.md).
+Yuki-no maintains backward compatibility for all existing workflows. See [COMPATIBILITY.md](./docs/COMPATIBILITY.md).
 
 ## Contributing
 

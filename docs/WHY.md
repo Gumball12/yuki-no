@@ -27,7 +27,7 @@ Change tracking directly affects translation reliability. It's more important th
 
 <p align="center">
 
-<img width="400" src="./docs/change-tracking-example.webp" title="Change Tracking Example" alt="Change Tracking Example">
+<img width="400" src="./assets/change-tracking-example.webp" title="Change Tracking Example" alt="Change Tracking Example">
 
 _Example: Yuki-no automatically creates an issue for new commits in the head repository_
 
@@ -43,7 +43,7 @@ These improvements ensure no commits are missed, even in challenging situations 
 
 ### 2. Extensible Plugin System
 
-Yuki-no features a powerful plugin system that allows teams to customize their translation workflows according to their specific needs. This extensibility sets it apart from other tools that offer only fixed functionality.
+Yuki-no features a [powerful plugin system](./PLUGINS.md) that allows teams to customize their translation workflows according to their specific needs. This extensibility sets it apart from other tools that offer only fixed functionality.
 
 The plugin architecture enables:
 
@@ -53,7 +53,7 @@ The plugin architecture enables:
 
 <p align="center">
 
-<img width="350" src="./docs/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
+<img width="350" src="./assets/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
 
 _Example: The core:release-tracking plugin automatically manages release status_
 
@@ -91,7 +91,7 @@ Yuki-no delivers all three essential features for technical docs translation pro
 - Provides `include` and `exclude` options based on [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing)
 - Includes a `verbose` option for detailed logging
 
-If you want to start a translation project or add Yuki-no to an existing one, check out the [main guide](README.md). For users of issue-based translation processes like Ryu-Cho, we have a [migration guide](./MIGRATION.md). For real examples, see the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
+If you want to start a translation project or add Yuki-no to an existing one, check out the [main guide](../README.md). For users of issue-based translation processes like Ryu-Cho, we have a [migration guide](./MIGRATION.md). For real examples, see the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
 
 ## Other Open-Source Solutions
 

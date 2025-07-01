@@ -29,7 +29,7 @@ This plugin automatically excludes any labels that are already configured in the
 
 Previously, release tracking was configured using the `release-tracking` and `release-tracking-labels` options directly in the workflow configuration. With the introduction of the plugin system, release tracking is now implemented as a core plugin for better modularity and extensibility.
 
-For backward compatibility and migration details, see [COMPATIBILITY.md](../../COMPATIBILITY.md#legacy-release-tracking-support).
+For backward compatibility and migration details, see [COMPATIBILITY.md](../../../docs/COMPATIBILITY.md#legacy-release-tracking-support).
 
 ## Configuration
 
