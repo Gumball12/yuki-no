@@ -43,29 +43,30 @@ These improvements ensure no commits are missed, even in challenging situations 
 
 ### 2. Extensible Plugin System
 
-Yuki-no features a [powerful plugin system](./PLUGINS.md) that allows teams to customize their translation workflows according to their specific needs. This extensibility sets it apart from other tools that offer only fixed functionality.
+Translation projects require vastly different workflows depending on team size, project scope, content type, and organizational structure. This diversity significantly impacts the choice of translation management tools:
 
-The plugin architecture enables:
+- **Release Tracking**: Some projects need detailed beta/stable release status management
+- **Notification Systems**: Teams prefer different communication channels (Slack, Discord, email, webhooks)
+- **Quality Management**: Varying needs for automated terminology checks, reviewer assignment, etc.
+- **External Integrations**: Existing project management tools, CI/CD pipelines, and custom systems
 
-- **Custom Workflow Integration**: Hook into various stages of the tracking process
-- **Modular Functionality**: Enable only the features you need
-- **Community Contributions**: Develop and share plugins with the community
+Most existing translation management tools provide only fixed workflows. When new requirements emerge or team processes change, teams must either switch tools or use complex workarounds. Custom integrations with external systems or team-specific features are particularly difficult to implement.
 
 <p align="center">
 
-<img width="350" src="./assets/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
+<img width="250" src="./assets/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
 
-_Example: The core:release-tracking plugin automatically manages release status_
+_Example: The `core:release-tracking` plugin automatically manages release status_
 
 </p>
 
-For instance, the built-in `core:release-tracking` plugin provides:
+Yuki-no addresses these diverse requirements through an extensible [plugin architecture](./PLUGINS.md):
 
-- Automated release status tracking using Issue Comments
-- Issue Labels for better organization
-- Pre-release and release monitoring
+- **Custom Workflow Integration**: Hook into various stages of the tracking process to match your specific needs
+- **Modular Functionality**: Enable only the features you need, keeping your setup simple or complex as required
+- **Community Contributions**: Develop and share plugins with the community for common use cases
 
-This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
+For instance, the built-in `core:release-tracking` plugin provides automated release status tracking using Issue Comments and Labels for projects where release management is critical. This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
 
 ### 3. Work Status Tracking
 
