@@ -73,7 +73,7 @@ Yuki-no executes plugins through a well-defined lifecycle that corresponds to th
 Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a development dependency to get TypeScript types, input helpers, and testing utilities:
 
 ```bash
-npm install --save-dev @gumball12/yuki-no
+npm install @gumball12/yuki-no
 ```
 
 ### Creating a Plugin
