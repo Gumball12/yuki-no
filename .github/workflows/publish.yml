@@ -25,21 +25,21 @@ jobs:
         run: corepack enable
 
       - uses: actions/cache@v4
-        id: yarn-cache
+        id: pnpm-cache
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('yarn.lock') }}
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-yarn-
+            ${{ runner.os }}-pnpm-
 
-      - if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn install
+      - if: steps.pnpm-cache.outputs.cache-hit != 'true'
+        run: pnpm install
 
       - name: Set environment variables
         run: echo "MOCKED_REQUEST_TEST=${{ secrets.MOCKED_REQUEST_TEST }}" >> $GITHUB_ENV
 
       - name: Run tests
-        run: yarn test
+        run: pnpm test
 
       - name: Publish to NPM
         run: npm publish --provenance --access public

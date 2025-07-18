@@ -20,7 +20,7 @@ git checkout "${YUKI_NO_VERSION:-main}" || {
 
 # Install base dependencies
 echo "📦 Installing base dependencies..."
-yarn install
+pnpm install
 
 # Install plugins with exact version requirement
 if [ ! -z "${PLUGINS:-}" ]; then
@@ -39,7 +39,7 @@ if [ ! -z "${PLUGINS:-}" ]; then
     
     # Install npm package plugins with exact version
     echo "📦 Installing: $plugin"
-    if yarn add "$plugin"; then
+    if pnpm add "$plugin"; then
       echo "✅ Successfully installed: $plugin"
     else
       echo "❌ Failed to install plugin: $plugin"
