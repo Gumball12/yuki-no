@@ -40,7 +40,7 @@ jobs:
             actions: read
 
           model: 'claude-sonnet-4-20250514' # Avoid implicit model
-          allowed_tools: 'Bash(yarn install),Bash(yarn run build),Bash(yarn run test),Bash(yarn run lint)'
+          allowed_tools: 'Bash(pnpm install),Bash(pnpm run build),Bash(pnpm run test),Bash(pnpm run lint)'
 
           custom_instructions: |
             You are a senior code reviewer for this TypeScript/Node.js project. 

@@ -7,7 +7,7 @@ Thank you for your interest in contributing to Yuki-no! This guide will help you
 ### Prerequisites
 
 - Node.js v22.0.0 or higher
-- [Yarn Classic](https://classic.yarnpkg.com/lang/en/) (install via [Node Corepack](https://nodejs.org/api/corepack.html))
+- [pnpm](https://pnpm.io/) (install via [Node Corepack](https://nodejs.org/api/corepack.html))
   ```bash
   corepack enable
   ```
@@ -51,7 +51,7 @@ For more details, see [GitHub documentation](https://docs.github.com/en/authenti
    cd yuki-no
 
    # Install dependencies
-   yarn install
+   pnpm install
    ```
 
 2. Create `.env` file in the project root
@@ -84,14 +84,14 @@ git checkout -b feat/your-feature
 2. Run tests and the application:
 
 ```bash
-yarn test # unit tests
-yarn start:dev # run script
+pnpm test # unit tests
+pnpm start:dev # run script
 ```
 
 3. Format your code:
 
 ```bash
-yarn lint
+pnpm lint
 ```
 
 4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
@@ -172,7 +172,7 @@ The project uses [Vitest](https://vitest.dev/) for testing. Tests are in the `sr
 To run tests with coverage:
 
 ```bash
-yarn test
+pnpm test
 ```
 
 ### About Mocking

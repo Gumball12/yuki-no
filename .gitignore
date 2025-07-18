@@ -4,6 +4,7 @@
 node_modules/
 repo/*
 npm-debug.log
+pnpm-debug.log
 yarn-error.log
 !.gitkeep
 coverage/
