@@ -90,7 +90,7 @@ runs:
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
         VERBOSE: ${{ inputs.verbose }}
-        run: |
-          cd yuki-no
-          pnpm start
-        shell: bash
+      run: |
+        cd yuki-no
+        pnpm start
+      shell: bash
