@@ -92,5 +92,5 @@ runs:
         VERBOSE: ${{ inputs.verbose }}
       run: |
         cd yuki-no
-        yarn start
+        pnpm start
       shell: bash
