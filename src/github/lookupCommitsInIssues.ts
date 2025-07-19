@@ -36,10 +36,10 @@ export const lookupCommitsInIssues = async (
     // - Server-side filtering: only returns issues that contain specific commit hashes in their body
     // - Avoids downloading thousands of irrelevant issues when we only need a few matches
     // - Much more efficient than client-side filtering of all repository issues
-    // Using advanced_search: true to prepare for 2025-09-04 API deprecation
+    // Using advanced_search: 'true' to prepare for 2025-09-04 API deprecation
     const { data } = await github.api.search.issuesAndPullRequests({
       q,
-      advanced_search: true,
+      advanced_search: 'true',
     });
 
     const findHashes = unique(
