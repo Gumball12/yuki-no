@@ -34,7 +34,7 @@ jobs:
 
           model: 'claude-sonnet-4-20250514' # Avoid implicit model
           use_sticky_comment: true
-          allowed_tools: 'Bash(yarn install),Bash(yarn run build),Bash(yarn run test),Bash(yarn run lint)'
+          allowed_tools: 'Bash(pnpm install),Bash(pnpm run build),Bash(pnpm run test),Bash(pnpm run lint)'
 
           direct_prompt: |
             Review this PR systematically. Check each category and provide specific feedback:

@@ -22,16 +22,16 @@
   "files": [
     "dist"
   ],
-  "packageManager": "yarn@1.22.22",
+  "packageManager": "pnpm@10.13.1",
   "scripts": {
     "start": "tsx src/index.ts",
     "start:dev": "tsx --env-file=.env src/index.ts",
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "type-check": "tsc --noEmit",
-    "lint": "yarn type-check && yarn lint:prettier",
+    "lint": "pnpm type-check && pnpm lint:prettier",
     "lint:prettier": "prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "yarn lint && vitest --coverage --run",
-    "prepublishOnly": "yarn build && cp README.npm.md README.md"
+    "test": "vitest --coverage --run",
+    "prepublishOnly": "pnpm build && cp README.npm.md README.md"
   },
   "dependencies": {
     "@actions/github": "^6.0.1",
