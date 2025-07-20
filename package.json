@@ -30,7 +30,7 @@
     "type-check": "tsc --noEmit",
     "lint": "pnpm type-check && pnpm lint:prettier",
     "lint:prettier": "prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "pnpm lint && vitest --coverage --run",
+    "test": "vitest --coverage --run",
     "prepublishOnly": "pnpm build && cp README.npm.md README.md"
   },
   "dependencies": {

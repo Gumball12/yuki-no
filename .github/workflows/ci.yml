@@ -36,7 +36,7 @@ jobs:
         run: echo "MOCKED_REQUEST_TEST=${{ secrets.MOCKED_REQUEST_TEST }}" >> $GITHUB_ENV
 
       - name: Run lint and tests
-        run: pnpm test
+        run: pnpm lint && pnpm test
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
