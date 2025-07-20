@@ -1,0 +1,64 @@
+name: Claude Code Review
+
+# TEMPORARILY DISABLED
+# This automated review workflow is temporarily disabled to support
+# selective usage of Claude code reviews. Currently using mention-based
+# review workflow (claude.yml) for on-demand feedback only.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  claude-review:
+    # Temporarily disabled - remove this below line to re-enable
+    if: false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          model: 'claude-sonnet-4-20250514' # Avoid implicit model
+          use_sticky_comment: true
+          allowed_tools: 'Bash(yarn install),Bash(yarn run build),Bash(yarn run test),Bash(yarn run lint)'
+
+          direct_prompt: |
+            Review this PR systematically. Check each category and provide specific feedback:
+
+            ✅ **Code Design & Architecture:**
+            □ Is business logic separated from UI/infrastructure concerns?
+            □ Are functions pure where possible (predictable inputs/outputs)?
+            □ Is the code testable without major refactoring?
+            □ Are APIs intuitive and well-designed from user perspective?
+            □ Is dependency injection used for external dependencies?
+
+            ✅ **Testing Strategy:**
+            □ Do tests focus on behavior rather than implementation details?
+            □ Is test coverage meaningful (business logic focused, not just metrics)?
+            □ Are edge cases and error scenarios properly covered?
+            □ Do tests follow Given-When-Then structure where applicable?
+            □ Are tests independent and don't rely on execution order?
+
+            ✅ **Code Quality:**
+            □ Are performance considerations addressed?
+            □ Are security concerns properly handled?
+            □ Is error handling implemented correctly?
+            □ Is type safety maintained (TypeScript best practices)?
+            □ Are naming conventions clear and consistent?
+
+            For each failing item, provide specific, actionable feedback with examples.
+            Focus on what the code DOES, not how it's implemented internally.
