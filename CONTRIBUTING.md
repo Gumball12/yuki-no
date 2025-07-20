@@ -193,6 +193,27 @@ When mocking is necessary, follow these practices:
 - Keep mocks as close to real behavior as possible
 - Reset mocks between tests using `vi.clearAllMocks()`
 
+## Code Review
+
+### Current Approach: On-Demand Only
+
+We use **mention-based Claude reviews** for flexible, selective code feedback.
+
+**How to use:**
+
+```
+@claude Please review this code focusing on [specific concerns]
+```
+
+**Status:**
+
+- ✅ **Interactive Review** (`claude.yml`) - Active
+- ❌ **Automated Review** (`claude-code-review.yml`) - Temporarily disabled
+
+**Why selective approach?** Avoids unnecessary automation while maintaining code quality when needed.
+
+For detailed configuration and principles, see [Claude GitHub Actions documentation](https://docs.anthropic.com/en/docs/claude-code/github-actions).
+
 ## Getting Help
 
 If you need help:

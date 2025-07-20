@@ -1,11 +1,18 @@
 name: Claude Code Review
 
+# TEMPORARILY DISABLED
+# This automated review workflow is temporarily disabled to support
+# selective usage of Claude code reviews. Currently using mention-based
+# review workflow (claude.yml) for on-demand feedback only.
+
 on:
   pull_request:
     types: [opened, synchronize]
 
 jobs:
   claude-review:
+    # Temporarily disabled - remove this below line to re-enable
+    if: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
