@@ -18,6 +18,13 @@ git checkout "${YUKI_NO_VERSION:-main}" || {
   git checkout main
 }
 
+# Check if pnpm is installed, install if not
+if ! command -v pnpm &> /dev/null; then
+    echo "📦 pnpm not found, installing pnpm..."
+    npm install -g pnpm
+    echo "✅ pnpm installed successfully"
+fi
+
 # Install base dependencies
 echo "📦 Installing base dependencies..."
 pnpm install
