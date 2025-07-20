@@ -14,29 +14,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - run: corepack enable
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'pnpm'
 
-      - name: Enable corepack
-        run: corepack enable
-
-      - uses: actions/cache@v4
-        id: pnpm-cache
-        with:
-          path: ./node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - if: steps.pnpm-cache.outputs.cache-hit != 'true'
-        run: pnpm install
-
-      - name: Set environment variables
-        run: echo "MOCKED_REQUEST_TEST=${{ secrets.MOCKED_REQUEST_TEST }}" >> $GITHUB_ENV
-
-      - name: Run lint and tests
-        run: pnpm lint && pnpm test
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm test
+        env:
+          MOCKED_REQUEST_TEST: ${{ secrets.MOCKED_REQUEST_TEST }}
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
