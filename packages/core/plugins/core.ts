@@ -70,27 +70,27 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   return plugins;
 };
 
-const MONOREPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
+const MONOREPO_ROOT = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../..',
+);
 
 export const getResolveId = (name: string): string => {
-  // Check if it's a local monorepo plugin (e.g., "release-tracking")
-  const localPluginPath = path.resolve(MONOREPO_ROOT, 'packages', name);
-  
-  try {
-    // Try to resolve as a local monorepo plugin first
-    return localPluginPath;
-  } catch {
-    // Fallback to external package resolution
-    const isScopedPackage = name.startsWith('@');
-
-    if (isScopedPackage) {
-      return name.split('@').slice(0, 2).join('@');
-    }
-
-    if (name.includes('@')) {
-      return name.split('@')[0];
-    }
-
-    return name;
+  // For local monorepo plugins without version (e.g., "release-tracking")
+  if (!name.includes('@') && !name.startsWith('@')) {
+    return path.resolve(MONOREPO_ROOT, 'packages', name);
   }
+
+  // For external packages with version
+  const isScopedPackage = name.startsWith('@');
+
+  if (isScopedPackage) {
+    return name.split('@').slice(0, 2).join('@');
+  }
+
+  if (name.includes('@')) {
+    return name.split('@')[0];
+  }
+
+  return name;
 };

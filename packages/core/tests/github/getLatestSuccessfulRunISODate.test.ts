@@ -1,8 +1,9 @@
-import { name as ACTION_NAME } from '../../../package.json';
 import { GitHub } from '../../github/core';
 import * as GetLatestModule from '../../github/getLatestSuccessfulRunISODate';
 
 import { beforeEach, expect, it, vi } from 'vitest';
+
+const ACTION_NAME = 'yuki-no';
 
 vi.mock('../../github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({

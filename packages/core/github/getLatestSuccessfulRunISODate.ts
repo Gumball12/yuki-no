@@ -1,7 +1,8 @@
-import { name } from '../../package.json';
 import { log } from '../utils';
 
 import type { GitHub } from './core';
+
+const WORKFLOW_NAME = 'yuki-no';
 
 export const getLatestSuccessfulRunISODate = async (
   github: GitHub,
@@ -17,7 +18,7 @@ export const getLatestSuccessfulRunISODate = async (
 
   const latestSuccessfulRun = data.workflow_runs
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .findLast(run => run.name === name);
+    .findLast(run => run.name === WORKFLOW_NAME);
 
   if (!latestSuccessfulRun) {
     log(

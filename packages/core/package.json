@@ -12,7 +12,7 @@
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
     "type-check": "tsc --noEmit",
     "lint": "pnpm type-check && pnpm lint:prettier",
-    "lint:prettier": "prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
+    "lint:prettier": "prettier --check --write --parser typescript \"**/*.ts\" --ignore-path ../../.gitignore",
     "test": "vitest --coverage --run"
   },
   "dependencies": {

@@ -1,16 +1,16 @@
-import type { ReleaseInfo } from '../../../git/getRelease';
-import { GitHub } from '../../../github/core';
-import * as CreateIssueCommentModule from '../../../github/createIssueComment';
-import * as GetLastIssueCommentsModule from '../../../github/getLastIssueComments';
-import type { Issue } from '../../../github/getOpenedIssues';
-import { updateIssueCommentByRelease } from '../../../plugins/release-tracking/updateIssueCommentsByRelease';
+import { updateIssueCommentByRelease } from '../updateIssueCommentsByRelease';
 
+import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
+import { GitHub } from '@gumball12/yuki-no-core/github/core';
+import * as CreateIssueCommentModule from '@gumball12/yuki-no-core/github/createIssueComment';
+import * as GetLastIssueCommentsModule from '@gumball12/yuki-no-core/github/getLastIssueComments';
+import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['pending'];
 
 // Mocking to bypass network requests
-vi.mock('../../../github/core', () => ({
+vi.mock('@gumball12/yuki-no-core/github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
@@ -18,16 +18,16 @@ vi.mock('../../../github/core', () => ({
   })),
 }));
 
-vi.mock('../../../github/getLastIssueComments', () => ({
+vi.mock('@gumball12/yuki-no-core/github/getLastIssueComments', () => ({
   getLastIssueComment: vi.fn(),
 }));
 
-vi.mock('../../../github/createIssueComment', () => ({
+vi.mock('@gumball12/yuki-no-core/github/createIssueComment', () => ({
   createIssueComment: vi.fn(),
 }));
 
 // Mock environment variables
-vi.mock('../../../inputUtils', () => ({
+vi.mock('@gumball12/yuki-no-core/inputUtils', () => ({
   getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
     if (key === 'RELEASE_TRACKING_LABELS') {
       return MOCK_RELEASE_TRACKING_LABELS;

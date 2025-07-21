@@ -36,8 +36,8 @@ describe('Plugin version validation', () => {
     );
     expect(getResolveId('@org/plugin@2.1.3')).toBe('@org/plugin');
 
-    // Edge cases
-    expect(getResolveId('plugin')).toBe('plugin');
+    // Edge cases (now treated as monorepo plugins)
+    expect(getResolveId('plugin').endsWith('/plugin')).toBeTruthy();
     expect(getResolveId('@scoped/package')).toBe('@scoped/package');
 
     // Monorepo plugins
