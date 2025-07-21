@@ -6,7 +6,9 @@ settings:
 
 importers:
 
-  .:
+  .: {}
+
+  packages/core:
     dependencies:
       '@actions/github':
         specifier: ^6.0.1
@@ -72,6 +74,12 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.16.5)(@vitest/ui@2.1.9)
+
+  packages/plugin-release-tracking:
+    dependencies:
+      '@gumball12/yuki-no':
+        specifier: workspace:*
+        version: link:../core
 
 packages:
 
