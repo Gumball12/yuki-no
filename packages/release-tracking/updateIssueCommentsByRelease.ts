@@ -1,9 +1,9 @@
-import type { ReleaseInfo } from '../../git/getRelease';
-import type { GitHub } from '../../github/core';
-import { createIssueComment } from '../../github/createIssueComment';
-import { getLastIssueComment } from '../../github/getLastIssueComments';
-import type { Issue } from '../../github/getOpenedIssues';
-import { log } from '../../utils';
+import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
+import type { GitHub } from '@gumball12/yuki-no-core/github/core';
+import { createIssueComment } from '@gumball12/yuki-no-core/github/createIssueComment';
+import { getLastIssueComment } from '@gumball12/yuki-no-core/github/getLastIssueComments';
+import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
+import { log } from '@gumball12/yuki-no-core/utils';
 
 import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 
@@ -59,7 +59,7 @@ const createReleaseComment = (
     !releasesAvailable &&
     [
       `> This comment and the \`${releaseTrackingLabels.join(', ')}\` label appear because release-tracking is enabled.`,
-      '> To disable, remove `core:release-tracking` from the plugins list.',
+      '> To disable, remove `release-tracking` from the plugins list.',
       '\n',
     ].join('\n');
 

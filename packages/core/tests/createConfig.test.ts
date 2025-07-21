@@ -102,7 +102,7 @@ describe('Custom envs processing', () => {
       exclude: ['node_modules', 'dist'],
       labels: ['label1', 'label2'].sort(),
       releaseTracking: true,
-      plugins: ['yuki-no-plugin-example@1.0.0', 'core:release-tracking'],
+      plugins: ['yuki-no-plugin-example@1.0.0', 'release-tracking'],
       verbose: true,
     });
   });

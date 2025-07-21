@@ -1,6 +1,6 @@
-import type { GitHub } from '../../github/core';
-import { getMultilineInput } from '../../inputUtils';
-import { excludeFrom } from '../../utils';
+import type { GitHub } from '@gumball12/yuki-no-core/github/core';
+import { getMultilineInput } from '@gumball12/yuki-no-core/inputUtils';
+import { excludeFrom } from '@gumball12/yuki-no-core/utils';
 
 const DEFAULT_RELEASE_TRACKING_LABELS = ['pending'];
 

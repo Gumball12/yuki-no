@@ -17,20 +17,19 @@
   },
   "homepage": "https://github.com/Gumball12/yuki-no#readme",
   "type": "module",
-  "main": "dist/public.js",
-  "types": "dist/public.d.ts",
+  "main": "packages/core/dist/public.js",
+  "types": "packages/core/dist/public.d.ts",
   "files": [
-    "dist"
+    "packages/core/dist"
   ],
   "packageManager": "pnpm@10.13.1",
   "scripts": {
-    "start": "tsx src/index.ts",
-    "start:dev": "tsx --env-file=.env src/index.ts",
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "type-check": "tsc --noEmit",
-    "lint": "pnpm type-check && pnpm lint:prettier",
-    "lint:prettier": "prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "vitest --coverage --run",
+    "start": "tsx packages/core/index.ts",
+    "start:dev": "tsx --env-file=.env packages/core/index.ts",
+    "build": "pnpm -r build",
+    "type-check": "pnpm -r type-check",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
     "prepublishOnly": "pnpm build && cp README.npm.md README.md"
   },
   "dependencies": {

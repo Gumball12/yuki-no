@@ -100,10 +100,10 @@ The entire process runs safely without affecting your local environment or git c
 
              # [Optional]
              # List of plugins to load. See ./docs/PLUGINS.md for details.
-             # For example, core:release-tracking enables release status tracking
+             # For example, release-tracking enables release status tracking
              # (see: ./src/plugins/release-tracking/README.md)
              plugins: |
-               core:release-tracking
+               release-tracking
    ```
 
    Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `on.workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
@@ -151,7 +151,7 @@ Yuki-no includes built-in core plugins:
 
 | Plugin                  | Description                                                                       | Documentation                                       |
 | ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `core:release-tracking` | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./src/plugins/release-tracking/README.md) |
+| `release-tracking` | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/release-tracking/README.md) |
 
 ## Compatibility
 

@@ -192,7 +192,7 @@ it('Adds an informational comment when no releases exist', async () => {
     MOCK_ISSUE.number,
     [
       '> This comment and the `pending` label appear because release-tracking is enabled.',
-      '> To disable, remove `core:release-tracking` from the plugins list.',
+      '> To disable, remove `release-tracking` from the plugins list.',
       '\n',
       '- pre-release: none',
       '- release: none',

@@ -40,12 +40,12 @@ describe('Plugin version validation', () => {
     expect(getResolveId('plugin')).toBe('plugin');
     expect(getResolveId('@scoped/package')).toBe('@scoped/package');
 
-    // Core plugins
+    // Monorepo plugins
     expect(
-      getResolveId('core:release-tracking').endsWith('/release-tracking'),
+      getResolveId('release-tracking').endsWith('/release-tracking'),
     ).toBeTruthy();
     expect(
-      getResolveId('core:example-plugin').endsWith('/example-plugin'),
+      getResolveId('example-plugin').endsWith('/example-plugin'),
     ).toBeTruthy();
   });
 });

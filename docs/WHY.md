@@ -56,7 +56,7 @@ Most existing translation management tools provide only fixed workflows. When ne
 
 <img width="250" src="./assets/release-tracking-example.webp" title="Plugin Example: Release Tracking" alt="Plugin Example: Release Tracking">
 
-_Example: The `core:release-tracking` plugin automatically manages release status_
+_Example: The `release-tracking` plugin automatically manages release status_
 
 </p>
 
@@ -66,7 +66,7 @@ Yuki-no addresses these diverse requirements through an extensible [plugin archi
 - **Modular Functionality**: Enable only the features you need, keeping your setup simple or complex as required
 - **Community Contributions**: Develop and share plugins with the community for common use cases
 
-For instance, the built-in `core:release-tracking` plugin provides automated release status tracking using Issue Comments and Labels for projects where release management is critical. This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
+For instance, the built-in `release-tracking` plugin provides automated release status tracking using Issue Comments and Labels for projects where release management is critical. This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
 
 ### 3. Work Status Tracking
 

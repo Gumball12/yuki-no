@@ -67,8 +67,8 @@ export const createConfig = (): Config => {
 
   // Compatibility layer: automatically add core plugin when release-tracking is enabled
   const finalPlugins = [...plugins];
-  if (releaseTracking && !finalPlugins.includes('core:release-tracking')) {
-    finalPlugins.push('core:release-tracking');
+  if (releaseTracking && !finalPlugins.includes('release-tracking')) {
+    finalPlugins.push('release-tracking');
   }
 
   return {

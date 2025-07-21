@@ -1,8 +1,8 @@
-import type { ReleaseInfo } from '../../git/getRelease';
-import type { GitHub } from '../../github/core';
-import type { Issue } from '../../github/getOpenedIssues';
-import { setIssueLabels } from '../../github/setIssueLabels';
-import { log, unique } from '../../utils';
+import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
+import type { GitHub } from '@gumball12/yuki-no-core/github/core';
+import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
+import { setIssueLabels } from '@gumball12/yuki-no-core/github/setIssueLabels';
+import { log, unique } from '@gumball12/yuki-no-core/utils';
 
 import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 

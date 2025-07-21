@@ -1,16 +1,16 @@
-import { Git } from '../../git/core';
-import { getRelease } from '../../git/getRelease';
-import { hasAnyRelease } from '../../git/hasAnyRelease';
-import { GitHub } from '../../github/core';
-import { getOpenedIssues, type Issue } from '../../github/getOpenedIssues';
-import { log, mergeArray, uniqueWith } from '../../utils';
-import type { YukiNoPlugin } from '../core';
+import { Git } from '@gumball12/yuki-no-core/git/core';
+import { getRelease } from '@gumball12/yuki-no-core/git/getRelease';
+import { hasAnyRelease } from '@gumball12/yuki-no-core/git/hasAnyRelease';
+import { GitHub } from '@gumball12/yuki-no-core/github/core';
+import { getOpenedIssues, type Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
+import { log, mergeArray, uniqueWith } from '@gumball12/yuki-no-core/utils';
+import type { YukiNoPlugin } from '@gumball12/yuki-no-core/plugins/core';
 
 import { updateIssueCommentByRelease } from './updateIssueCommentsByRelease';
 import { updateIssueLabelsByRelease } from './updateIssueLabelsByRelease';
 
 const releaseTrackingPlugin: YukiNoPlugin = {
-  name: 'core:release-tracking',
+  name: 'release-tracking',
 
   async onAfterCreateIssue(ctx) {
     const git = new Git({ ...ctx.config, repoSpec: ctx.config.headRepoSpec });
