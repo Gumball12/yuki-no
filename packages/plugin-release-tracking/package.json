@@ -1,0 +1,15 @@
+{
+  "name": "@gumball12/yuki-no-plugin-release-tracking",
+  "version": "1.0.0",
+  "description": "Release tracking plugin for Yuki-no",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "test": "vitest --coverage --run"
+  },
+  "dependencies": {
+    "@gumball12/yuki-no": "workspace:*"
+  }
+}

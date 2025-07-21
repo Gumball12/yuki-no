@@ -31,12 +31,12 @@ For new projects, we recommend using the explicit plugin syntax with environment
       needs-release
   with:
     plugins: |
-      core:release-tracking
+      @gumball12/yuki-no-plugin-release-tracking
 ```
 
 ### Key Changes
 
-- **Plugin System**: Release tracking is now implemented as a core plugin (`core:release-tracking`)
+- **Plugin System**: Release tracking is now implemented as a plugin (`@gumball12/yuki-no-plugin-release-tracking`)
 - **Environment Variables**: `release-tracking-labels` option moved to `RELEASE_TRACKING_LABELS` environment variable
 - **Automatic Migration**: Legacy `release-tracking` option automatically enables the plugin
 
@@ -44,5 +44,5 @@ For new projects, we recommend using the explicit plugin syntax with environment
 
 The following options are deprecated but still supported for backward compatibility:
 
-- `release-tracking`: Use `plugins: ["core:release-tracking"]` instead
+- `release-tracking`: Use `plugins: ["@gumball12/yuki-no-plugin-release-tracking"]` instead
 - `release-tracking-labels`: Use `env.RELEASE_TRACKING_LABELS` instead

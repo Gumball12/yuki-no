@@ -6,6 +6,8 @@
 
 Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.
 
+This project is now structured as a **monorepo**. The action core lives in `packages/core` and official plugins are published under the `packages/` directory as separate packages.
+
 > **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./docs/WHY.md) might be the right choice for your project.
 
 > Looking to migrate from a GitHub Issues-based translation project like Ryu-cho? Check out our [migration guide](./docs/MIGRATION.md) for a seamless transition.
@@ -99,11 +101,11 @@ The entire process runs safely without affecting your local environment or git c
                docs/**
 
              # [Optional]
-             # List of plugins to load. See ./docs/PLUGINS.md for details.
-             # For example, core:release-tracking enables release status tracking
-             # (see: ./src/plugins/release-tracking/README.md)
+           # List of plugins to load. See ./docs/PLUGINS.md for details.
+            # For example, @gumball12/yuki-no-plugin-release-tracking enables release status tracking
+            # (see: ./packages/plugin-release-tracking/src/README.md)
              plugins: |
-               core:release-tracking
+              @gumball12/yuki-no-plugin-release-tracking
    ```
 
    Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `on.workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
@@ -151,7 +153,7 @@ Yuki-no includes built-in core plugins:
 
 | Plugin                  | Description                                                                       | Documentation                                       |
 | ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `core:release-tracking` | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./src/plugins/release-tracking/README.md) |
+| `@gumball12/yuki-no-plugin-release-tracking` | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/plugin-release-tracking/src/README.md) |
 
 ## Compatibility
 

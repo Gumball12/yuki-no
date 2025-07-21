@@ -1,0 +1,5 @@
+{
+  "extends": "../core/tsconfig.build.json",
+  "include": ["src"],
+  "exclude": ["tests"]
+}
