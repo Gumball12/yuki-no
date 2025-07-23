@@ -19,8 +19,6 @@ export type IssueMeta = Readonly<{
   labels: string[];
 }>;
 
-export type IssueResult = Issue;
-
 export interface YukiNoPluginHooks {
   onInit?(ctx: YukiNoContext): Promise<void> | void;
   onBeforeCompare?(ctx: YukiNoContext): Promise<void> | void;
@@ -31,9 +29,14 @@ export interface YukiNoPluginHooks {
     ctx: YukiNoContext & { commit: Commit; meta: IssueMeta },
   ): Promise<void> | void;
   onAfterCreateIssue?(
-    ctx: YukiNoContext & { commit: Commit; result: IssueResult },
+    ctx: YukiNoContext & { commit: Commit; issue: Issue },
   ): Promise<void> | void;
-  onExit?(ctx: YukiNoContext & { success: boolean }): Promise<void> | void;
+  onExit?(
+    ctx: YukiNoContext & {
+      processedCommits: Commit[];
+      createdIssues: Issue[];
+    },
+  ): Promise<void> | void;
   onError?(ctx: YukiNoContext & { error: Error }): Promise<void> | void;
 }
 

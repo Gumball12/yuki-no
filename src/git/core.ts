@@ -1,37 +1,65 @@
 import type { Config, RepoSpec } from '../createConfig';
-import { log } from '../utils';
+import { createTempDir, log } from '../utils';
 
 import { createRepoUrl } from './utils';
 
 import fs from 'node:fs';
-import { tmpdir } from 'node:os';
-import path from 'node:path';
+import os from 'node:os';
 import shell from 'shelljs';
 
-type GitConfig = Pick<Config, 'accessToken' | 'userName'> & {
+type GitConfig = Pick<Config, 'accessToken' | 'userName' | 'email'> & {
   repoSpec: RepoSpec;
+  withClone?: boolean;
 };
 
 type NotStartsWithGit<T extends string> = T extends `git${string}` ? never : T;
 
-export const TEMP_DIR = tmpdir();
+export const TEMP_DIR = os.tmpdir();
 
 export class Git {
-  #config: GitConfig;
-
-  constructor(config: GitConfig) {
+  constructor(private readonly config: GitConfig) {
     log('I', 'Git[[Construct]] :: Git instance created');
-    this.#config = config;
+
+    if (config.withClone) {
+      this.clone();
+    }
+  }
+
+  get repoSpec(): RepoSpec {
+    return this.config.repoSpec;
+  }
+
+  #dirName?: string;
+
+  get dirName(): string {
+    if (this.#dirName) {
+      return this.#dirName;
+    }
+
+    this.#dirName = createTempDir(
+      `cloned-by-yuki-no__${this.config.repoSpec.name}__`,
+    );
+    return this.#dirName;
   }
 
   exec<T extends string>(command: NotStartsWithGit<T>): string {
-    const repoDir = path.resolve(TEMP_DIR, this.#config.repoSpec.name);
-    shell.cd(repoDir);
-    return shell.exec(`git ${command}`).stdout.trim();
+    shell.cd(this.dirName);
+
+    const result = shell.exec(`git ${command}`);
+    if (result.code !== 0) {
+      throw new GitCommandError(
+        command,
+        result.code,
+        result.stderr,
+        result.stdout,
+      );
+    }
+
+    return result.stdout.trim();
   }
 
   clone(): void {
-    const dirName = this.#config.repoSpec.name;
+    const dirName = this.dirName;
     log('I', `Git.clone :: Cloning repository: ${TEMP_DIR}/${dirName}`);
 
     shell.cd(TEMP_DIR);
@@ -50,21 +78,23 @@ export class Git {
 
     const authorizedRepoUrl = createAuthorizedRepoUrl(
       this.repoUrl,
-      this.#config,
+      this.config,
     );
 
     // Execute exec directly only here since repoDir doesn't exist yet
-    const result = shell.exec(`git clone ${authorizedRepoUrl} ${dirName}`);
+    shell.exec(`git clone ${authorizedRepoUrl} ${dirName}`);
 
-    if (result.code === 0) {
-      log('S', 'Git.clone :: Repository clone completed');
-    } else {
-      throw new Error(`Failed to clone repository: ${result.stderr}`);
-    }
+    this.exec(`config user.name "${this.config.userName}"`);
+    this.exec(`config user.email "${this.config.email}"`);
+
+    log(
+      'S',
+      `Git.clone :: Repository clone completed with '${this.config.userName}' and '${this.config.email}'`,
+    );
   }
 
   get repoUrl(): string {
-    return createRepoUrl(this.#config.repoSpec);
+    return createRepoUrl(this.config.repoSpec);
   }
 }
 
@@ -76,3 +106,17 @@ const createAuthorizedRepoUrl = (
     'https://',
     `https://${config.userName}:${config.accessToken}@`,
   );
+
+export class GitCommandError extends Error {
+  constructor(
+    public readonly command: string,
+    public readonly exitCode: number,
+    public readonly stderr: string,
+    public readonly stdout: string,
+  ) {
+    super(
+      `Git command failed: git ${command}\nExit code: ${exitCode}\nError: ${stderr}`,
+    );
+    this.name = 'GitCommandError';
+  }
+}

@@ -1,6 +1,6 @@
 import { type Config, createConfig } from './createConfig';
 import { Git } from './git/core';
-import { getCommits } from './git/getCommits';
+import { type Commit, getCommits } from './git/getCommits';
 import { createRepoUrl } from './git/utils';
 import { GitHub } from './github/core';
 import { createIssue } from './github/createIssue';
@@ -13,7 +13,7 @@ import {
   type YukiNoContext,
   type YukiNoPlugin,
 } from './plugins/core';
-import { log } from './utils';
+import { log, useIsTrackingFile } from './utils';
 
 import { context as actionsContext } from '@actions/github';
 import shell from 'shelljs';
@@ -27,8 +27,11 @@ const start = async () => {
   const config = createConfig();
   log('S', 'Configuration initialized');
 
-  const git = new Git({ ...config, repoSpec: config.headRepoSpec });
-  git.clone();
+  const git = new Git({
+    ...config,
+    repoSpec: config.headRepoSpec,
+    withClone: true,
+  });
   git.exec(`config user.name "${config.userName}"`);
   git.exec(`config user.email "${config.email}"`);
   log('S', 'Git initialized');
@@ -43,13 +46,18 @@ const start = async () => {
     config,
   };
 
-  let success = false;
   try {
     for (const plugin of plugins) {
       await plugin.onInit?.({ ...pluginCtx });
     }
 
-    await syncCommits(github, git, config, plugins, pluginCtx);
+    const syncCommitsResults = await syncCommits(
+      github,
+      git,
+      config,
+      plugins,
+      pluginCtx,
+    );
 
     const endTime = new Date();
     const duration = (endTime.getTime() - startTime.getTime()) / 1000;
@@ -57,17 +65,22 @@ const start = async () => {
       'S',
       `Yuki-No completed (${endTime.toISOString()}) - Duration: ${duration}s`,
     );
-    success = true;
+
+    // TODO: (NOTE) finally 안에서 onExit 실행하면 특정 플러그인이 onInit은 실행 안되었는데
+    // onExit만 실행될 수 있음 (그래서 success도 제거, 특정 plugin 실패하면 나머지 다 실패처리하는게 더 적절)
+    for (const plugin of plugins) {
+      await plugin.onExit?.({
+        ...pluginCtx,
+        ...(syncCommitsResults ?? { createdIssues: [], processedCommits: [] }),
+      });
+    }
   } catch (error) {
     const err = error as Error;
     for (const plugin of plugins) {
       await plugin.onError?.({ ...pluginCtx, error: err });
     }
+
     throw err;
-  } finally {
-    for (const plugin of plugins) {
-      await plugin.onExit?.({ ...pluginCtx, success });
-    }
   }
 };
 
@@ -77,15 +90,25 @@ const syncCommits = async (
   config: Config,
   plugins: YukiNoPlugin[],
   ctx: YukiNoContext,
-): Promise<Issue[]> => {
+): Promise<{ createdIssues: Issue[]; processedCommits: Commit[] }> => {
   log('I', '=== Synchronization started ===');
 
   for (const p of plugins) {
     await p.onBeforeCompare?.({ ...ctx });
   }
 
+  const isTrackingFile = useIsTrackingFile(config);
+  const commitFilter = (commit: Commit) =>
+    commit.fileNames.some(isTrackingFile);
+
   const latestSuccessfulRun = await getLatestSuccessfulRunISODate(github);
-  const commits = getCommits(config, git, latestSuccessfulRun);
+  const commits = getCommits({
+    trackFrom: config.trackFrom,
+    latestSuccessfulRun,
+    git,
+    commitFilter,
+  });
+
   const notCreatedCommits = await lookupCommitsInIssues(github, commits);
 
   for (const p of plugins) {
@@ -118,7 +141,7 @@ const syncCommits = async (
       await p.onAfterCreateIssue?.({
         ...ctx,
         commit: notCreatedCommit,
-        result: issue,
+        issue,
       });
     }
   }
@@ -128,7 +151,7 @@ const syncCommits = async (
     `syncCommits :: ${createdIssues.length} issues created successfully`,
   );
 
-  return createdIssues;
+  return { createdIssues, processedCommits: commits };
 };
 
 start();

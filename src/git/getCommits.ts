@@ -4,8 +4,6 @@ import { isNotEmpty, log, splitByNewline } from '../utils';
 
 import type { Git } from './core';
 
-import picomatch from 'picomatch';
-
 export type Commit = {
   title: string;
   isoDate: string;
@@ -13,18 +11,26 @@ export type Commit = {
   fileNames: string[];
 };
 
+type GetCommitsOptions = {
+  git: Git;
+  trackFrom: Config['trackFrom'];
+  commitFilter: (commit: Commit) => boolean;
+  latestSuccessfulRun?: string;
+};
+
 export const COMMIT_SEP = ':COMMIT_START_SEP:';
 export const COMMIT_DATA_SEPARATOR = ':COMMIT_DATA_SEP:';
 
-export const getCommits = (
-  config: Pick<Config, 'trackFrom' | 'headRepoSpec' | 'include' | 'exclude'>,
-  git: Git,
-  latestSuccessfulRun?: string,
-): Commit[] => {
+export const getCommits = ({
+  git,
+  trackFrom,
+  commitFilter,
+  latestSuccessfulRun,
+}: GetCommitsOptions): Commit[] => {
   const command = [
     'log',
     'origin/main',
-    config.trackFrom ? `${config.trackFrom}..` : undefined,
+    trackFrom ? `${trackFrom}..` : undefined,
     latestSuccessfulRun ? `--since="${latestSuccessfulRun}"` : undefined,
     '--name-only',
     `--format="${COMMIT_SEP}%H${COMMIT_DATA_SEPARATOR}%s${COMMIT_DATA_SEPARATOR}%aI"`,
@@ -42,7 +48,7 @@ export const getCommits = (
   }
 
   if (!result.includes(COMMIT_SEP)) {
-    throw new Error(`Invalid trackFrom commit hash: ${config.trackFrom}`);
+    throw new Error(`Invalid trackFrom commit hash: ${trackFrom}`);
   }
 
   const commits = result
@@ -50,7 +56,8 @@ export const getCommits = (
     .filter(isNotEmpty)
     .map(splitByNewline)
     .map(createCommitFromLog)
-    .filter(useIsIncludedCommit(config));
+    .filter(isCommit)
+    .filter(commitFilter);
 
   log('I', `getCommits :: Total ${commits.length} commits extracted`);
 
@@ -85,21 +92,10 @@ const createCommitFromLog = ([line, ...fileNames]: string[]):
   };
 };
 
-const useIsIncludedCommit = (config: Pick<Config, 'include' | 'exclude'>) => {
-  const isIncluded = picomatch(config.include.length ? config.include : ['**']);
-  const isExcluded = picomatch(config.exclude);
-
-  return (commit?: Commit): commit is Commit => {
-    if (!commit) {
-      return false;
-    }
-
-    if (config.include.length === 0 && config.exclude.length === 0) {
-      return true;
-    }
-
-    return commit.fileNames.some(
-      fileName => !isExcluded(fileName) && isIncluded(fileName),
-    );
-  };
-};
+const isCommit = (value: unknown): value is Commit =>
+  value !== null &&
+  typeof value === 'object' &&
+  'title' in value &&
+  'isoDate' in value &&
+  'hash' in value &&
+  'fileNames' in value;

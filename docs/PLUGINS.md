@@ -135,7 +135,7 @@ export default myPlugin;
 - `onBeforeCompare(ctx: YukiNoContext)`: Called before comparing commits between repositories.
 - `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`: Called after commit comparison, with the list of new commits.
 - `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`: Called before each issue is created. The `meta` object is read-only for inspection purposes.
-- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`: Called after each issue is created.
+- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; issue: Issue })`: Called after each issue is created.
 - `onExit(ctx: YukiNoContext & { success: boolean })`: Called before the action exits (success or failure).
 - `onError(ctx: YukiNoContext & { error: Error })`: Called when any error occurs during execution.
 
