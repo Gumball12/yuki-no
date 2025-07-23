@@ -1,4 +1,10 @@
+import type { Config } from './createConfig';
+
 import colors from 'colors/safe';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import picomatch from 'picomatch';
 
 /**
  * Log types:
@@ -119,3 +125,28 @@ export const mergeArray = <T>(a: T[], b: T[]): T[] => {
 
   return [...a, ...b];
 };
+
+export const useIsTrackingFile = (
+  config: Pick<Config, 'include' | 'exclude'>,
+) => {
+  const isIncluded = picomatch(config.include.length ? config.include : ['**']);
+  const isExcluded = picomatch(config.exclude);
+
+  return (fileName: string): boolean => {
+    if (!fileName.length) {
+      return false;
+    }
+
+    if (config.include.length === 0 && config.exclude.length === 0) {
+      return true;
+    }
+
+    return !isExcluded(fileName) && isIncluded(fileName);
+  };
+};
+
+export const formatError = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+export const createTempDir = (prefix: string): string =>
+  fs.mkdtempSync(path.join(os.tmpdir(), prefix));

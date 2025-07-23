@@ -13,17 +13,25 @@ const releaseTrackingPlugin: YukiNoPlugin = {
   name: 'core:release-tracking',
 
   async onAfterCreateIssue(ctx) {
-    const git = new Git({ ...ctx.config, repoSpec: ctx.config.headRepoSpec });
+    const git = new Git({
+      ...ctx.config,
+      repoSpec: ctx.config.headRepoSpec,
+      withClone: true,
+    });
     const github = new GitHub({
       ...ctx.config,
       repoSpec: ctx.config.upstreamRepoSpec,
     });
 
-    await processReleaseTrackingForIssue(github, git, ctx.result);
+    await processReleaseTrackingForIssue(github, git, ctx.issue);
   },
 
   async onExit(ctx) {
-    const git = new Git({ ...ctx.config, repoSpec: ctx.config.headRepoSpec });
+    const git = new Git({
+      ...ctx.config,
+      repoSpec: ctx.config.headRepoSpec,
+      withClone: true,
+    });
     const github = new GitHub({
       ...ctx.config,
       repoSpec: ctx.config.upstreamRepoSpec,

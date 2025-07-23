@@ -12,11 +12,9 @@ type GitHubConfig = Pick<Config, 'accessToken' | 'labels'> & {
 const ThrottledOctokit = Octokit.plugin(retry, throttling);
 
 export class GitHub {
-  #config: GitHubConfig;
   api: Octokit;
 
-  constructor(config: GitHubConfig) {
-    this.#config = config;
+  constructor(private readonly config: GitHubConfig) {
     log(
       'I',
       `GitHub[[Construct]] :: Initializing GitHub API client (${config.repoSpec.owner}/${config.repoSpec.name})`,
@@ -94,16 +92,16 @@ export class GitHub {
 
   get ownerAndRepo(): { owner: string; repo: string } {
     return {
-      owner: this.#config.repoSpec.owner,
-      repo: this.#config.repoSpec.name,
+      owner: this.config.repoSpec.owner,
+      repo: this.config.repoSpec.name,
     };
   }
 
   get repoSpec(): RepoSpec {
-    return this.#config.repoSpec;
+    return this.config.repoSpec;
   }
 
   get configuredLabels(): string[] {
-    return this.#config.labels;
+    return this.config.labels;
   }
 }

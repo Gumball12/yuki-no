@@ -1,4 +1,5 @@
 import {
+  type Commit,
   COMMIT_DATA_SEPARATOR,
   COMMIT_SEP,
   getCommits,
@@ -20,6 +21,44 @@ const MOCK_CONFIG = {
   exclude: [],
 };
 
+// Basic commit filter that accepts all commits
+const defaultCommitFilter = (commit: Commit) => true;
+
+// Helper function to create commit filter with include/exclude patterns
+const createCommitFilter = (include: string[] = [], exclude: string[] = []) => {
+  return (commit: Commit) => {
+    // If include patterns exist, check if any file matches
+    if (include.length > 0) {
+      const hasIncludedFile = commit.fileNames.some(fileName =>
+        include.some(pattern => {
+          // Simple glob pattern matching for testing
+          const regex = new RegExp(
+            pattern.replace('**', '.*').replace('*', '.*'),
+          );
+          return regex.test(fileName);
+        }),
+      );
+      if (!hasIncludedFile) return false;
+    }
+
+    // If exclude patterns exist, check if any file matches
+    if (exclude.length > 0) {
+      const hasExcludedFile = commit.fileNames.some(fileName =>
+        exclude.some(pattern => {
+          // Simple glob pattern matching for testing
+          const regex = new RegExp(
+            pattern.replace('**', '.*').replace('*', '.*'),
+          );
+          return regex.test(fileName);
+        }),
+      );
+      if (hasExcludedFile) return false;
+    }
+
+    return true;
+  };
+};
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
@@ -34,7 +73,11 @@ describe('getCommits - git log command creation', () => {
       ].join('\n'),
     );
 
-    getCommits(MOCK_CONFIG, mockGit);
+    getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       [
@@ -56,7 +99,11 @@ describe('getCommits - git log command creation', () => {
       ].join('\n'),
     );
 
-    getCommits({ ...MOCK_CONFIG, trackFrom: '' }, mockGit);
+    getCommits({
+      git: mockGit,
+      trackFrom: '',
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       expect.stringMatching(/^log origin\/main +--name-only/),
@@ -77,7 +124,12 @@ describe('getCommits - git log command creation', () => {
 
     const latestRun = '2023-01-01';
 
-    getCommits(MOCK_CONFIG, mockGit, latestRun);
+    getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+      latestSuccessfulRun: latestRun,
+    });
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       expect.stringMatching(`--since="${latestRun}"`),
@@ -89,7 +141,11 @@ describe('getCommits - result verification', () => {
   it('return an empty array when result is empty', () => {
     mockGit.exec.mockReturnValue('');
 
-    const result = getCommits(MOCK_CONFIG, mockGit);
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(result).toEqual([]);
   });
@@ -97,9 +153,13 @@ describe('getCommits - result verification', () => {
   it('git log result should not contain COMMIT_SEP to throw an error', () => {
     mockGit.exec.mockReturnValue('invalid result');
 
-    expect(() => getCommits(MOCK_CONFIG, mockGit)).toThrow(
-      `Invalid trackFrom commit hash: ${MOCK_CONFIG.trackFrom}`,
-    );
+    expect(() =>
+      getCommits({
+        git: mockGit,
+        trackFrom: MOCK_CONFIG.trackFrom,
+        commitFilter: defaultCommitFilter,
+      }),
+    ).toThrow(`Invalid trackFrom commit hash: ${MOCK_CONFIG.trackFrom}`);
   });
 
   it('git log result should be parsed correctly', () => {
@@ -113,7 +173,11 @@ describe('getCommits - result verification', () => {
 
     mockGit.exec.mockReturnValue(commitData);
 
-    const result = getCommits(MOCK_CONFIG, mockGit);
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(result).toHaveLength(2);
     expect(result[0]).toEqual({
@@ -144,7 +208,11 @@ describe('getCommits - commit filtering', () => {
 
     mockGit.exec.mockReturnValue(commitData);
 
-    const result = getCommits(MOCK_CONFIG, mockGit);
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(result).toHaveLength(0);
   });
@@ -159,7 +227,11 @@ describe('getCommits - commit filtering', () => {
 
     mockGit.exec.mockReturnValue(commitData);
 
-    const result = getCommits({ ...MOCK_CONFIG, include: ['src/**'] }, mockGit);
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: createCommitFilter(['src/**'], []),
+    });
 
     expect(result).toHaveLength(1);
     expect(result[0].hash).toBe('hash1');
@@ -175,10 +247,11 @@ describe('getCommits - commit filtering', () => {
 
     mockGit.exec.mockReturnValue(commitData);
 
-    const result = getCommits(
-      { ...MOCK_CONFIG, exclude: ['test/**'] },
-      mockGit,
-    );
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: createCommitFilter([], ['test/**']),
+    });
 
     expect(result).toHaveLength(1);
     expect(result[0].hash).toBe('hash1');
@@ -196,7 +269,11 @@ describe('getCommits - commit sorting', () => {
 
     mockGit.exec.mockReturnValue(commitData);
 
-    const result = getCommits(MOCK_CONFIG, mockGit);
+    const result = getCommits({
+      git: mockGit,
+      trackFrom: MOCK_CONFIG.trackFrom,
+      commitFilter: defaultCommitFilter,
+    });
 
     expect(result[0].hash).toBe('hash1');
     expect(result[1].hash).toBe('hash2');

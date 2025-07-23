@@ -52,7 +52,7 @@ describe('plugin loading and hooks', () => {
     await plugin.onAfterCreateIssue?.({
       ...ctx,
       commit: {} as any,
-      result: {} as any,
+      issue: {} as any,
     });
     await plugin.onExit?.({ ...ctx, success: true });
 
