@@ -4,19 +4,18 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
   plugins: [tsconfigPaths()],
   test: {
-    include: ['./src/tests/**', '!./src/tests/setup.ts'],
-    setupFiles: ['./src/tests/setup.ts'],
+    include: ['./packages/*/tests/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['src/*'],
+      include: ['packages/**/*.ts'],
       exclude: [
-        'src/tests/*',
-        '*.config.ts',
+        'packages/*/tests/**/*.ts',
+        'packages/*/dist/**/*.ts',
+        'vitest.config.ts',
 
         // orchestration
-        'src/index.ts',
-        'src/plugins/**/index.ts',
+        'packages/**/index.ts',
       ],
     },
   },

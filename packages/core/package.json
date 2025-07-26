@@ -1,0 +1,58 @@
+{
+  "name": "@gumball12/yuki-no",
+  "version": "1.4.1",
+  "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gumball12/yuki-no.git",
+    "directory": "packages/core/plugin-sdk"
+  },
+  "author": {
+    "name": "Gumball12",
+    "email": "to@shj.rip",
+    "url": "https://github.com/Gumball12"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gumball12/yuki-no/issues"
+  },
+  "homepage": "https://github.com/Gumball12/yuki-no#readme",
+  "keywords": [
+    "yuki-no",
+    "sync",
+    "documentation",
+    "automatically",
+    "typescript",
+    "translation",
+    "github-actions",
+    "translation-tools",
+    "issue-tracking"
+  ],
+  "type": "module",
+  "main": "dist/plugin-sdk/index.js",
+  "types": "dist/plugin-sdk/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm build && cp ./plugin-sdk/README.md ./README.md",
+    "start": "tsx ./index.ts",
+    "start:dev": "tsx --env-file=.env ./index.ts"
+  },
+  "dependencies": {
+    "@actions/github": "^6.0.1",
+    "@octokit/plugin-retry": "^7.2.0",
+    "@octokit/plugin-throttling": "^9.6.0",
+    "@octokit/rest": "^21.0.2",
+    "colors": "^1.4.0",
+    "picomatch": "^4.0.2",
+    "semver": "^7.7.1",
+    "shelljs": "^0.8.5"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^3.0.2",
+    "@types/semver": "^7.5.8",
+    "@types/shelljs": "^0.8.15"
+  }
+}

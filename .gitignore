@@ -9,3 +9,4 @@ yarn-error.log
 !.gitkeep
 coverage/
 dist/
+*.tsbuildinfo

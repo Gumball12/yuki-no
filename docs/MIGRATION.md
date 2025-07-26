@@ -27,9 +27,12 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 >
 > For a successful migration, set `track-from` to the last commit hash that was fully translated. Using an incorrect value when first running Yuki-no may create duplicate issues for already translated content. Note that Yuki-no starts tracking from the commit after your specified `track-from` hash, not including the `track-from` commit itself.
 
+<!-- prettier-ignore-start -->
+
 1. Add Labels to Translation Issues for Yuki-no Tracking
 
    <img width="400" src="./assets/create-sync-label.webp" title="Create Sync Label" alt="Create Sync Label">
+
    - Yuki-no identifies which issues it manages through labels
    - Go to GitHub and create labels like `sync`
    - Add these labels to your existing translation issues
@@ -38,9 +41,12 @@ This guide shows how to use Yuki-no in projects that use GitHub Issues for trans
 2. Create Yuki-no Action Configuration File
 
    <img width="350" src="./assets/create-an-action.webp" title="Create an Action" alt="Create an Action">
+
    - Remove any existing sync action files (like Ryu-Cho)
-   - Create a new Yuki-no config file by following the [Usage](https://github.com/Gumball12/yuki-no?tab=readme-ov-file#usage) section
+   - Create a new Yuki-no config file by following the [Usage](../README.md#usage) section
    - If moving from Ryu-Cho, check the [Yuki-no Options vs Ryu-Cho Options](#yuki-no-options-vs-ryu-cho-options) section below
+
+<!-- prettier-ignore-end -->
 
 3. Run the Action
    - Wait for the next scheduled run, or trigger it manually if you enabled `on.workflow_dispatch` (see [GitHub docs](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow))
@@ -83,7 +89,7 @@ For detailed option descriptions, see [README](../README.md#configuration).
 
 **If issues or comments aren't being created:**
 
-![settings](./assets/settings.webp)
+<img width="700" src="./assets/settings.webp" title="Workflow permissions" alt="Workflow permissions">
 
 - Go to Settings > Actions > General > Workflow permissions
 - Select "Read and write permissions"
