@@ -4,7 +4,8 @@
   "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Gumball12/yuki-no.git"
+    "url": "git+https://github.com/Gumball12/yuki-no.git",
+    "directory": "packages/core/plugin-sdk"
   },
   "author": {
     "name": "Gumball12",
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/Gumball12/yuki-no#readme",
   "keywords": [
+    "yuki-no",
     "sync",
     "documentation",
     "automatically",
@@ -26,6 +28,7 @@
     "translation-tools",
     "issue-tracking"
   ],
+  "type": "module",
   "main": "dist/plugin-sdk/index.js",
   "types": "dist/plugin-sdk/index.d.ts",
   "files": [
