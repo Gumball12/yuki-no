@@ -6,9 +6,9 @@
 
 Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.
 
-> **Why Yuki-no?**: Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./docs/WHY.md) might be the right choice for your project.
+> **Why Yuki-no?:** Looking for a reliable, automated solution for managing documentation translation? Check out [why Yuki-no](./docs/WHY.md) might be the right choice for your project.
 
-> Looking to migrate from a GitHub Issues-based translation project like Ryu-cho? Check out our [migration guide](./docs/MIGRATION.md) for a seamless transition.
+> Looking to migrate from a GitHub issues based translation project like Ryu-cho? Check out our [migration guide](./docs/MIGRATION.md) for a seamless transition.
 
 ## Features
 
@@ -28,19 +28,16 @@ Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg
 2. **Commit Change Detection and Issue Creation**
    - Tracks commits newer than the last successful run
    - Filters changes based on `include`/`exclude` patterns
-   - Creates issues for new changes with your specified `labels`
+   - Creates issues for new changes with your specified `labels` in `upstream-repo`
 3. **Plugin Integration** (when configured)
-   - Executes custom plugins during various lifecycle stages
-   - See [Plugin System](./docs/PLUGINS.md) for available plugins, usage, and lifecycle details
-
-The entire process runs safely without affecting your local environment or git configuration.
+   - Executes plugins during the lifecycle stages
+   - See [Plugin system](./docs/PLUGINS.md) for available plugins, usage, and lifecycle details
 
 ## Usage
 
-1. **Required**: Configure workflow permissions
+1. **Required:** Configure workflow permissions
 
    ![settings](./docs/assets/settings.webp)
-
    - Go to Settings > Actions > General > Workflow permissions
    - Select "Read and write permissions"
    - Save the changes
@@ -100,32 +97,30 @@ The entire process runs safely without affecting your local environment or git c
 
              # [Optional]
              # List of plugins to load. See ./docs/PLUGINS.md for details.
-             # For example, release-tracking enables release status tracking
-             # (see: ./src/plugins/release-tracking/README.md)
              plugins: |
-               release-tracking
+               yuki-no-plugin-release-tracking@1.0.0
    ```
 
    Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `on.workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
 
 ### Configuration
 
-| Option             | Required | Default                    | Description                                                                                                                     |
-| ------------------ | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `access-token`     | Yes      | -                          | GitHub access token.                                                                                                            |
-| `username`         | No       | `github-actions`           | Git username used for GitHub issue operations.                                                                                  |
-| `email`            | No       | `action@github.com`        | Git username used for GitHub issue operations.                                                                                  |
-| `upstream-repo`    | No       | Current working repository | URL of your repository.                                                                                                         |
-| `head-repo`        | Yes      | -                          | URL of repository to track                                                                                                      |
-| `track-from`       | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                     |
-| `head-repo-branch` | No       | `main`                     | Branch to track in head repo                                                                                                    |
-| `include`          | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked.                                                  |
-| `exclude`          | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns.                                                      |
-| `labels`           | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. |
-| `plugins`          | No       | -                          | List of plugins to load. See [PLUGINS.md](./docs/PLUGINS.md) for details. (newline separated)                                   |
-| `verbose`          | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
+| Option             | Required | Default                    | Description                                                                                                                                         |
+| ------------------ | -------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `access-token`     | Yes      | -                          | GitHub access token.                                                                                                                                |
+| `username`         | No       | `github-actions`           | Git username used for GitHub issue operations.                                                                                                      |
+| `email`            | No       | `action@github.com`        | Git username used for GitHub issue operations.                                                                                                      |
+| `upstream-repo`    | No       | Current working repository | URL of your repository.                                                                                                                             |
+| `head-repo`        | Yes      | -                          | URL of repository to track                                                                                                                          |
+| `track-from`       | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                                         |
+| `head-repo-branch` | No       | `main`                     | Branch to track in head repo                                                                                                                        |
+| `include`          | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked. (newline separated)                                                  |
+| `exclude`          | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns. (newline separated)                                                      |
+| `labels`           | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. (newline separated) |
+| `plugins`          | No       | -                          | List of plugins to load. See [PLUGINS.md](./docs/PLUGINS.md) for details (newline separated). Format: `package-name@version`                        |
+| `verbose`          | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                                               |
 
-#### File Pattern Examples
+**File Pattern Examples:**
 
 ```yaml
 # Track only markdown(*.md) and TypeScript(*.ts) files
@@ -145,13 +140,11 @@ For more information on Glob Patterns, see [Picomatch docs](https://github.com/m
 
 Yuki-no supports a plugin system for extending functionality. For detailed information about plugin development, lifecycle, and usage examples, see [PLUGINS.md](./docs/PLUGINS.md).
 
-### Core Plugins
+### Official Plugins
 
-Yuki-no includes built-in core plugins:
-
-| Plugin                  | Description                                                                       | Documentation                                       |
-| ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------- |
-| `release-tracking` | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/release-tracking/README.md) |
+| Plugin             | version                                                                                                                                                                                               | Description                                                                       | Documentation                                    |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `release-tracking` | [![NPM Version](https://img.shields.io/npm/v/yuki-no-plugin-release-tracking?style=flat-square&label=yuki-no-plugin-release-tracking)](https://www.npmjs.com/package/yuki-no-plugin-release-tracking) | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/release-tracking/README.md) |
 
 ## Compatibility
 

@@ -1,5 +1,5 @@
 {
-  "name": "@gumball12/yuki-no-plugin-release-tracking",
+  "name": "yuki-no-plugin-release-tracking",
   "version": "1.0.0",
   "description": "Release tracking plugin for yuki-no - Tracks release status for commits and manages issue labels/comments automatically",
   "type": "module",

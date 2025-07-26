@@ -45,10 +45,10 @@ These improvements ensure no commits are missed, even in challenging situations 
 
 Translation projects require vastly different workflows depending on team size, project scope, content type, and organizational structure. This diversity significantly impacts the choice of translation management tools:
 
-- **Release Tracking**: Some projects need detailed beta/stable release status management
-- **Notification Systems**: Teams prefer different communication channels (Slack, Discord, email, webhooks)
-- **Quality Management**: Varying needs for automated terminology checks, reviewer assignment, etc.
-- **External Integrations**: Existing project management tools, CI/CD pipelines, and custom systems
+- **Release Tracking:** Some projects need detailed beta/stable release status management
+- **Notification Systems:** Teams prefer different communication channels (Slack, Discord, email, webhooks)
+- **Quality Management:** Varying needs for automated terminology checks, reviewer assignment, etc.
+- **External Integrations:** Existing project management tools, CI/CD pipelines, and custom systems
 
 Most existing translation management tools provide only fixed workflows. When new requirements emerge or team processes change, teams must either switch tools or use complex workarounds. Custom integrations with external systems or team-specific features are particularly difficult to implement.
 
@@ -62,9 +62,9 @@ _Example: The `release-tracking` plugin automatically manages release status_
 
 Yuki-no addresses these diverse requirements through an extensible [plugin architecture](./PLUGINS.md):
 
-- **Custom Workflow Integration**: Hook into various stages of the tracking process to match your specific needs
-- **Modular Functionality**: Enable only the features you need, keeping your setup simple or complex as required
-- **Community Contributions**: Develop and share plugins with the community for common use cases
+- **Custom Workflow Integration:** Hook into various stages of the tracking process to match your specific needs
+- **Modular Functionality:** Enable only the features you need, keeping your setup simple or complex as required
+- **Community Contributions:** Develop and share plugins with the community for common use cases
 
 For instance, the built-in `release-tracking` plugin provides automated release status tracking using Issue Comments and Labels for projects where release management is critical. This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
 

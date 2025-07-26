@@ -31,18 +31,18 @@ For new projects, we recommend using the explicit plugin syntax with environment
       needs-release
   with:
     plugins: |
-      release-tracking
+      yuki-no-plugin-release-tracking@1.0.0
 ```
 
 ### Key Changes
 
-- **Plugin System**: Release tracking is now implemented as a plugin (`release-tracking`)
-- **Environment Variables**: `release-tracking-labels` option moved to `RELEASE_TRACKING_LABELS` environment variable
-- **Automatic Migration**: Legacy `release-tracking` option automatically enables the plugin
+- **Plugin System:** Release tracking is now implemented as a plugin [`yuki-no-plugin-release-tracking`](../packages/release-tracking/)
+- **Environment Variables:** `release-tracking-labels` option moved to `RELEASE_TRACKING_LABELS` environment variable
+- **Automatic Migration:** Legacy `release-tracking` option automatically enables the plugin
 
 ### Deprecated Options
 
 The following options are deprecated but still supported for backward compatibility:
 
-- `release-tracking`: Use `plugins: ["release-tracking"]` instead
+- `release-tracking`: Use `plugins: ["yuki-no-plugin-release-tracking"]` instead
 - `release-tracking-labels`: Use `env.RELEASE_TRACKING_LABELS` instead

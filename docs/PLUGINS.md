@@ -70,7 +70,7 @@ Yuki-no executes plugins through a well-defined lifecycle that corresponds to th
 
 [![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@gumball12/yuki-no)
 
-Install [yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a development dependency to get TypeScript types, input helpers, and testing utilities:
+Install [@gumball12/yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a development dependency to get TypeScript types and input helpers:
 
 ```bash
 npm install @gumball12/yuki-no
@@ -171,8 +171,7 @@ const myValues = getMultilineInput('PLUGIN_MY_VALUES', [
 ]);
 ```
 
-> [!TIP]
-> We recommend prefixing your environment variables with `PLUGIN_` to avoid conflicts with system variables.
+We recommend prefixing your environment variables with `PLUGIN_` to avoid conflicts with system variables.
 
 ### Context Types
 
@@ -207,10 +206,10 @@ type IssueMeta = {
 
 ### Publishing
 
-1. **Create Package**: Create a package named like `yuki-no-plugin-<name>`
-2. **Export Plugin**: Export the plugin as `default` from your entry file
-3. **Publish**: Publish the package to npm
-4. **Configure**: Users add the package name with exact version to the `plugins` option in their workflow
+1. **Create Package:** Create a package named like `yuki-no-plugin-<name>`
+2. **Export Plugin:** Export the plugin as `default` from your entry file
+3. **Publish:** Publish the package to npm
+4. **Configure:** Users add the package name with exact version to the `plugins` option in their workflow
 
 ## Using Plugins
 
@@ -233,4 +232,4 @@ Specify published npm packages with exact version:
       @my-org/yuki-no-plugin-teams@1.5.2
 ```
 
-Plugins are automatically installed by Yuki-no during GitHub Actions execution. You only need to specify them in your workflow configuration.
+Plugins are automatically installed by Yuki-no during [GitHub Actions execution](../scripts/checkout.sh). You only need to specify them in your workflow configuration.

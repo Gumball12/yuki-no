@@ -4,9 +4,9 @@ This plugin tracks the release status for each commit and automatically updates 
 
 ## Features
 
-- **Automatic Label Management**: Automatically adds specified labels for unreleased changes and removes them after release.
-- **Release Status Comments**: Automatically adds comments showing pre-release and release status to each issue.
-- **Existing Issue Tracking**: Tracks both newly created issues and existing open issues.
+- **Automatic Label Management:** Automatically adds specified labels for unreleased changes and removes them after release.
+- **Release Status Comments:** Automatically adds comments showing pre-release and release status to each issue.
+- **Existing Issue Tracking:** Tracks both newly created issues and existing open issues.
 
 This plugin automatically excludes any labels that are already configured in the main `labels` option to avoid conflicts.
 
