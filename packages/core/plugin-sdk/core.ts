@@ -4,8 +4,6 @@ import type { Issue } from '../github/getOpenedIssues';
 
 import type { Context } from '@actions/github/lib/context';
 import type { Octokit } from '@octokit/rest';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 export type YukiNoContext = Readonly<{
   octokit: Octokit;
@@ -70,25 +68,14 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
   return plugins;
 };
 
-const MONOREPO_ROOT = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../..',
-);
-
 export const getResolveId = (name: string): string => {
-  // For local monorepo plugins without version (e.g., "release-tracking")
-  if (!name.includes('@') && !name.startsWith('@')) {
-    return path.resolve(MONOREPO_ROOT, 'packages', name);
-  }
-
-  // For external packages with version
   const isScopedPackage = name.startsWith('@');
-
   if (isScopedPackage) {
     return name.split('@').slice(0, 2).join('@');
   }
 
-  if (name.includes('@')) {
+  const hasVersion = name.includes('@');
+  if (hasVersion) {
     return name.split('@')[0];
   }
 

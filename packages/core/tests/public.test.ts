@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('public module exports', () => {
   it('exports YukiNoPlugin type', async () => {
-    const publicModule = await import('../public');
+    const publicModule = await import('../plugin-sdk');
     expect(publicModule).toBeDefined();
   });
 
   it('exports inputUtils functions', async () => {
     const { getInput, getBooleanInput, getMultilineInput } = await import(
-      '../public'
+      '../plugin-sdk'
     );
 
     expect(typeof getInput).toBe('function');
@@ -31,7 +31,7 @@ describe('public module exports', () => {
 
     it('environment variable functions work correctly', async () => {
       const { getInput, getBooleanInput, getMultilineInput } = await import(
-        '../public'
+        '../plugin-sdk'
       );
 
       expect(getInput('TEST_INPUT')).toBe('test-value');

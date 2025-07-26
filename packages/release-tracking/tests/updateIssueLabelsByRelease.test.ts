@@ -1,15 +1,15 @@
 import { updateIssueLabelsByRelease } from '../updateIssueLabelsByRelease';
 
-import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
-import { GitHub } from '@gumball12/yuki-no-core/github/core';
-import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
-import * as SetIssueLabelsModule from '@gumball12/yuki-no-core/github/setIssueLabels';
+import type { ReleaseInfo } from '@gumball12/yuki-no/git/getRelease';
+import { GitHub } from '@gumball12/yuki-no/github/core';
+import type { Issue } from '@gumball12/yuki-no/github/getOpenedIssues';
+import * as SetIssueLabelsModule from '@gumball12/yuki-no/github/setIssueLabels';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['needs-release', 'in-next-release'];
 
 // Mocking to avoid network requests
-vi.mock('@gumball12/yuki-no-core/github/core', () => ({
+vi.mock('@gumball12/yuki-no/github/core', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
     api: {},
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
@@ -17,12 +17,12 @@ vi.mock('@gumball12/yuki-no-core/github/core', () => ({
   })),
 }));
 
-vi.mock('@gumball12/yuki-no-core/github/setIssueLabels', () => ({
+vi.mock('@gumball12/yuki-no/github/setIssueLabels', () => ({
   setIssueLabels: vi.fn(),
 }));
 
 // Mock environment variables
-vi.mock('@gumball12/yuki-no-core/inputUtils', () => ({
+vi.mock('@gumball12/yuki-no/inputUtils', () => ({
   getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
     if (key === 'RELEASE_TRACKING_LABELS') {
       return MOCK_RELEASE_TRACKING_LABELS;

@@ -12,7 +12,7 @@ import {
   loadPlugins,
   type YukiNoContext,
   type YukiNoPlugin,
-} from './plugins/core';
+} from './plugin-sdk/core';
 import { log } from './utils';
 
 import { context as actionsContext } from '@actions/github';

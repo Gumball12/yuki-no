@@ -1,5 +1,5 @@
 import { getInput } from '../../inputUtils';
-import * as PluginCore from '../../plugins/core';
+import { loadPlugins } from '../../plugin-sdk/core';
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,17 +19,15 @@ const mockExamplePlugin = {
   async onError() {},
 };
 
-// Mock the loadPlugins function
-const mockLoadPlugins = vi.spyOn(PluginCore, 'loadPlugins');
+vi.doMock(mockExamplePlugin.name, () => ({ default: mockExamplePlugin }));
 
-describe.skip('plugin loading and hooks', () => {
+describe('plugin loading and hooks', () => {
   beforeEach(() => {
     delete process.env.MY_PLUGIN_INPUT;
   });
 
   it('loads plugin and calls hooks', async () => {
-    mockLoadPlugins.mockResolvedValue([mockExamplePlugin]);
-    const plugins = await PluginCore.loadPlugins(['yuki-no-plugin-example']);
+    const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
     const ctx: any = { octokit: {}, context: {}, config: {} };
     const spies = {

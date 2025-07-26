@@ -1,11 +1,11 @@
 import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 
-import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
-import type { GitHub } from '@gumball12/yuki-no-core/github/core';
-import { createIssueComment } from '@gumball12/yuki-no-core/github/createIssueComment';
-import { getLastIssueComment } from '@gumball12/yuki-no-core/github/getLastIssueComments';
-import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
-import { log } from '@gumball12/yuki-no-core/utils';
+import type { ReleaseInfo } from '@gumball12/yuki-no/git/getRelease';
+import type { GitHub } from '@gumball12/yuki-no/github/core';
+import { createIssueComment } from '@gumball12/yuki-no/github/createIssueComment';
+import { getLastIssueComment } from '@gumball12/yuki-no/github/getLastIssueComments';
+import type { Issue } from '@gumball12/yuki-no/github/getOpenedIssues';
+import { log } from '@gumball12/yuki-no/utils';
 
 export const updateIssueCommentByRelease = async (
   github: GitHub,

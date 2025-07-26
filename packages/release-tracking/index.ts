@@ -1,16 +1,16 @@
 import { updateIssueCommentByRelease } from './updateIssueCommentsByRelease';
 import { updateIssueLabelsByRelease } from './updateIssueLabelsByRelease';
 
-import { Git } from '@gumball12/yuki-no-core/git/core';
-import { getRelease } from '@gumball12/yuki-no-core/git/getRelease';
-import { hasAnyRelease } from '@gumball12/yuki-no-core/git/hasAnyRelease';
-import { GitHub } from '@gumball12/yuki-no-core/github/core';
+import { Git } from '@gumball12/yuki-no/git/core';
+import { getRelease } from '@gumball12/yuki-no/git/getRelease';
+import { hasAnyRelease } from '@gumball12/yuki-no/git/hasAnyRelease';
+import { GitHub } from '@gumball12/yuki-no/github/core';
 import {
   getOpenedIssues,
   type Issue,
-} from '@gumball12/yuki-no-core/github/getOpenedIssues';
-import type { YukiNoPlugin } from '@gumball12/yuki-no-core/plugins/core';
-import { log, mergeArray, uniqueWith } from '@gumball12/yuki-no-core/utils';
+} from '@gumball12/yuki-no/github/getOpenedIssues';
+import type { YukiNoPlugin } from '@gumball12/yuki-no/plugin-sdk/core';
+import { log, mergeArray, uniqueWith } from '@gumball12/yuki-no/utils';
 
 const releaseTrackingPlugin: YukiNoPlugin = {
   name: 'release-tracking',

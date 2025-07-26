@@ -5,14 +5,9 @@
     "target": "ESNext",
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
-    "noEmit": false,
-    "declaration": true,
-    "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true
-  },
-  "include": ["src/public.ts"],
-  "exclude": ["src/tests/**/*", "**/*.test.ts"]
+  }
 }

@@ -1,5 +1,5 @@
 import type { Commit } from '../git/getCommits';
-import type { IssueMeta } from '../plugins/core';
+import type { IssueMeta } from '../plugin-sdk/core';
 import { log } from '../utils';
 
 import type { GitHub } from './core';

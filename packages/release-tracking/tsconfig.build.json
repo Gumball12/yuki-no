@@ -1,18 +1,7 @@
 {
+  "extends": "../../tsconfig.build.base.json",
   "compilerOptions": {
-    "lib": ["ESNext"],
-    "module": "ESNext",
-    "target": "ESNext",
-    "moduleResolution": "bundler",
-    "verbatimModuleSyntax": true,
-    "noEmit": false,
-    "declaration": true,
-    "outDir": "dist",
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true
+    "outDir": "dist"
   },
-  "include": ["index.ts", "**/*.ts"],
-  "exclude": ["tests/**/*", "**/*.test.ts"]
+  "include": ["index.ts"]
 }

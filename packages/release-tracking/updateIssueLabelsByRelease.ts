@@ -1,10 +1,10 @@
 import { getReleaseTrackingLabels } from './getReleaseTrackingLabels';
 
-import type { ReleaseInfo } from '@gumball12/yuki-no-core/git/getRelease';
-import type { GitHub } from '@gumball12/yuki-no-core/github/core';
-import type { Issue } from '@gumball12/yuki-no-core/github/getOpenedIssues';
-import { setIssueLabels } from '@gumball12/yuki-no-core/github/setIssueLabels';
-import { log, unique } from '@gumball12/yuki-no-core/utils';
+import type { ReleaseInfo } from '@gumball12/yuki-no/git/getRelease';
+import type { GitHub } from '@gumball12/yuki-no/github/core';
+import type { Issue } from '@gumball12/yuki-no/github/getOpenedIssues';
+import { setIssueLabels } from '@gumball12/yuki-no/github/setIssueLabels';
+import { log, unique } from '@gumball12/yuki-no/utils';
 
 export const updateIssueLabelsByRelease = async (
   github: GitHub,

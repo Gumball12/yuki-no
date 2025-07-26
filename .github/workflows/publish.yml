@@ -6,12 +6,22 @@ on:
 
 jobs:
   publish:
+    # <package_name>-v-<version>
+    if: startsWith(github.event.release.tag_name, '-v')
+
     runs-on: ubuntu-latest
-    if: startsWith(github.event.release.tag_name, 'npm-v')
     permissions:
       contents: read
       id-token: write
+
     steps:
+      - name: Extract package info
+        id: package
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          PACKAGE_NAME=${TAG%-v*}
+          echo "path=packages/$PACKAGE_NAME" >> $GITHUB_OUTPUT
+
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -30,7 +40,7 @@ jobs:
         env:
           MOCKED_REQUEST_TEST: ${{ secrets.MOCKED_REQUEST_TEST }}
 
-      - name: Publish to NPM
-        run: npm publish --provenance --access public
+      - name: Publish package
+        run: cd ${{ steps.package.outputs.path }} && npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

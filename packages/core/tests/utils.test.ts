@@ -13,10 +13,6 @@ import {
 import colors from 'colors/safe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-// Overwrite the global mocking from vitest setup files
-// with the original implementation for testing purposes
-vi.mock('../utils', async importOriginal => await importOriginal());
-
 describe('log', () => {
   beforeEach(() => {
     vi.spyOn(console, 'info').mockImplementation(() => {});

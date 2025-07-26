@@ -1,4 +1,4 @@
-import { getResolveId } from '../../plugins/core';
+import { getResolveId } from '../../plugin-sdk/core';
 
 import { describe, expect, it } from 'vitest';
 
@@ -36,16 +36,8 @@ describe('Plugin version validation', () => {
     );
     expect(getResolveId('@org/plugin@2.1.3')).toBe('@org/plugin');
 
-    // Edge cases (now treated as monorepo plugins)
-    expect(getResolveId('plugin').endsWith('/plugin')).toBeTruthy();
+    // Without versions
+    expect(getResolveId('plugin')).toBe('plugin');
     expect(getResolveId('@scoped/package')).toBe('@scoped/package');
-
-    // Monorepo plugins
-    expect(
-      getResolveId('release-tracking').endsWith('/release-tracking'),
-    ).toBeTruthy();
-    expect(
-      getResolveId('example-plugin').endsWith('/example-plugin'),
-    ).toBeTruthy();
   });
 });

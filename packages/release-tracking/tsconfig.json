@@ -1,20 +1,4 @@
 {
-  "compilerOptions": {
-    "lib": ["ESNext"],
-    "module": "ESNext",
-    "target": "ESNext",
-
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": true,
-    "noEmit": true,
-
-    "strict": true,
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "esModuleInterop": true,
-    "noUnusedLocals": true
-  },
-  "include": ["src", "tests"]
+  "extends": "../../tsconfig.dev.base.json",
+  "include": ["./**/*.ts"]
 }
