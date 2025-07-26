@@ -9,7 +9,14 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       include: ['packages/**/*.ts'],
-      exclude: ['packages/*/tests/**/*.ts', '', 'vitest.config.ts'],
+      exclude: [
+        'packages/*/tests/**/*.ts',
+        'packages/*/dist/**/*.ts',
+        'vitest.config.ts',
+
+        // orchestration
+        'packages/**/index.ts',
+      ],
     },
   },
 });
