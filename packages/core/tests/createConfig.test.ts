@@ -1,7 +1,6 @@
 import {
   createConfig,
   inferUpstreamRepo,
-  RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
   defaults as yukiNoDefaults,
 } from '../createConfig';
 
@@ -103,10 +102,7 @@ describe('Custom envs processing', () => {
       exclude: ['node_modules', 'dist'],
       labels: ['label1', 'label2'].sort(),
       releaseTracking: true,
-      plugins: [
-        'yuki-no-plugin-example@1.0.0',
-        RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-      ],
+      plugins: ['yuki-no-plugin-example@1.0.0'],
       verbose: true,
     });
   });
@@ -138,95 +134,3 @@ describe('Error handling', () => {
   });
 });
 
-describe('Release tracking migration path', () => {
-  it('automatically adds release-tracking plugin when RELEASE_TRACKING=true', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    process.env.PLUGINS = 'yuki-no-plugin-example@1.0.0';
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      'yuki-no-plugin-example@1.0.0',
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-
-  it('does not duplicate release-tracking plugin when both are specified', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    process.env.PLUGINS = 'yuki-no-plugin-example@1.0.0\nrelease-tracking';
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      'yuki-no-plugin-example@1.0.0',
-      'release-tracking',
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-
-  it('does not add release-tracking plugin when RELEASE_TRACKING=false', () => {
-    process.env.RELEASE_TRACKING = 'false';
-    process.env.PLUGINS = 'yuki-no-plugin-example@1.0.0';
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(false);
-    expect(config.plugins).toEqual(['yuki-no-plugin-example@1.0.0']);
-  });
-
-  it('handles release-tracking plugin with version specification', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    process.env.PLUGINS =
-      'release-tracking@1.0.0\nyuki-no-plugin-example@1.0.0';
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      'release-tracking@1.0.0',
-      'yuki-no-plugin-example@1.0.0',
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-
-  it('handles scoped release-tracking plugin', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    process.env.PLUGINS = RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME;
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-
-  it('preserves plugin order when adding release-tracking', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    process.env.PLUGINS = 'plugin-a@1.0.0\nplugin-b@2.0.0\nplugin-c@3.0.0';
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      'plugin-a@1.0.0',
-      'plugin-b@2.0.0',
-      'plugin-c@3.0.0',
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-
-  it('handles empty plugins list with release tracking enabled', () => {
-    process.env.RELEASE_TRACKING = 'true';
-    delete process.env.PLUGINS;
-
-    const config = createConfig();
-
-    expect(config.releaseTracking).toBe(true);
-    expect(config.plugins).toEqual([
-      RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME,
-    ]);
-  });
-});

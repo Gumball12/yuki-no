@@ -29,6 +29,17 @@ fi
 echo "📦 Installing base dependencies..."
 pnpm install
 
+# Handle deprecated RELEASE_TRACKING option
+if [ "${RELEASE_TRACKING:-false}" = "true" ]; then
+  echo "⚠️  Warning: RELEASE_TRACKING is deprecated. Consider using plugins: ['@yuki-no/plugin-release-tracking@latest'] instead."
+  if [ -z "${PLUGINS:-}" ]; then
+    PLUGINS="@yuki-no/plugin-release-tracking@latest"
+  else
+    PLUGINS="${PLUGINS}
+@yuki-no/plugin-release-tracking@latest"
+  fi
+fi
+
 # Install plugins with exact version requirement
 if [ ! -z "${PLUGINS:-}" ]; then
   echo "🔌 Installing plugins with exact version requirement..."
