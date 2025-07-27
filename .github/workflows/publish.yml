@@ -6,14 +6,29 @@ on:
 
 jobs:
   publish:
+    # <package_name>-v-<version>
+    if: startsWith(github.event.release.tag_name, '-v')
+
     runs-on: ubuntu-latest
-    if: startsWith(github.event.release.tag_name, 'npm-v')
     permissions:
-      contents: read
+      contents: write
       id-token: write
+
     steps:
+      - name: Extract package info
+        id: package
+        run: |
+          TAG="${{ github.event.release.tag_name }}"
+          PACKAGE_NAME=${TAG%-v*}
+          VERSION=${TAG#*-v}
+          echo "path=packages/$PACKAGE_NAME" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
 
       - run: corepack enable
 
@@ -25,12 +40,27 @@ jobs:
           cache: 'pnpm'
 
       - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
       - run: pnpm lint
       - run: pnpm test
         env:
           MOCKED_REQUEST_TEST: ${{ secrets.MOCKED_REQUEST_TEST }}
 
-      - name: Publish to NPM
-        run: npm publish --provenance --access public
+      - name: Update package.json version
+        working-directory: ${{ steps.package.outputs.path }}
+        run: |
+          npm version ${{ steps.package.outputs.version }} --no-git-tag-version
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore: bump ${{ steps.package.outputs.path }} to v${{ steps.package.outputs.version }}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish package
+        working-directory: ${{ steps.package.outputs.path }}
+        run: |
+          npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

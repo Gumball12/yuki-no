@@ -1,0 +1,73 @@
+{
+  "name": "@yuki-no/plugin-sdk",
+  "version": "1.0.0",
+  "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gumball12/yuki-no.git",
+    "directory": "packages/core"
+  },
+  "author": {
+    "name": "Gumball12",
+    "email": "to@shj.rip",
+    "url": "https://github.com/Gumball12"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gumball12/yuki-no/issues"
+  },
+  "homepage": "https://github.com/Gumball12/yuki-no#readme",
+  "keywords": [
+    "yuki-no",
+    "sync",
+    "documentation",
+    "automatically",
+    "typescript",
+    "translation",
+    "github-actions",
+    "translation-tools",
+    "issue-tracking"
+  ],
+  "type": "module",
+  "exports": {
+    "./infra/*": {
+      "development": "./infra/*.ts",
+      "import": "./dist/infra/*.js",
+      "types": "./dist/infra/*.d.ts"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts"
+    },
+    "./utils/*": {
+      "development": "./utils/*.ts",
+      "import": "./dist/utils/*.js",
+      "types": "./dist/utils/*.d.ts"
+    },
+    "./utils-infra/*": {
+      "development": "./utils-infra/*.ts",
+      "import": "./dist/utils-infra/*.js",
+      "types": "./dist/utils-infra/*.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm build",
+    "start": "tsx ./index.ts",
+    "start:dev": "tsx --conditions=development --env-file=.env ./index.ts"
+  },
+  "dependencies": {
+    "@octokit/plugin-retry": "^7.2.0",
+    "@octokit/plugin-throttling": "^9.6.0",
+    "@octokit/rest": "^21.0.2",
+    "colors": "^1.4.0",
+    "picomatch": "^4.0.2",
+    "shelljs": "^0.8.5"
+  },
+  "devDependencies": {
+    "@types/picomatch": "^3.0.2",
+    "@types/shelljs": "^0.8.15"
+  }
+}

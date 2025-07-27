@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "composite": true
+  },
+  "exclude": ["dist", "node_modules", "coverage", "**/*.tsbuildinfo"]
+}

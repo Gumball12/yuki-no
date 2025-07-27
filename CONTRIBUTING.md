@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Yuki-no! This guide will help you
 
 ### Prerequisites
 
-- Node.js v22.0.0 or higher
+- Node.js v22.12.0+
 - [pnpm](https://pnpm.io/) (install via [Node Corepack](https://nodejs.org/api/corepack.html))
   ```bash
   corepack enable
@@ -50,13 +50,19 @@ For more details, see [GitHub documentation](https://docs.github.com/en/authenti
    git clone https://github.com/Gumball12/yuki-no.git
    cd yuki-no
 
+   # Enable Corepack
+   # https://nodejs.org/api/corepack.html
+   corepack enable
+
    # Install dependencies
    pnpm install
    ```
 
-2. Create `.env` file in the project root
+2. Create `.env` file in the [core package](./packages/core/)
 
    ```.env
+   # /packages/core/.env
+
    ACCESS_TOKEN=your_pat_here
    USER_NAME=your_github_username
    EMAIL=your_github_email
@@ -67,41 +73,41 @@ For more details, see [GitHub documentation](https://docs.github.com/en/authenti
    # ...
    ```
 
-   > [!IMPORTANT]
-   > For local development, you must set `UPSTREAM_REPO` explicitly.
-   > The automatic repository detection only works in GitHub Actions.
+   Note that **you must set `UPSTREAM_REPO` when developing locally**. The automatic repository detection only works in GitHub Actions.
 
 For more environment variables, see [README](./README.md#configuration).
 
 ### Development Workflow
 
 1. Create a new branch for your changes:
-
-```bash
-git checkout -b feat/your-feature
-```
-
-2. Run tests and the application:
-
-```bash
-pnpm test # unit tests
-pnpm start:dev # run script
-```
-
-3. Format your code:
-
-```bash
-pnpm lint
-```
-
-4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
-
-```bash
-git commit -m "feat: add new feature"
-git commit -m "fix: resolve issue #123"
-```
-
-5. Push your changes and create a pull request!
+   ```bash
+   git checkout -b feat/your-feature
+   ```
+2. Build Yuki-no:
+   ```bash
+   pnpm -r build # recursive build
+   ```
+3. Run tests:
+   ```bash
+   pnpm test # unit tests
+   ```
+4. Run Yuki-no locally:
+   ```bash
+   # If you are using plugins locally, you must install those
+   # plugins as devDependencies. Otherwise, you will encounter
+   # a "Failed to load plugin" error.
+   pnpm start:dev # run yuki-no with packages/core/.env
+   ```
+5. Format your code:
+   ```bash
+   pnpm lint
+   ```
+6. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+   ```bash
+   git commit -m "feat: add new feature"
+   git commit -m "fix: resolve issue #123"
+   ```
+7. Push your changes and create a pull request!
 
 ### Troubleshooting
 
@@ -109,23 +115,30 @@ git commit -m "fix: resolve issue #123"
 
 If you find bugs not covered here, please [open an issue](https://github.com/Gumball12/yuki-no/issues).
 
-**GitHub API 403 Errors**:
+**GitHub API 403 Errors:**
 
 - Check your PAT permissions
 
 ## Project Structure
 
 ```
-src/
-├── index.ts           # Entry point
-├── createConfig.ts    # Configuration setup and validation
-├── utils.ts           # Utility functions
-├── git/               # Git operations
-├── github/            # GitHub API interactions
-├── plugins/           # Plugin system and core plugins
-│   └── release-tracking/  # Core release tracking plugin
-└── tests/             # Unit tests
+packages/
+├── core/                   # Main core logic (@yuki-no/plugin-sdk)
+│   ├── infra/              # Infrastructure layer (git, github)
+│   ├── plugin/             # Plugin SDK for external plugins
+│   ├── types/
+│   ├── utils/              # Common utilities
+│   └── utils-infra/        # Infrastructure utilities
+├── release-tracking/       # Core release tracking plugin
+└── other packages...
 ```
+
+#### Available Packages
+
+For detailed information about each package, see their individual documentation:
+
+- **[Core Package](./packages/core/README.md)** (`@yuki-no/plugin-sdk`) - Yuki-no Plugin SDK
+- **[Release Tracking Plugin](./packages/release-tracking/README.md)** (`@yuki-no/plugin-release-tracking`)
 
 ### Flow
 
@@ -133,39 +146,47 @@ The diagram below shows the execution flow of Yuki-no:
 
 ```mermaid
 stateDiagram-v2
-  state "syncCommits" as sc
-  state "releaseTracking" as rt
+  direction LR
 
-  state Initialize {
-    direction LR
+  state "parse configs" as pc
+  state "init Git/GitHub" as initGg
+  state "load plugins" as lp
 
-    state "createConfig" as cf
-    state "Git" as g
-    state "GitHub" as gh
+  state "compare commits" as cc
+  state "create issues" as cis
 
-    cf --> g
-    g --> gh
+  [*] --> init
+  init --> cc : plugin.onInit
+  cc --> cis
+  cis --> [*] : plugin.onFinally
+
+  state init {
+    pc --> initGg
+    initGg --> lp
   }
 
-  state if_rt <<choice>>
+  state cc {
+    state "get commits" as gc
 
-  [*] --> Initialize
-  Initialize --> sc
+    [*] --> gc : plugin.onBeforeCompare
+    gc --> [*] : plugin.onAfterCompare
+  }
 
-  sc --> if_rt
-  if_rt --> [*]: releaseTracking == false
-  if_rt --> rt: releaseTracking == true
+  state cis {
+    state "create issue" as ci
 
-  rt --> [*]
+    [*] --> ci : plugin.onBeforeCreateIssue
+    ci --> [*] : plugin.onAfterCreateIssue
+  }
 ```
 
-1. **Initialize**: Sets up the configuration and initializes Git and GitHub clients
-2. **syncCommits**: Synchronizes commits from the head repository to issues
-3. **releaseTracking**: When enabled, updates issues with release information
+1. **Initialize:** Parses configuration, initializes Git/GitHub clients, and loads configured plugins
+1. **Compare Commits:** Compares commits from `head-repo` with plugin lifecycle hooks (`onBeforeCompare`/`onAfterCompare`)
+1. **Create Issues:** Creates GitHub issues to `upstream-repo` for each new commit with plugin lifecycle hooks (`onBeforeCreateIssue`/`onAfterCreateIssue`)
 
 ## Testing
 
-The project uses [Vitest](https://vitest.dev/) for testing. Tests are in the `src/tests/` directory.
+The project uses [Vitest](https://vitest.dev/) for testing.
 
 ### Running Tests
 
@@ -185,7 +206,7 @@ We generally recommend avoiding excessive mocking in tests. However, for operati
 
 External libraries without side-effects should **not** be mocked. These libraries are typically well-tested already, and as long as their version remains consistent, they won't introduce unexpected behavior.
 
-For similar reasons, most mocked behaviors are excluded from our test coverage metrics. Currently, we only have [mockedRequests.test.ts](./src/tests/mockedRequests.test.ts) for testing GitHub API interactions while maintaining idempotence.
+For similar reasons, most mocked behaviors are excluded from our test coverage metrics. Currently, we only have [mockedRequests.test.ts](./packages/core/tests/mockedRequests.test.ts) for testing GitHub API interactions while maintaining idempotence.
 
 When mocking is necessary, follow these practices:
 
@@ -193,9 +214,16 @@ When mocking is necessary, follow these practices:
 - Keep mocks as close to real behavior as possible
 - Reset mocks between tests using `vi.clearAllMocks()`
 
-## Code Review
+## Getting Help
 
-### Current Approach: On-Demand Only
+If you need help:
+
+1. Check existing issues and docs
+2. Open a new issue with a clear description
+
+## For Maintainers
+
+### Claude Code Reviews: On-Demand Only
 
 We use **mention-based Claude reviews** for flexible, selective code feedback.
 
@@ -207,46 +235,25 @@ We use **mention-based Claude reviews** for flexible, selective code feedback.
 
 **Status:**
 
-- ✅ **Interactive Review** (`claude.yml`) - Active
-- ❌ **Automated Review** (`claude-code-review.yml`) - Temporarily disabled
+- ✅ **Interactive Review** ([claude.yml](./.github/workflows/claude.yml)) - Active
+- ❌ **Automated Review** ([claude-code-review.yml](./.github/workflows/claude-code-review.yml)) - Temporarily disabled
 
 **Why selective approach?** Avoids unnecessary automation while maintaining code quality when needed.
 
 For detailed configuration and principles, see [Claude GitHub Actions documentation](https://docs.anthropic.com/en/docs/claude-code/github-actions).
 
-## Getting Help
+### Publishing
 
-If you need help:
+This monorepo contains multiple npm packages that can be published independently to npm using automated GitHub workflows.
 
-1. Check existing issues and docs
-2. Open a new issue with a clear description
-
-## Publishing (Maintainers Only)
-
-This project serves dual purposes: a GitHub Action and an npm package for TypeScript types.
-
-### Release Types
-
-For publishing TypeScript types to npm:
-
-1. Update version in `package.json`
-2. Commit and push changes
-3. Create GitHub Release with tag `npm-v1.x.x` (e.g., `npm-v1.0.0`)
-4. GitHub Actions automatically builds types and publishes to npm
-5. Plugin developers can install for development: `npm install @gumball12/yuki-no`
-
-### Manual Publishing
-
-If automatic publishing fails, you can manually publish:
-
-```bash
-npm publish
-```
-
-**Prerequisites:**
-
-- `NPM_TOKEN` secret configured in GitHub repository settings
-- npm publishing permissions for the `@gumball12/yuki-no` package
+1. **Create GitHub Release** with tag format: `<package-name>-v<version>`
+   - e.g. Core package: `core-v1.4.2` / Release tracking package: `release-tracking-v1.0.1`
+2. **GitHub Actions automatically ([publish.yml](./.github/workflows/publish.yml)):**
+   - Extracts package name and version from the release tag
+   - Updates the package.json version in the corresponding package
+   - Commits the version change
+   - Runs tests and linting
+   - Publishes to npm with provenance
 
 ## License
 

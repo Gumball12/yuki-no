@@ -1,0 +1,56 @@
+{
+  "name": "@yuki-no/plugin-release-tracking",
+  "version": "1.0.0",
+  "description": "Release tracking plugin for yuki-no - Tracks release status for commits and manages issue labels/comments automatically",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gumball12/yuki-no.git",
+    "directory": "packages/release-tracking"
+  },
+  "author": {
+    "name": "Gumball12",
+    "email": "to@shj.rip",
+    "url": "https://github.com/Gumball12"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gumball12/yuki-no/issues"
+  },
+  "homepage": "https://github.com/Gumball12/yuki-no/tree/main/packages/release-tracking#readme",
+  "keywords": [
+    "yuki-no",
+    "plugins",
+    "sync",
+    "documentation",
+    "automatically",
+    "translation",
+    "github-actions"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@yuki-no/plugin-sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@yuki-no/plugin-sdk": "workspace:*",
+    "@types/semver": "^7.7.0"
+  },
+  "dependencies": {
+    "semver": "^7.7.2"
+  }
+}
