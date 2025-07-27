@@ -1,6 +1,6 @@
 import type { Config, RepoSpec } from './types/config';
 import { unique } from './utils/common';
-import { getBooleanInput, getInput, getMultilineInput } from './utils/input';
+import { getSystemBooleanInput, getSystemInput, getSystemMultilineInput } from './utils/input';
 import { log } from './utils/log';
 
 import path from 'node:path';
@@ -19,19 +19,19 @@ export const createConfig = (): Config => {
   log('I', 'createConfig :: Parsing configuration values');
 
   // Required values validation
-  const accessToken = getInput('ACCESS_TOKEN');
-  const headRepo = getInput('HEAD_REPO');
-  const trackFrom = getInput('TRACK_FROM');
+  const accessToken = getSystemInput('ACCESS_TOKEN');
+  const headRepo = getSystemInput('HEAD_REPO');
+  const trackFrom = getSystemInput('TRACK_FROM');
 
   assert(!!accessToken, '`accessToken` is required.');
   assert(!!headRepo, '`headRepo` is required.');
   assert(!!trackFrom, '`trackFrom` is required.');
 
   // Optional values with defaults
-  const userName = getInput('USER_NAME', defaults.userName);
-  const email = getInput('EMAIL', defaults.email);
-  const upstreamRepo = getInput('UPSTREAM_REPO');
-  const headRepoBranch = getInput('HEAD_REPO_BRANCH', defaults.branch);
+  const userName = getSystemInput('USER_NAME', defaults.userName);
+  const email = getSystemInput('EMAIL', defaults.email);
+  const upstreamRepo = getSystemInput('UPSTREAM_REPO');
+  const headRepoBranch = getSystemInput('HEAD_REPO_BRANCH', defaults.branch);
 
   const upstreamRepoSpec = createRepoSpec(
     upstreamRepo || inferUpstreamRepo(),
@@ -39,14 +39,14 @@ export const createConfig = (): Config => {
   );
   const headRepoSpec = createRepoSpec(headRepo!, headRepoBranch!);
 
-  const include = getMultilineInput('INCLUDE');
-  const exclude = getMultilineInput('EXCLUDE');
-  const labels = getMultilineInput('LABELS', [defaults.label]);
+  const include = getSystemMultilineInput('INCLUDE');
+  const exclude = getSystemMultilineInput('EXCLUDE');
+  const labels = getSystemMultilineInput('LABELS', [defaults.label]);
   const sortedLabels = labels.sort();
-  const plugins = getMultilineInput('PLUGINS');
-  const releaseTracking = getBooleanInput('RELEASE_TRACKING');
+  const plugins = getSystemMultilineInput('PLUGINS');
+  const releaseTracking = getSystemBooleanInput('RELEASE_TRACKING');
 
-  const verbose = getBooleanInput('VERBOSE', true);
+  const verbose = getSystemBooleanInput('VERBOSE', true);
   process.env.VERBOSE = verbose.toString();
 
   // Compatibility layer: automatically add core plugin when release-tracking is enabled
@@ -78,8 +78,8 @@ const assert = (condition: boolean, message: string): void => {
 };
 
 export const inferUpstreamRepo = (): string => {
-  const serverUrl = getInput('GITHUB_SERVER_URL', 'https://github.com');
-  const repository = getInput('GITHUB_REPOSITORY');
+  const serverUrl = getSystemInput('GITHUB_SERVER_URL', 'https://github.com');
+  const repository = getSystemInput('GITHUB_REPOSITORY');
 
   if (!repository) {
     throw new Error(

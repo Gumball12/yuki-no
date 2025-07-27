@@ -9,67 +9,91 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 describe('plugin input helpers', () => {
   beforeEach(() => {
-    process.env.TEST_TOKEN = 'abc123';
-    process.env.TEST_ENABLED = 'true';
-    process.env.TEST_PATHS = 'a\nb\nc';
+    process.env.YUKI_NO_TEST_TOKEN = 'abc123';
+    process.env.YUKI_NO_TEST_ENABLED = 'true';
+    process.env.YUKI_NO_TEST_PATHS = 'a\nb\nc';
   });
 
   afterEach(() => {
-    delete process.env.TEST_TOKEN;
-    delete process.env.TEST_ENABLED;
-    delete process.env.TEST_PATHS;
+    delete process.env.YUKI_NO_TEST_TOKEN;
+    delete process.env.YUKI_NO_TEST_ENABLED;
+    delete process.env.YUKI_NO_TEST_PATHS;
+    delete process.env.YUKI_NO_TEST_FALSE;
   });
 
   describe('getInput', () => {
-    it('returns environment variable value', () => {
-      expect(getInput('TEST_TOKEN')).toBe('abc123');
+    it('returns environment variable value with YUKI_NO_ prefix', () => {
+      expect(getInput('YUKI_NO_TEST_TOKEN')).toBe('abc123');
     });
 
     it('returns undefined for non-existent variable', () => {
-      expect(getInput('NON_EXISTENT')).toBeUndefined();
+      expect(getInput('YUKI_NO_NON_EXISTENT')).toBeUndefined();
+    });
+
+    it('returns undefined for variable without YUKI_NO_ prefix', () => {
+      process.env.TEST_TOKEN_NO_PREFIX = 'secret';
+      expect(getInput('TEST_TOKEN_NO_PREFIX')).toBeUndefined();
+      delete process.env.TEST_TOKEN_NO_PREFIX;
     });
 
     it('returns default value when variable is undefined', () => {
-      expect(getInput('NON_EXISTENT', 'default')).toBe('default');
+      expect(getInput('YUKI_NO_NON_EXISTENT', 'default')).toBe('default');
+    });
+
+    it('returns default value for variable without YUKI_NO_ prefix', () => {
+      process.env.TEST_TOKEN_NO_PREFIX = 'secret';
+      expect(getInput('TEST_TOKEN_NO_PREFIX', 'default')).toBe('default');
+      delete process.env.TEST_TOKEN_NO_PREFIX;
     });
 
     it('returns environment value over default', () => {
-      expect(getInput('TEST_TOKEN', 'default')).toBe('abc123');
+      expect(getInput('YUKI_NO_TEST_TOKEN', 'default')).toBe('abc123');
     });
   });
 
   describe('getBooleanInput', () => {
     it('parses true correctly', () => {
-      expect(getBooleanInput('TEST_ENABLED')).toBe(true);
+      expect(getBooleanInput('YUKI_NO_TEST_ENABLED')).toBe(true);
     });
 
     it('parses false correctly', () => {
-      process.env.TEST_FALSE = 'false';
-      expect(getBooleanInput('TEST_FALSE')).toBe(false);
-      delete process.env.TEST_FALSE;
+      process.env.YUKI_NO_TEST_FALSE = 'false';
+      expect(getBooleanInput('YUKI_NO_TEST_FALSE')).toBe(false);
     });
 
     it('returns false by default for non-existent variable', () => {
-      expect(getBooleanInput('NON_EXISTENT')).toBe(false);
+      expect(getBooleanInput('YUKI_NO_NON_EXISTENT')).toBe(false);
+    });
+
+    it('returns false for variable without YUKI_NO_ prefix', () => {
+      process.env.TEST_ENABLED_NO_PREFIX = 'true';
+      expect(getBooleanInput('TEST_ENABLED_NO_PREFIX')).toBe(false);
+      delete process.env.TEST_ENABLED_NO_PREFIX;
     });
 
     it('returns custom default value', () => {
-      expect(getBooleanInput('NON_EXISTENT', true)).toBe(true);
+      expect(getBooleanInput('YUKI_NO_NON_EXISTENT', true)).toBe(true);
     });
   });
 
   describe('getMultilineInput', () => {
     it('splits lines correctly', () => {
-      expect(getMultilineInput('TEST_PATHS')).toEqual(['a', 'b', 'c']);
+      expect(getMultilineInput('YUKI_NO_TEST_PATHS')).toEqual(['a', 'b', 'c']);
     });
 
     it('returns empty array by default for non-existent variable', () => {
-      expect(getMultilineInput('NON_EXISTENT')).toEqual([]);
+      expect(getMultilineInput('YUKI_NO_NON_EXISTENT')).toEqual([]);
+    });
+
+    it('returns empty array for variable without YUKI_NO_ prefix', () => {
+      process.env.TEST_PATHS_NO_PREFIX = 'x\ny\nz';
+      expect(getMultilineInput('TEST_PATHS_NO_PREFIX')).toEqual([]);
+      delete process.env.TEST_PATHS_NO_PREFIX;
     });
 
     it('returns custom default value', () => {
       expect(
-        getMultilineInput('NON_EXISTENT', ['default1', 'default2']),
+        getMultilineInput('YUKI_NO_NON_EXISTENT', ['default1', 'default2']),
       ).toEqual(['default1', 'default2']);
     });
   });
