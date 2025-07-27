@@ -1,5 +1,4 @@
 import type { Config, RepoSpec } from './types/config';
-import { unique } from './utils/common';
 import { getBooleanInput, getInput, getMultilineInput } from './utils/input';
 import { log } from './utils/log';
 
@@ -11,9 +10,6 @@ export const defaults = {
   branch: 'main',
   label: 'sync',
 } as const;
-
-export const RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME =
-  '@yuki-no/plugin-release-tracking@latest';
 
 export const createConfig = (): Config => {
   log('I', 'createConfig :: Parsing configuration values');
@@ -49,12 +45,6 @@ export const createConfig = (): Config => {
   const verbose = getBooleanInput('VERBOSE', true);
   process.env.VERBOSE = verbose.toString();
 
-  // Compatibility layer: automatically add core plugin when release-tracking is enabled
-  const finalPlugins = [...plugins];
-  if (releaseTracking) {
-    finalPlugins.push(RELEASE_TRACKING_COMPATIBILITY_PLUGIN_NAME);
-  }
-
   return {
     accessToken: accessToken!,
     userName: userName!,
@@ -66,7 +56,7 @@ export const createConfig = (): Config => {
     exclude,
     labels: sortedLabels,
     releaseTracking,
-    plugins: unique(finalPlugins),
+    plugins,
     verbose,
   };
 };
