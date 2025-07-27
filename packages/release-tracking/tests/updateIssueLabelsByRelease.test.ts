@@ -1,40 +1,43 @@
-import { updateIssueLabelsByRelease } from '../updateIssueLabelsByRelease';
+import type { ReleaseInfo } from '../utils/getRelease';
+import { updateIssueLabelsByRelease } from '../utils/updateIssueLabelsByRelease';
 
-import type { ReleaseInfo } from '@gumball12/yuki-no/git/getRelease';
-import { GitHub } from '@gumball12/yuki-no/github/core';
-import type { Issue } from '@gumball12/yuki-no/github/getOpenedIssues';
-import * as SetIssueLabelsModule from '@gumball12/yuki-no/github/setIssueLabels';
+import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
+import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['needs-release', 'in-next-release'];
 
+// Mock GitHub API methods
+const setIssueLabelsMock = vi.fn();
+
 // Mocking to avoid network requests
-vi.mock('@gumball12/yuki-no/github/core', () => ({
+vi.mock('@yuki-no/plugin-sdk/infra/github', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
-    api: {},
+    api: {
+      issues: {
+        setLabels: setIssueLabelsMock,
+      },
+    },
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
     configuredLabels: [],
   })),
 }));
 
-vi.mock('@gumball12/yuki-no/github/setIssueLabels', () => ({
-  setIssueLabels: vi.fn(),
-}));
-
 // Mock environment variables
-vi.mock('@gumball12/yuki-no/inputUtils', () => ({
+vi.mock('@yuki-no/plugin-sdk/utils/input', () => ({
   getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
-    if (key === 'RELEASE_TRACKING_LABELS') {
+    if (key === 'YUKI_NO_RELEASE_TRACKING_LABELS') {
       return MOCK_RELEASE_TRACKING_LABELS;
     }
     return defaultValue;
   }),
 }));
 
-const mockGitHub = new GitHub({} as any);
+vi.mock('@yuki-no/plugin-sdk/utils/common', () => ({
+  unique: vi.fn((arr: string[]) => [...new Set(arr)]),
+}));
 
-// Mocking for spy
-const setIssueLabelsMock = vi.mocked(SetIssueLabelsModule.setIssueLabels);
+const mockGitHub = new GitHub({} as any);
 
 const MOCK_ISSUE: Issue = {
   number: 123,
@@ -71,11 +74,12 @@ it('For released issues, release tracking labels should be removed', async () =>
     MOCK_RELEASE_INFO,
   );
 
-  expect(setIssueLabelsMock).toHaveBeenCalledWith(
-    mockGitHub,
-    issueWithTrackingLabels.number,
-    ['bug', 'enhancement'],
-  );
+  expect(setIssueLabelsMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: issueWithTrackingLabels.number,
+    labels: ['bug', 'enhancement'],
+  });
 });
 
 it('For unreleased issues, release tracking labels should be added', async () => {
@@ -86,14 +90,15 @@ it('For unreleased issues, release tracking labels should be added', async () =>
 
   await updateIssueLabelsByRelease(mockGitHub, MOCK_ISSUE, prereleaseOnly);
 
-  expect(setIssueLabelsMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    expect.arrayContaining([
+  expect(setIssueLabelsMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    labels: expect.arrayContaining([
       ...MOCK_ISSUE.labels,
       ...MOCK_RELEASE_TRACKING_LABELS,
     ]),
-  );
+  });
 });
 
 it('For unreleased issues, if all release tracking labels are already present, no changes should be made', async () => {
@@ -133,14 +138,15 @@ it('For unreleased issues, if only some release tracking labels are present, the
     prereleaseOnly,
   );
 
-  expect(setIssueLabelsMock).toHaveBeenCalledWith(
-    mockGitHub,
-    issueWithSomeTrackingLabels.number,
-    expect.arrayContaining([
+  expect(setIssueLabelsMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: issueWithSomeTrackingLabels.number,
+    labels: expect.arrayContaining([
       ...issueWithSomeTrackingLabels.labels,
       MOCK_RELEASE_TRACKING_LABELS[1],
     ]),
-  );
+  });
 });
 
 it('If release information is undefined, it should be treated as unreleased and labels should be added', async () => {
@@ -151,12 +157,13 @@ it('If release information is undefined, it should be treated as unreleased and 
 
   await updateIssueLabelsByRelease(mockGitHub, MOCK_ISSUE, noReleaseInfo);
 
-  expect(setIssueLabelsMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    expect.arrayContaining([
+  expect(setIssueLabelsMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    labels: expect.arrayContaining([
       ...MOCK_ISSUE.labels,
       ...MOCK_RELEASE_TRACKING_LABELS,
     ]),
-  );
+  });
 });

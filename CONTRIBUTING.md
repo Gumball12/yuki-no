@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Yuki-no! This guide will help you
 
 ### Prerequisites
 
-- Node.js v22.0.0 or higher
+- Node.js v22.12.0+
 - [pnpm](https://pnpm.io/) (install via [Node Corepack](https://nodejs.org/api/corepack.html))
   ```bash
   corepack enable
@@ -50,6 +50,10 @@ For more details, see [GitHub documentation](https://docs.github.com/en/authenti
    git clone https://github.com/Gumball12/yuki-no.git
    cd yuki-no
 
+   # Enable Corepack
+   # https://nodejs.org/api/corepack.html
+   corepack enable
+
    # Install dependencies
    pnpm install
    ```
@@ -79,21 +83,27 @@ For more environment variables, see [README](./README.md#configuration).
    ```bash
    git checkout -b feat/your-feature
    ```
-2. Run tests and the application:
+2. Run tests:
    ```bash
    pnpm test # unit tests
-   pnpm start:dev # run yuki-no with .env
    ```
-3. Format your code:
+3. Run Yuki-no locally:
+   ```bash
+   # If you are using plugins locally, you must install those
+   # plugins as devDependencies. Otherwise, you will encounter
+   # a "Failed to load plugin" error.
+   pnpm start:dev # run yuki-no with packages/core/.env
+   ```
+4. Format your code:
    ```bash
    pnpm lint
    ```
-4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+5. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
    ```bash
    git commit -m "feat: add new feature"
    git commit -m "fix: resolve issue #123"
    ```
-5. Push your changes and create a pull request!
+6. Push your changes and create a pull request!
 
 ### Troubleshooting
 
@@ -109,13 +119,22 @@ If you find bugs not covered here, please [open an issue](https://github.com/Gum
 
 ```
 packages/
-├── core/                   # Main core logic (@gumball12/yuki-no)
-│   ├── git/                # Git operations
-│   ├── github/             # GitHub API interactions
-│   └── plugin-sdk/         # Plugin SDK for external plugins
+├── core/                   # Main core logic (@yuki-no/plugin-sdk)
+│   ├── infra/              # Infrastructure layer (git, github)
+│   ├── plugin/             # Plugin SDK for external plugins
+│   ├── types/
+│   ├── utils/              # Common utilities
+│   └── utils-infra/        # Infrastructure utilities
 ├── release-tracking/       # Core release tracking plugin
 └── other packages...
 ```
+
+#### Available Packages
+
+For detailed information about each package, see their individual documentation:
+
+- **[Core Package](./packages/core/README.md)** (`@yuki-no/plugin-sdk`) - Yuki-no Plugin SDK
+- **[Release Tracking Plugin](./packages/release-tracking/README.md)** (`@yuki-no/plugin-release-tracking`)
 
 ### Flow
 
@@ -135,7 +154,7 @@ stateDiagram-v2
   [*] --> init
   init --> cc : plugin.onInit
   cc --> cis
-  cis --> [*] : plugin.onExit
+  cis --> [*] : plugin.onFinally
 
   state init {
     pc --> initGg
@@ -222,15 +241,6 @@ For detailed configuration and principles, see [Claude GitHub Actions documentat
 ### Publishing
 
 This monorepo contains multiple npm packages that can be published independently to npm using automated GitHub workflows.
-
-#### Available Packages
-
-For detailed information about each package, see their individual documentation:
-
-- **[Core Package](./packages/core/plugin-sdk/README.md)** (`@gumball12/yuki-no`) - Yuki-no Plugin SDK
-- **[Release Tracking Plugin](./packages/release-tracking/README.md)** (`yuki-no-plugin-release-tracking`)
-
-#### Automated Publishing Process
 
 1. **Create GitHub Release** with tag format: `<package-name>-v<version>`
    - e.g. Core package: `core-v1.4.2` / Release tracking package: `release-tracking-v1.0.1`

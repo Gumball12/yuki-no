@@ -2,6 +2,29 @@
 
 Yuki-no supports external plugins that can hook into its lifecycle. Specify plugin package names with the `plugins` option in your workflow. Names are conventionally prefixed with `yuki-no-plugin-`, though this is not enforced.
 
+## Using Plugins
+
+> [!NOTE]
+>
+> **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
+
+Specify published npm packages with exact version:
+
+```yaml
+- uses: Gumball12/yuki-no@v1
+  with:
+    # ... other options ...
+
+    # [Optional]
+    # List of plugin package names with exact versions
+    plugins: |
+      yuki-no-plugin-test@0.0.4
+      yuki-no-plugin-slack@2.1.0
+      @my-org/yuki-no-plugin-teams@1.5.2
+```
+
+Plugins are automatically installed by Yuki-no during [GitHub Actions execution](../scripts/checkout.sh). You only need to specify them in your workflow configuration.
+
 ## Plugin Lifecycle
 
 Yuki-no executes plugins through a well-defined lifecycle that corresponds to the main phases of repository synchronization and issue creation.
@@ -57,26 +80,32 @@ Yuki-no executes plugins through a well-defined lifecycle that corresponds to th
         └─────────────────────┤
                               ▼
                         ┌─────────────┐
-                        │  onExit()   │ ← Cleanup & finalization
+                        │  onFinally()   │ ← Cleanup & finalization
                         └─────┬───────┘
                               │
                               ▼
                           ✅ Complete
 ```
 
+Each hook in the plugin lifecycle is called sequentially according to Yuki-no's execution flow. Importantly, if no new commits are found, the `onBeforeCreateIssue` and `onAfterCreateIssue` hooks will not be called at all. Therefore, tasks that must be performed in every plugin execution should be handled in the `onInit` or `onFinally` hooks for safety.
+
+Performance considerations include that the `onBeforeCreateIssue` and `onAfterCreateIssue` hooks are executed repeatedly for each discovered commit. Heavy operations or external API calls should preferably be batched in `onAfterCompare`, or each hook should perform minimal work.
+
+For error handling, even if one plugin encounters an error, the `onError` hooks of all other plugins will still be called. This allows for independent error logging or notifications per plugin. Most data passed through context is read-only, but the `issueMeta` object received in `onBeforeCreateIssue` is mutable, allowing dynamic changes to issue titles, bodies, and labels.
+
 ## Plugin Development
 
-### Installing Dependencies
+### Installing Plugin SDK
 
-[![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@gumball12/yuki-no)
+[![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@yuki-no/plugin-sdk)
 
-Install [@gumball12/yuki-no](https://www.npmjs.com/package/@gumball12/yuki-no) as a development dependency to get TypeScript types and input helpers:
+We provide the [@yuki-no/plugin-sdk](https://www.npmjs.com/package/@yuki-no/plugin-sdk) library that includes types, helper functions, and other utilities to assist with Yuki-no plugin development:
 
 ```bash
-npm install @gumball12/yuki-no
+npm install @yuki-no/plugin-sdk
 ```
 
-### Creating a Plugin
+### Creating a Yuki-no Plugin w/ Hooks
 
 > [!NOTE]
 > Every plugin **must** export a default object implementing any of the lifecycle hooks below.
@@ -84,104 +113,97 @@ npm install @gumball12/yuki-no
 Create a plugin by implementing the `YukiNoPlugin` interface:
 
 ```ts
-import type { YukiNoPlugin } from 'yuki-no';
+import type { YukiNoPlugin } from '@yuki-no/plugin-sdk';
 
 const myPlugin: YukiNoPlugin = {
   name: 'my-plugin',
 
-  async onInit(ctx) {
-    console.log('Plugin initialized!');
-    console.log(`Tracking from: ${ctx.config.trackFrom}`);
-    console.log(`Release tracking: ${ctx.config.releaseTracking}`);
-    // Initialize plugin state, validate configuration
-  },
+  // Called when the action starts, after configuration is loaded.
+  async onInit(ctx: YukiNoContext) {},
 
-  async onBeforeCompare(ctx) {
-    // Called before comparing commits
-    console.log('About to compare commits...');
-  },
+  // Called before comparing commits between repositories.
+  async onBeforeCompare(ctx: YukiNoContext) {},
 
-  async onAfterCompare(ctx) {
-    // Called after comparing commits
-    console.log(`Found ${ctx.commits.length} new commits`);
-  },
+  // Called after commit comparison, with the list of new commits.
+  async onAfterCompare(ctx: YukiNoContext & { commits: Commit[] }) {},
 
-  async onBeforeCreateIssue(ctx) {
-    // Inspect issue metadata before creation
-    console.log(`Creating issue: ${ctx.meta.title}`);
-    console.log(`Labels: ${ctx.meta.labels.join(', ')}`);
-  },
+  // Called before each issue is created.
+  // The `issueMeta` object is read-only for inspection purposes.
+  async onBeforeCreateIssue(
+    ctx: YukiNoContext & { commit: Commit; issueMeta: IssueMeta },
+  ) {},
 
-  async onAfterCreateIssue(ctx) {
-    // Called after issue is created
-    console.log(`Created issue #${ctx.result.number}: ${ctx.result.html_url}`);
-  },
+  // Called after each issue is created.
+  async onAfterCreateIssue(
+    ctx: YukiNoContext & { commit: Commit; issue: Issue },
+  ) {},
 
-  async onExit(ctx) {
-    console.log(`Plugin finished, success: ${ctx.success}`);
-    // Cleanup, send notifications
-  },
+  // Called before the action exits (success or failure)
+  async onFinally(ctx: YukiNoContext & { success: boolean }) {},
 
-  async onError(ctx) {
-    console.error('Plugin error:', ctx.error.message);
-    // Error handling, send alerts
-  },
+  // Called when any error occurs during execution.
+  async onError(ctx: YukiNoContext & { error: Error }) {},
 };
 
 export default myPlugin;
 ```
 
-- `onInit(ctx: YukiNoContext)`: Called when the action starts, after configuration is loaded.
-- `onBeforeCompare(ctx: YukiNoContext)`: Called before comparing commits between repositories.
-- `onAfterCompare(ctx: YukiNoContext & { commits: Commit[] })`: Called after commit comparison, with the list of new commits.
-- `onBeforeCreateIssue(ctx: YukiNoContext & { commit: Commit; meta: IssueMeta })`: Called before each issue is created. The `meta` object is read-only for inspection purposes.
-- `onAfterCreateIssue(ctx: YukiNoContext & { commit: Commit; result: IssueResult })`: Called after each issue is created.
-- `onExit(ctx: YukiNoContext & { success: boolean })`: Called before the action exits (success or failure).
-- `onError(ctx: YukiNoContext & { error: Error })`: Called when any error occurs during execution.
+As previously explained, Yuki-no provides several hook interfaces that are called at different parts of the lifecycle. Plugin developers can use these to define what actions to perform at each stage.
 
-See [@gumball12/yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin-test) for a plugin example.
+For detailed information about types, please refer to the [Plugin SDK API](#plugin-sdk-api) section.
+
+See [yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin-test) for a plugin example.
 
 ### Passing Inputs to Plugins
+
+> [!CAUTION]
+> Environment variable names passed as plugin inputs must always have the `YUKI_NO_` prefix.
 
 Plugins can receive custom values using environment variables instead [`with`](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith). This approach avoids IDE warnings about undefined inputs and follows GitHub Actions best practices. Use the `env` block to pass custom values to your plugins:
 
 ```yaml
 - uses: Gumball12/yuki-no@v1
   env:
-    PLUGIN_CUSTOM_MESSAGE: ${{ secrets.CUSTOM_MESSAGE }}
-    PLUGIN_IS_TRUE: true
-    PLUGIN_MY_VALUES: |
+    YUKI_NO_CUSTOM_MESSAGE: ${{ secrets.CUSTOM_MESSAGE }}
+    YUKI_NO_IS_TRUE: true
+    YUKI_NO_MY_VALUES: |
       value 1
       value 2
   with:
-    # ... standard yuki-no inputs only ...
+    # ... yuki-no options ...
     access-token: ${{ secrets.GITHUB_TOKEN }}
     head-repo: https://github.com/vitejs/vite.git
     track-from: abc123
 ```
 
-```ts
-import { getBooleanInput, getInput, getMultilineInput } from 'yuki-no';
+Only environment variables with the `YUKI_NO` prefix are passed to plugins to prevent access to unauthorized environment variables. Therefore, you must include the `YUKI_NO_` prefix in your environment variable names.
 
-const customMessage = getInput('PLUGIN_CUSTOM_MESSAGE', 'default message'); // default value is optional
-const isTrue = getBooleanInput('PLUGIN_IS_TRUE', false);
-const myValues = getMultilineInput('PLUGIN_MY_VALUES', [
-  'default1',
-  'default2',
-]);
+### Publishing
+
+1. **Create Package:** Create a package named like `yuki-no-plugin-<name>`
+2. **Export Plugin:** Export the plugin as `default` from your entry file
+3. **Publish:** Publish the package to npm
+4. **Configure:** Users add the package name with exact version to the `plugins` option in their workflow
+
+## Plugin SDK API
+
+Yuki-no provides a [Plugin SDK](https://www.npmjs.com/package/@yuki-no/plugin-sdk) that can help with plugin development.
+
+```bash
+npm install @yuki-no/plugin-sdk
 ```
 
-We recommend prefixing your environment variables with `PLUGIN_` to avoid conflicts with system variables.
-
-### Context Types
+This section describes the types and helper functions provided by this library. You can import and use them as follows:
 
 ```ts
-type YukiNoContext = {
-  octokit: Octokit; // GitHub API client (@octokit/rest)
-  context: Context; // GitHub Actions context (@actions/github/lib/context)
-  config: Config; // Yuki-no configuration settings
-};
+import { Config } from '@yuki-no/plugin-sdk/types/config';
+```
 
+### `types/config`
+
+#### `Config`
+
+```ts
 type Config = {
   accessToken: string;
   userName: string;
@@ -196,40 +218,246 @@ type Config = {
   plugins: string[];
   verbose: boolean;
 };
+```
 
-type IssueMeta = {
-  title: string; // Issue title
-  body: string; // Issue body
-  labels: string[]; // Issue labels
+The Yuki-no configuration is structured with the above type definition.
+
+#### `RepoSpec`
+
+```ts
+type RepoSpec = {
+  owner: string;
+  name: string;
+  branch: string;
 };
 ```
 
-### Publishing
+Information about a repository.
 
-1. **Create Package:** Create a package named like `yuki-no-plugin-<name>`
-2. **Export Plugin:** Export the plugin as `default` from your entry file
-3. **Publish:** Publish the package to npm
-4. **Configure:** Users add the package name with exact version to the `plugins` option in their workflow
+### `types/git`
 
-## Using Plugins
+#### `Commit`
 
-> [!NOTE]
->
-> **You do NOT need to install plugins in your repository!** Yuki-no automatically installs plugins during GitHub Actions execution. Simply specify plugin names in your workflow configuration.
-
-Specify published npm packages with exact version:
-
-```yaml
-- uses: Gumball12/yuki-no@v1
-  with:
-    # ... other options ...
-
-    # [Optional]
-    # List of plugin package names with exact versions
-    plugins: |
-      @gumball12/yuki-no-plugin-test@0.0.4
-      yuki-no-plugin-slack@2.1.0
-      @my-org/yuki-no-plugin-teams@1.5.2
+```ts
+type Commit = {
+  title: string;
+  isoDate: string;
+  hash: string;
+  fileNames: string[];
+};
 ```
 
-Plugins are automatically installed by Yuki-no during [GitHub Actions execution](../scripts/checkout.sh). You only need to specify them in your workflow configuration.
+### `types/github`
+
+#### `IssueMeta`
+
+```ts
+type IssueMeta = Readonly<{
+  title: string;
+  body: string;
+  labels: string[];
+}>;
+```
+
+Type definition for information needed when creating an issue.
+
+#### `Issue`
+
+```ts
+type Issue = {
+  number: number;
+  body: string;
+  labels: string[];
+  hash: string;
+  isoDate: string;
+};
+```
+
+Type definition for issues created by Yuki-no.
+
+### `types/plugin`
+
+#### `YukiNoContext`
+
+```ts
+type YukiNoContext = {
+  config: Config;
+};
+```
+
+Type definition for Yuki-no plugin context.
+
+#### `YukiNoPlugin`
+
+```ts
+interface YukiNoPlugin extends YukiNoPluginHooks {
+  name: string;
+}
+
+interface YukiNoPluginHooks {
+  onInit?(ctx: YukiNoContext): Promise<void> | void;
+  onBeforeCompare?(ctx: YukiNoContext): Promise<void> | void;
+  onAfterCompare?(
+    ctx: YukiNoContext & { commits: Commit[] },
+  ): Promise<void> | void;
+  onBeforeCreateIssue?(
+    ctx: YukiNoContext & { commit: Commit; issueMeta: IssueMeta },
+  ): Promise<void> | void;
+  onAfterCreateIssue?(
+    ctx: YukiNoContext & { commit: Commit; issue: Issue },
+  ): Promise<void> | void;
+  onFinally?(ctx: YukiNoContext & { success: boolean }): Promise<void> | void;
+  onError?(ctx: YukiNoContext & { error: Error }): Promise<void> | void;
+}
+```
+
+### `infra/git`
+
+#### `Git`
+
+```ts
+class Git {
+  constructor(config: Config & { repoSpec: RepoSpec; withClone?: boolean });
+
+  clone(): void;
+  exec(command: string): string;
+  get repoUrl(): string;
+  get dirName(): string;
+}
+```
+
+A class for managing Git repositories and executing git commands. When creating a `new Git` instance, you can pass `withClone` as `true` to clone the repository during creation.
+
+- `clone()`: Clones the specified repository
+- `exec(command: string)`: Executes git commands
+- `repoUrl`: Returns the repository URL
+- `dirName`: Returns the repository directory name
+
+### `infra/github`
+
+#### `GitHub`
+
+```ts
+class GitHub {
+  constructor(config: Config & { repoSpec: RepoSpec });
+
+  get api(): Octokit;
+  get ownerAndRepo(): { owner: string; repo: string };
+  get configuredLabels(): string[];
+}
+```
+
+A class for managing GitHub API integration and interactions.
+
+- `api`: Returns an Octokit instance
+- `ownerAndRepo`: Returns the repository owner and name
+- `configuredLabels`: Returns the configured label list
+
+### `utils/common`
+
+#### `isNotEmpty`
+
+```ts
+function isNotEmpty(value: string): boolean;
+```
+
+#### `extractHashFromIssue`
+
+```ts
+function extractHashFromIssue(issue: Pick<Issue, 'body'>): string | undefined;
+```
+
+Extracts the commit hash from the body of translation issues managed by Yuki-no.
+
+#### `filterByPattern`
+
+```ts
+function filterByPattern(
+  items: string[],
+  include: string[],
+  exclude: string[],
+): string[];
+```
+
+Filters items based on include/exclude patterns. Patterns follow Glob Patterns; for details, see [Picomatch docs](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing).
+
+### `utils/input`
+
+#### `getInput`
+
+```ts
+function getInput(key: string, defaultValue?: string): string | undefined;
+```
+
+Retrieves the corresponding value from environment variables.
+
+#### `getBooleanInput`
+
+```ts
+function getBooleanInput(key: string, defaultValue?: boolean): boolean;
+```
+
+Retrieves the corresponding value from environment variables as a boolean type.
+
+#### `getMultilineInput`
+
+```ts
+function getMultilineInput(key: string, defaultValue?: string[]): string[];
+```
+
+Retrieves multiline environment variable values as a string array.
+
+### `utils-infra/createIssue`
+
+```ts
+function createIssue(github: GitHub, issueMeta: IssueMeta): Promise<Issue>;
+```
+
+Creates a new Yuki-no issue on GitHub.
+
+- `github`: GitHub API class instance
+- `issueMeta`: Issue metadata (title, body, labels)
+
+### `utils-infra/getCommits`
+
+```ts
+function getCommits(config: Config, git: Git, since?: string): Commit[];
+```
+
+Retrieves the list of commits after the specified point.
+
+- `config`: Yuki-no configuration
+- `git`: Git class instance
+- `since`: Query starting point (ISO date string)
+
+### `utils-infra/getLatestSuccessfulRunISODate`
+
+```ts
+function getLatestSuccessfulRunISODate(
+  github: GitHub,
+): Promise<string | undefined>;
+```
+
+Retrieves the execution time of the most recent successful Yuki-no GitHub Actions workflow.
+
+### `utils-infra/getOpenedIssues`
+
+```ts
+function getOpenedIssues(github: GitHub): Promise<Issue[]>;
+```
+
+Retrieves all currently open Yuki-no issues. Returns only issues that have the configured labels after filtering.
+
+### `utils-infra/lookupCommitsInIssues`
+
+```ts
+function lookupCommitsInIssues(
+  github: GitHub,
+  commits: Commit[],
+): Promise<Commit[]>;
+```
+
+Finds and returns commits from the given commit list that do not yet have issues created for them.
+
+- `github`: GitHub API class instance
+- `commits`: List of commits to check

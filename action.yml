@@ -41,13 +41,13 @@ inputs:
     default: |
       sync
   release-tracking:
-    description: '(Deprecated) Whether to enable release tracking. Use plugins: ["release-tracking"] instead.'
+    description: '(Deprecated) Whether to enable release tracking. Use plugins: ["@yuki-no/plugin-release-tracking"] instead.'
     required: false
-    deprecationMessage: 'release-tracking option is deprecated. Use plugins: ["release-tracking"] instead. See documentation for migration guide.'
+    deprecationMessage: 'release-tracking option is deprecated. Use plugins: ["@yuki-no/plugin-release-tracking"] instead. See documentation for migration guide.'
   release-tracking-labels:
-    description: '(Deprecated) Labels for unreleased changes. Use env.RELEASE_TRACKING_LABELS instead.'
+    description: '(Deprecated) Labels for unreleased changes. Use env.YUKI_NO_RELEASE_TRACKING_LABELS instead.'
     required: false
-    deprecationMessage: 'release-tracking-labels option is deprecated. Set RELEASE_TRACKING_LABELS in env block instead.'
+    deprecationMessage: 'release-tracking-labels option is deprecated. Set YUKI_NO_RELEASE_TRACKING_LABELS in env block instead.'
     default: |
       pending
   verbose:

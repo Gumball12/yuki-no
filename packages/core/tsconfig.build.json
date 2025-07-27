@@ -2,6 +2,5 @@
   "extends": "../../tsconfig.build.base.json",
   "compilerOptions": {
     "outDir": "dist"
-  },
-  "include": ["plugin-sdk/index.ts"]
+  }
 }

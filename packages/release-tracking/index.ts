@@ -1,32 +1,38 @@
-import { updateIssueCommentByRelease } from './updateIssueCommentsByRelease';
-import { updateIssueLabelsByRelease } from './updateIssueLabelsByRelease';
+import { getRelease } from './utils/getRelease';
+import { hasAnyRelease } from './utils/hasAnyRelease';
+import { updateIssueCommentByRelease } from './utils/updateIssueCommentsByRelease';
+import { updateIssueLabelsByRelease } from './utils/updateIssueLabelsByRelease';
 
-import { Git } from '@gumball12/yuki-no/git/core';
-import { getRelease } from '@gumball12/yuki-no/git/getRelease';
-import { hasAnyRelease } from '@gumball12/yuki-no/git/hasAnyRelease';
-import { GitHub } from '@gumball12/yuki-no/github/core';
-import {
-  getOpenedIssues,
-  type Issue,
-} from '@gumball12/yuki-no/github/getOpenedIssues';
-import type { YukiNoPlugin } from '@gumball12/yuki-no/plugin-sdk/core';
-import { log, mergeArray, uniqueWith } from '@gumball12/yuki-no/utils';
+import { Git } from '@yuki-no/plugin-sdk/infra/git';
+import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
+import type { Issue } from '@yuki-no/plugin-sdk/types/github';
+import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
+import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
+import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 const releaseTrackingPlugin: YukiNoPlugin = {
   name: 'release-tracking',
 
   async onAfterCreateIssue(ctx) {
-    const git = new Git({ ...ctx.config, repoSpec: ctx.config.headRepoSpec });
+    const git = new Git({
+      ...ctx.config,
+      repoSpec: ctx.config.headRepoSpec,
+      withClone: true,
+    });
     const github = new GitHub({
       ...ctx.config,
       repoSpec: ctx.config.upstreamRepoSpec,
     });
 
-    await processReleaseTrackingForIssue(github, git, ctx.result);
+    await processReleaseTrackingForIssue(github, git, ctx.issue);
   },
 
-  async onExit(ctx) {
-    const git = new Git({ ...ctx.config, repoSpec: ctx.config.headRepoSpec });
+  async onFinally(ctx) {
+    const git = new Git({
+      ...ctx.config,
+      repoSpec: ctx.config.headRepoSpec,
+      withClone: true,
+    });
     const github = new GitHub({
       ...ctx.config,
       repoSpec: ctx.config.upstreamRepoSpec,
@@ -90,4 +96,42 @@ const processReleaseTrackingForIssue = async (
     releaseInfo,
     releasesAvailable,
   );
+};
+
+const uniqueWith = <V>(value: V[], mapper: (v: V) => unknown): V[] => {
+  if (value.length <= 1) {
+    return [...value];
+  }
+
+  const result: V[] = [];
+  const seen = new Set();
+
+  for (const v of value) {
+    const mapped = mapper(v);
+
+    if (seen.has(mapped)) {
+      continue;
+    }
+
+    result.push(v);
+    seen.add(mapped);
+  }
+
+  return [...result];
+};
+
+const mergeArray = <T>(a: T[], b: T[]): T[] => {
+  if (a.length === 0 && b.length === 0) {
+    return [];
+  }
+
+  if (a.length === 0) {
+    return [...b];
+  }
+
+  if (b.length === 0) {
+    return [...a];
+  }
+
+  return [...a, ...b];
 };

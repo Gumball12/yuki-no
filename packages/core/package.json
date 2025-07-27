@@ -1,11 +1,11 @@
 {
-  "name": "@gumball12/yuki-no",
-  "version": "1.4.1",
+  "name": "@yuki-no/plugin-sdk",
+  "version": "1.0.0",
   "description": "A GitHub Action that tracks changes between repositories. It creates GitHub issues based on commits from a head repository, making it ideal for documentation translation projects.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Gumball12/yuki-no.git",
-    "directory": "packages/core/plugin-sdk"
+    "directory": "packages/core"
   },
   "author": {
     "name": "Gumball12",
@@ -29,30 +29,45 @@
     "issue-tracking"
   ],
   "type": "module",
-  "main": "dist/plugin-sdk/index.js",
-  "types": "dist/plugin-sdk/index.d.ts",
+  "exports": {
+    "./infra/*": {
+      "development": "./infra/*.ts",
+      "import": "./dist/infra/*.js",
+      "types": "./dist/infra/*.d.ts"
+    },
+    "./types/*": {
+      "types": "./dist/types/*.d.ts"
+    },
+    "./utils/*": {
+      "development": "./utils/*.ts",
+      "import": "./dist/utils/*.js",
+      "types": "./dist/utils/*.d.ts"
+    },
+    "./utils-infra/*": {
+      "development": "./utils-infra/*.ts",
+      "import": "./dist/utils-infra/*.js",
+      "types": "./dist/utils-infra/*.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json",
-    "prepublishOnly": "pnpm build && cp ./plugin-sdk/README.md ./README.md",
+    "prepublishOnly": "pnpm build",
     "start": "tsx ./index.ts",
-    "start:dev": "tsx --env-file=.env ./index.ts"
+    "start:dev": "tsx --conditions=development --env-file=.env ./index.ts"
   },
   "dependencies": {
-    "@actions/github": "^6.0.1",
     "@octokit/plugin-retry": "^7.2.0",
     "@octokit/plugin-throttling": "^9.6.0",
     "@octokit/rest": "^21.0.2",
     "colors": "^1.4.0",
     "picomatch": "^4.0.2",
-    "semver": "^7.7.1",
     "shelljs": "^0.8.5"
   },
   "devDependencies": {
     "@types/picomatch": "^3.0.2",
-    "@types/semver": "^7.5.8",
     "@types/shelljs": "^0.8.15"
   }
 }

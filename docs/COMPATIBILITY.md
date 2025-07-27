@@ -26,23 +26,23 @@ For new projects, we recommend using the explicit plugin syntax with environment
 # Recommended style
 - uses: Gumball12/yuki-no@v1
   env:
-    RELEASE_TRACKING_LABELS: |
+    YUKI_NO_RELEASE_TRACKING_LABELS: |
       pending
       needs-release
   with:
     plugins: |
-      yuki-no-plugin-release-tracking@1.0.0
+      @yuki-no/plugin-release-tracking@1.1.0
 ```
 
 ### Key Changes
 
-- **Plugin System:** Release tracking is now implemented as a plugin [`yuki-no-plugin-release-tracking`](../packages/release-tracking/)
-- **Environment Variables:** `release-tracking-labels` option moved to `RELEASE_TRACKING_LABELS` environment variable
+- **Plugin System:** Release tracking is now implemented as a plugin [`@yuki-no/plugin-release-tracking`](../packages/release-tracking/)
+- **Environment Variables:** `release-tracking-labels` option moved to `YUKI_NO_RELEASE_TRACKING_LABELS` environment variable
 - **Automatic Migration:** Legacy `release-tracking` option automatically enables the plugin
 
 ### Deprecated Options
 
 The following options are deprecated but still supported for backward compatibility:
 
-- `release-tracking`: Use `plugins: ["yuki-no-plugin-release-tracking"]` instead
-- `release-tracking-labels`: Use `env.RELEASE_TRACKING_LABELS` instead
+- `release-tracking`: Use `plugins: ["@yuki-no/plugin-release-tracking"]` instead
+- `release-tracking-labels`: Use `env.YUKI_NO_RELEASE_TRACKING_LABELS` instead

@@ -1,6 +1,6 @@
-# yuki-no-plugin-release-tracking
+# @yuki-no/plugin-release-tracking
 
-[![NPM Version](https://img.shields.io/npm/v/yuki-no-plugin-release-tracking?style=flat-square&label=yuki-no-plugin-release-tracking)](https://www.npmjs.com/package/yuki-no-plugin-release-tracking)
+[![NPM Version](https://img.shields.io/npm/v/@yuki-no/plugin-release-tracking?style=flat-square&label=@yuki-no/plugin-release-tracking)](https://www.npmjs.com/package/@yuki-no/plugin-release-tracking)
 
 This plugin tracks the release status for each commit and automatically updates issue information with release details.
 
@@ -14,21 +14,21 @@ This plugin tracks the release status for each commit and automatically updates 
 ```yaml
 - uses: Gumball12/yuki-no@v1
   env:
-    RELEASE_TRACKING_LABELS: |
+    YUKI_NO_RELEASE_TRACKING_LABELS: |
       pending
       needs-release
   with:
     plugins: |
-      yuki-no-plugin-release-tracking@1.0.0
+      @yuki-no/plugin-release-tracking@1.1.0
 ```
 
 ## Configuration
 
 This plugin reads configuration from environment variables:
 
-- `RELEASE_TRACKING_LABELS`: Labels to add for unreleased changes. (default: `pending`)
+- `YUKI_NO_RELEASE_TRACKING_LABELS`: Labels to add for unreleased changes. (default: `pending`)
 
-To avoid conflicts, overlapping labels in `RELEASE_TRACKING_LABELS` with yuki-no `labels` option are automatically excluded.
+To avoid conflicts, overlapping labels in `YUKI_NO_RELEASE_TRACKING_LABELS` with yuki-no `labels` option are automatically excluded.
 
 ## Comment Generation
 

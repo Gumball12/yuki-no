@@ -1,35 +1,37 @@
-import { updateIssueCommentByRelease } from '../updateIssueCommentsByRelease';
+import { getLastIssueComment } from '../utils/getLastIssueComments';
+import type { ReleaseInfo } from '../utils/getRelease';
+import { updateIssueCommentByRelease } from '../utils/updateIssueCommentsByRelease';
 
-import type { ReleaseInfo } from '@gumball12/yuki-no/git/getRelease';
-import { GitHub } from '@gumball12/yuki-no/github/core';
-import * as CreateIssueCommentModule from '@gumball12/yuki-no/github/createIssueComment';
-import * as GetLastIssueCommentsModule from '@gumball12/yuki-no/github/getLastIssueComments';
-import type { Issue } from '@gumball12/yuki-no/github/getOpenedIssues';
+import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
+import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { beforeEach, expect, it, vi } from 'vitest';
 
 const MOCK_RELEASE_TRACKING_LABELS = ['pending'];
 
+// Mock GitHub API methods
+const createIssueCommentMock = vi.fn();
+
 // Mocking to bypass network requests
-vi.mock('@gumball12/yuki-no/github/core', () => ({
+vi.mock('@yuki-no/plugin-sdk/infra/github', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
-    api: {},
+    api: {
+      issues: {
+        createComment: createIssueCommentMock,
+      },
+    },
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
     configuredLabels: [],
   })),
 }));
 
-vi.mock('@gumball12/yuki-no/github/getLastIssueComments', () => ({
+vi.mock('../utils/getLastIssueComments', () => ({
   getLastIssueComment: vi.fn(),
 }));
 
-vi.mock('@gumball12/yuki-no/github/createIssueComment', () => ({
-  createIssueComment: vi.fn(),
-}));
-
 // Mock environment variables
-vi.mock('@gumball12/yuki-no/inputUtils', () => ({
+vi.mock('@yuki-no/plugin-sdk/utils/input', () => ({
   getMultilineInput: vi.fn((key: string, defaultValue: string[]) => {
-    if (key === 'RELEASE_TRACKING_LABELS') {
+    if (key === 'YUKI_NO_RELEASE_TRACKING_LABELS') {
       return MOCK_RELEASE_TRACKING_LABELS;
     }
     return defaultValue;
@@ -38,12 +40,7 @@ vi.mock('@gumball12/yuki-no/inputUtils', () => ({
 
 const mockGitHub = new GitHub({} as any);
 
-const getLastIssueCommentMock = vi.mocked(
-  GetLastIssueCommentsModule.getLastIssueComment,
-);
-const createIssueCommentMock = vi.mocked(
-  CreateIssueCommentModule.createIssueComment,
-);
+const getLastIssueCommentMock = vi.mocked(getLastIssueComment);
 
 const MOCK_ISSUE: Issue = {
   number: 123,
@@ -118,11 +115,12 @@ it('Should create a correct comment', async () => {
     true,
   );
 
-  expect(createIssueCommentMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    [EXPECTED_RELEASE_COMMENT.prerelease, '- release: none'].join('\n'),
-  );
+  expect(createIssueCommentMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    body: [EXPECTED_RELEASE_COMMENT.prerelease, '- release: none'].join('\n'),
+  });
 
   const releaseOnly: ReleaseInfo = {
     prerelease: undefined,
@@ -134,11 +132,12 @@ it('Should create a correct comment', async () => {
 
   await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseOnly, true);
 
-  expect(createIssueCommentMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    ['- pre-release: none', EXPECTED_RELEASE_COMMENT.release].join('\n'),
-  );
+  expect(createIssueCommentMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    body: ['- pre-release: none', EXPECTED_RELEASE_COMMENT.release].join('\n'),
+  });
 
   const noRelease: ReleaseInfo = {
     prerelease: undefined,
@@ -147,11 +146,12 @@ it('Should create a correct comment', async () => {
 
   await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, noRelease, true);
 
-  expect(createIssueCommentMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    '- pre-release: none\n- release: none',
-  );
+  expect(createIssueCommentMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    body: '- pre-release: none\n- release: none',
+  });
 });
 
 it('Should not add a new comment if the same content already exists', async () => {
@@ -187,15 +187,16 @@ it('Adds an informational comment when no releases exist', async () => {
 
   await updateIssueCommentByRelease(mockGitHub, MOCK_ISSUE, releaseInfo, false);
 
-  expect(createIssueCommentMock).toHaveBeenCalledWith(
-    mockGitHub,
-    MOCK_ISSUE.number,
-    [
+  expect(createIssueCommentMock).toHaveBeenCalledWith({
+    owner: 'test-owner',
+    repo: 'test-repo',
+    issue_number: MOCK_ISSUE.number,
+    body: [
       '> This comment and the `pending` label appear because release-tracking is enabled.',
       '> To disable, remove `release-tracking` from the plugins list.',
       '\n',
       '- pre-release: none',
       '- release: none',
     ].join('\n'),
-  );
+  });
 });

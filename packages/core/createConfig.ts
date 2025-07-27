@@ -1,28 +1,8 @@
-import { getBooleanInput, getInput, getMultilineInput } from './inputUtils';
-import { assert, log } from './utils';
+import type { Config, RepoSpec } from './types/config';
+import { getBooleanInput, getInput, getMultilineInput } from './utils/input';
+import { log } from './utils/log';
 
 import path from 'node:path';
-
-export type Config = Readonly<{
-  accessToken: string;
-  userName: string;
-  email: string;
-  upstreamRepoSpec: RepoSpec;
-  headRepoSpec: RepoSpec;
-  trackFrom: string;
-  include: string[];
-  exclude: string[];
-  labels: string[];
-  releaseTracking: boolean;
-  plugins: string[];
-  verbose: boolean;
-}>;
-
-export type RepoSpec = {
-  owner: string;
-  name: string;
-  branch: string;
-};
 
 export const defaults = {
   userName: 'github-actions',
@@ -60,10 +40,10 @@ export const createConfig = (): Config => {
   const labels = getMultilineInput('LABELS', [defaults.label]);
   const sortedLabels = labels.sort();
   const plugins = getMultilineInput('PLUGINS');
-
   const releaseTracking = getBooleanInput('RELEASE_TRACKING');
 
-  const verbose = getBooleanInput('VERBOSE');
+  const verbose = getBooleanInput('VERBOSE', true);
+  process.env.VERBOSE = verbose.toString();
 
   // Compatibility layer: automatically add core plugin when release-tracking is enabled
   const finalPlugins = [...plugins];
@@ -85,6 +65,12 @@ export const createConfig = (): Config => {
     plugins: finalPlugins,
     verbose,
   };
+};
+
+const assert = (condition: boolean, message: string): void => {
+  if (!condition) {
+    throw new Error(message);
+  }
 };
 
 export const inferUpstreamRepo = (): string => {

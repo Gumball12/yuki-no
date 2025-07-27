@@ -9,22 +9,19 @@
     "test": "vitest --coverage --run",
     "lint": "pnpm lint:prettier && pnpm type-check",
     "lint:prettier": "prettier --check --write --parser typescript \"**/*.ts\" --ignore-path .gitignore",
-    "start": "pnpm --filter @gumball12/yuki-no start",
-    "start:dev": "pnpm --filter @gumball12/yuki-no start:dev"
-  },
-  "dependencies": {
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "start": "pnpm --filter @yuki-no/plugin-sdk start",
+    "start:dev": "pnpm --filter @yuki-no/plugin-sdk start:dev"
   },
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.12.0",
     "@types/picomatch": "^3.0.2",
-    "@types/semver": "^7.5.8",
     "@types/shelljs": "^0.8.15",
     "@vitest/coverage-v8": "2.1.8",
     "@vitest/ui": "^2.1.8",
     "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8"
   }

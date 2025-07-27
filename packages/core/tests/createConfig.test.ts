@@ -48,7 +48,7 @@ describe('Basic configuration creation', () => {
       labels: [yukiNoDefaults.label],
       releaseTracking: false,
       plugins: [],
-      verbose: false,
+      verbose: true,
     });
   });
 
@@ -74,7 +74,7 @@ describe('Custom envs processing', () => {
       EXCLUDE: 'node_modules\ndist',
       LABELS: 'label1\nlabel2',
       RELEASE_TRACKING: 'true',
-      RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
+      YUKI_NO_RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
       VERBOSE: 'true',
       PLUGINS: 'yuki-no-plugin-example@1.0.0',
     };

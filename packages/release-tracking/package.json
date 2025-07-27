@@ -1,6 +1,6 @@
 {
-  "name": "yuki-no-plugin-release-tracking",
-  "version": "1.0.1",
+  "name": "@yuki-no/plugin-release-tracking",
+  "version": "1.0.0",
   "description": "Release tracking plugin for yuki-no - Tracks release status for commits and manages issue labels/comments automatically",
   "repository": {
     "type": "git",
@@ -29,6 +29,13 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -37,9 +44,13 @@
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "@gumball12/yuki-no": "*"
+    "@yuki-no/plugin-sdk": "^1.0.0"
   },
   "devDependencies": {
-    "@gumball12/yuki-no": "workspace:*"
+    "@yuki-no/plugin-sdk": "workspace:*",
+    "@types/semver": "^7.7.0"
+  },
+  "dependencies": {
+    "semver": "^7.7.2"
   }
 }

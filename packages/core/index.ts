@@ -1,21 +1,16 @@
-import { type Config, createConfig } from './createConfig';
-import { Git } from './git/core';
-import { getCommits } from './git/getCommits';
-import { createRepoUrl } from './git/utils';
-import { GitHub } from './github/core';
-import { createIssue } from './github/createIssue';
-import { getLatestSuccessfulRunISODate } from './github/getLatestSuccessfulRunISODate';
-import { type Issue } from './github/getOpenedIssues';
-import { lookupCommitsInIssues } from './github/lookupCommitsInIssues';
-import {
-  type IssueMeta,
-  loadPlugins,
-  type YukiNoContext,
-  type YukiNoPlugin,
-} from './plugin-sdk/core';
-import { log } from './utils';
+import { createConfig } from './createConfig';
+import { Git } from './infra/git';
+import { GitHub } from './infra/github';
+import { loadPlugins } from './plugin';
+import type { Config } from './types/config';
+import type { Issue, IssueMeta } from './types/github';
+import type { YukiNoContext, YukiNoPlugin } from './types/plugin';
+import { createIssue } from './utils-infra/createIssue';
+import { getCommits } from './utils-infra/getCommits';
+import { getLatestSuccessfulRunISODate } from './utils-infra/getLatestSuccessfulRunISODate';
+import { lookupCommitsInIssues } from './utils-infra/lookupCommitsInIssues';
+import { log } from './utils/log';
 
-import { context as actionsContext } from '@actions/github';
 import shell from 'shelljs';
 
 shell.config.silent = true;
@@ -27,21 +22,19 @@ const start = async () => {
   const config = createConfig();
   log('S', 'Configuration initialized');
 
-  const git = new Git({ ...config, repoSpec: config.headRepoSpec });
-  git.clone();
-  git.exec(`config user.name "${config.userName}"`);
-  git.exec(`config user.email "${config.email}"`);
+  const git = new Git({
+    ...config,
+    repoSpec: config.headRepoSpec,
+    withClone: true,
+  });
+
   log('S', 'Git initialized');
 
   const github = new GitHub({ ...config, repoSpec: config.upstreamRepoSpec });
   log('S', 'GitHub initialized');
 
   const plugins = await loadPlugins(config.plugins);
-  const pluginCtx: YukiNoContext = {
-    octokit: github.api,
-    context: actionsContext,
-    config,
-  };
+  const pluginCtx: YukiNoContext = { config };
 
   let success = false;
   try {
@@ -66,7 +59,7 @@ const start = async () => {
     throw err;
   } finally {
     for (const plugin of plugins) {
-      await plugin.onExit?.({ ...pluginCtx, success });
+      await plugin.onFinally?.({ ...pluginCtx, success });
     }
   }
 };
@@ -100,25 +93,33 @@ const syncCommits = async (
   const createdIssues: Issue[] = [];
 
   for (const notCreatedCommit of notCreatedCommits) {
-    const commitUrl = `${createRepoUrl(config.headRepoSpec)}/commit/${notCreatedCommit.hash}`;
-    const meta: IssueMeta = {
+    const commitUrl = `${git.repoUrl}/commit/${notCreatedCommit.hash}`;
+    const issueMeta: IssueMeta = {
       title: notCreatedCommit.title,
       body: `New updates on head repo.\r\n${commitUrl}`,
       labels: config.labels,
     };
 
     for (const p of plugins) {
-      await p.onBeforeCreateIssue?.({ ...ctx, commit: notCreatedCommit, meta });
+      await p.onBeforeCreateIssue?.({
+        ...ctx,
+        commit: notCreatedCommit,
+        issueMeta,
+      });
     }
 
-    const issue = await createIssue(github, notCreatedCommit, meta);
+    const issue: Issue = {
+      ...(await createIssue(github, issueMeta)),
+      hash: notCreatedCommit.hash,
+    };
+
     createdIssues.push(issue);
 
     for (const p of plugins) {
       await p.onAfterCreateIssue?.({
         ...ctx,
         commit: notCreatedCommit,
-        result: issue,
+        issue,
       });
     }
   }
