@@ -19,7 +19,7 @@ This plugin tracks the release status for each commit and automatically updates 
       needs-release
   with:
     plugins: |
-      @yuki-no/plugin-release-tracking@1.0.0
+      @yuki-no/plugin-release-tracking@latest
 ```
 
 ## Configuration

@@ -18,7 +18,7 @@ Specify published npm packages with exact version:
     # [Optional]
     # List of plugin package names with exact versions
     plugins: |
-      yuki-no-plugin-test@0.0.4
+      yuki-no-plugin-test@latest
       yuki-no-plugin-slack@2.1.0
       @my-org/yuki-no-plugin-teams@1.5.2
 ```

@@ -98,7 +98,7 @@ Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg
              # [Optional]
              # List of plugins to load. See ./docs/PLUGINS.md for details.
              plugins: |
-               @yuki-no/plugin-release-tracking@1.0.0
+               @yuki-no/plugin-release-tracking@latest
    ```
 
    Once configured, Yuki-no will create issues in your repository for any new changes in the `head-repo`. On its first run, it will process all commits after the specified `track-from` hash with your `include` and `exclude` filters. If you've enabled `on.workflow_dispatch`, you can also [trigger the action manually](https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow) to process changes immediately.
