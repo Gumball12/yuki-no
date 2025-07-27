@@ -10,6 +10,7 @@ import { getCommits } from './utils-infra/getCommits';
 import { getLatestSuccessfulRunISODate } from './utils-infra/getLatestSuccessfulRunISODate';
 import { lookupCommitsInIssues } from './utils-infra/lookupCommitsInIssues';
 import { log } from './utils/log';
+import { filterPluginEnv } from './utils/plugin';
 
 import shell from 'shelljs';
 
@@ -34,7 +35,10 @@ const start = async () => {
   log('S', 'GitHub initialized');
 
   const plugins = await loadPlugins(config.plugins);
-  const pluginCtx: YukiNoContext = { config };
+  const pluginCtx: YukiNoContext = { 
+    config,
+    env: filterPluginEnv(),
+  };
 
   let success = false;
   try {

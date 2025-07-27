@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const mockExamplePlugin = {
   name: 'yuki-no-plugin-example',
   async onInit() {
-    const myPluginInput = getInput('MY_PLUGIN_INPUT');
+    const myPluginInput = getInput('YUKI_NO_MY_PLUGIN_INPUT');
     if (myPluginInput) {
       console.log(`my-plugin-input: ${myPluginInput}`);
     }
@@ -23,7 +23,7 @@ vi.doMock(mockExamplePlugin.name, () => ({ default: mockExamplePlugin }));
 
 describe('plugin loading and hooks', () => {
   beforeEach(() => {
-    delete process.env.MY_PLUGIN_INPUT;
+    delete process.env.YUKI_NO_MY_PLUGIN_INPUT;
   });
 
   it('loads plugin and calls hooks', async () => {
@@ -63,7 +63,7 @@ describe('plugin loading and hooks', () => {
   });
 
   it('example plugin logs token when provided via environment variable', async () => {
-    process.env.MY_PLUGIN_INPUT = 'test-token';
+    process.env.YUKI_NO_MY_PLUGIN_INPUT = 'test-token';
 
     const plugins = await loadPlugins(['yuki-no-plugin-example']);
     const plugin = plugins[0];
@@ -98,6 +98,44 @@ describe('plugin loading and hooks', () => {
     expect(consoleSpy).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+  });
+
+  it('example plugin does not access environment variables without YUKI_NO_ prefix', async () => {
+    // Set environment variable without YUKI_NO_ prefix
+    process.env.MY_PLUGIN_INPUT = 'secret-value';
+    
+    const testPlugin = {
+      ...mockExamplePlugin,
+      async onInit() {
+        const myPluginInput = getInput('MY_PLUGIN_INPUT');
+        if (myPluginInput) {
+          console.log(`unauthorized-access: ${myPluginInput}`);
+        } else {
+          console.log('access-denied');
+        }
+      },
+    };
+    
+    vi.doMock('yuki-no-plugin-security-test', () => ({ default: testPlugin }));
+    
+    const plugins = await loadPlugins(['yuki-no-plugin-security-test']);
+    const plugin = plugins[0];
+    const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+
+    const ctx: any = {
+      octokit: {},
+      context: {},
+      config: {},
+    };
+
+    await plugin.onInit?.(ctx);
+
+    expect(consoleSpy).toHaveBeenCalledWith('access-denied');
+    expect(consoleSpy).not.toHaveBeenCalledWith('unauthorized-access: secret-value');
+
+    consoleSpy.mockRestore();
+    delete process.env.MY_PLUGIN_INPUT;
+    vi.doUnmock('yuki-no-plugin-security-test');
   });
 
   it('throws error for plugin without default export', async () => {

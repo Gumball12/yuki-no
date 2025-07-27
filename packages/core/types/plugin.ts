@@ -4,6 +4,7 @@ import type { Issue, IssueMeta } from './github';
 
 export type YukiNoContext = Readonly<{
   config: Config;
+  env: Record<string, string>;
 }>;
 
 export interface YukiNoPlugin extends YukiNoPluginHooks {
