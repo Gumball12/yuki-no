@@ -1,5 +1,4 @@
 import type { Config, RepoSpec } from './types/config';
-import { unique } from './utils/common';
 import { getBooleanInput, getInput, getMultilineInput } from './utils/input';
 import { log } from './utils/log';
 
@@ -11,7 +10,6 @@ export const defaults = {
   branch: 'main',
   label: 'sync',
 } as const;
-
 
 export const createConfig = (): Config => {
   log('I', 'createConfig :: Parsing configuration values');
