@@ -83,27 +83,31 @@ For more environment variables, see [README](./README.md#configuration).
    ```bash
    git checkout -b feat/your-feature
    ```
-2. Run tests:
+2. Build Yuki-no:
+   ```bash
+   pnpm -r build # recursive build
+   ```
+3. Run tests:
    ```bash
    pnpm test # unit tests
    ```
-3. Run Yuki-no locally:
+4. Run Yuki-no locally:
    ```bash
    # If you are using plugins locally, you must install those
    # plugins as devDependencies. Otherwise, you will encounter
    # a "Failed to load plugin" error.
    pnpm start:dev # run yuki-no with packages/core/.env
    ```
-4. Format your code:
+5. Format your code:
    ```bash
    pnpm lint
    ```
-5. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+6. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
    ```bash
    git commit -m "feat: add new feature"
    git commit -m "fix: resolve issue #123"
    ```
-6. Push your changes and create a pull request!
+7. Push your changes and create a pull request!
 
 ### Troubleshooting
 
