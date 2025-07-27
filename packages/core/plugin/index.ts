@@ -22,7 +22,22 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
       plugins.push(plugin);
     } catch (error) {
       const err = error as Error;
-      throw new Error(`Failed to load plugin "${name}": ${err.message}`);
+      const resolvedId = getResolveId(name);
+      const contextInfo = [
+        `Failed to load plugin "${name}": ${err.message}`,
+        `Resolved ID: ${resolvedId}`,
+        `Original plugin specification: ${name}`,
+      ];
+
+      // Add version info if available
+      if (name !== resolvedId) {
+        const versionPart = name.replace(resolvedId, '').replace(/^@/, '');
+        if (versionPart) {
+          contextInfo.push(`Version specification: ${versionPart}`);
+        }
+      }
+
+      throw new Error(contextInfo.join('\n'));
     }
   }
 
