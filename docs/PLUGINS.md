@@ -256,7 +256,6 @@ type Config = {
   include: string[];
   exclude: string[];
   labels: string[];
-  releaseTracking: boolean;
   plugins: string[];
   verbose: boolean;
 };

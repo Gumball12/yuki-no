@@ -105,9 +105,8 @@ runs:
         EXCLUDE: ${{ inputs.exclude }}
         PLUGINS: ${{ env.PLUGINS }}
         LABELS: ${{ inputs.labels }}
-        RELEASE_TRACKING: ${{ inputs.release-tracking }}
-        RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
         VERBOSE: ${{ inputs.verbose }}
+        YUKI_NO_RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }} # compat
       run: |
         cd yuki-no
         pnpm start

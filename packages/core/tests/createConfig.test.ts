@@ -46,7 +46,6 @@ describe('Basic configuration creation', () => {
       include: [],
       exclude: [],
       labels: [yukiNoDefaults.label],
-      releaseTracking: false,
       plugins: [],
       verbose: true,
     });
@@ -101,7 +100,6 @@ describe('Custom envs processing', () => {
       include: ['**/*.md', '**/*.ts'],
       exclude: ['node_modules', 'dist'],
       labels: ['label1', 'label2'].sort(),
-      releaseTracking: true,
       plugins: ['yuki-no-plugin-example@1.0.0'],
       verbose: true,
     });

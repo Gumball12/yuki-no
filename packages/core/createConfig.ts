@@ -40,7 +40,6 @@ export const createConfig = (): Config => {
   const labels = getMultilineInput('LABELS', [defaults.label]);
   const sortedLabels = labels.sort();
   const plugins = getMultilineInput('PLUGINS');
-  const releaseTracking = getBooleanInput('RELEASE_TRACKING');
 
   const verbose = getBooleanInput('VERBOSE', true);
   process.env.VERBOSE = verbose.toString();
@@ -55,7 +54,6 @@ export const createConfig = (): Config => {
     include,
     exclude,
     labels: sortedLabels,
-    releaseTracking,
     plugins,
     verbose,
   };
