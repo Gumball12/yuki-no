@@ -1,7 +1,7 @@
-import { Issue } from '../../../core/types/github';
 import { getTrackedIssues } from '../../utils/getTrackedIssues';
 
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
+import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock dependencies

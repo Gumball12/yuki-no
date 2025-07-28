@@ -3,16 +3,16 @@ import { createCommit } from './utils/createCommit';
 import { createPrBody } from './utils/createPrBody';
 import {
   extractFileLineChanges,
-  FileLineChanges,
-  FileNameFilter,
+  type FileLineChanges,
+  type FileNameFilter,
 } from './utils/extractFileLineChanges';
 import { getTrackedIssues } from './utils/getTrackedIssues';
 import { setupBatchPr } from './utils/setupBatchPr';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
-import { Config } from '@yuki-no/plugin-sdk/types/config';
-import { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
+import type { Config } from '@yuki-no/plugin-sdk/types/config';
+import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
 import picomatch from 'picomatch';
 

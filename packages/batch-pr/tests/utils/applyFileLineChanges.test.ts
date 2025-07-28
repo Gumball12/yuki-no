@@ -1,5 +1,5 @@
 import { applyFileLineChanges } from '../../utils/applyFileLineChanges';
-import { FileLineChanges } from '../../utils/extractFileLineChanges';
+import type { FileLineChanges } from '../../utils/extractFileLineChanges';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import fs from 'node:fs';

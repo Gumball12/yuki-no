@@ -1,6 +1,6 @@
 import {
   extractFileLineChanges,
-  FileLineChanges,
+  type FileLineChanges,
 } from '../../utils/extractFileLineChanges';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';

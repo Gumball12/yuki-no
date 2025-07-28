@@ -1,4 +1,4 @@
-import { FileLineChanges, LineChange } from './extractFileLineChanges';
+import type { FileLineChanges, LineChange } from './extractFileLineChanges';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import fs from 'node:fs';

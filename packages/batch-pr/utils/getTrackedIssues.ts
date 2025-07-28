@@ -1,9 +1,8 @@
-import { Issue } from '../../core/types/github';
+import type { BatchIssueType } from './createPrBody';
 
-import { BatchIssueType } from './createPrBody';
-
-import { RestEndpointMethodTypes } from '@octokit/rest';
+import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
+import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
 
 type GetTrackedIssuesReturns = {

@@ -1,4 +1,4 @@
-import { BatchIssueType, createPrBody } from '../../utils/createPrBody';
+import { type BatchIssueType, createPrBody } from '../../utils/createPrBody';
 
 import { describe, expect, test } from 'vitest';
 
