@@ -24,3 +24,15 @@ This plugin uses yuki-no's built-in `include` and `exclude` options to determine
 3. Applies changes to a unified branch
 4. Creates or updates a single pull request with all changes
 5. Links all related issues in the PR description
+
+## Important Notes
+
+### Closed Issue Handling
+
+When an issue tracked in a batch PR is closed, **the plugin does not automatically revert its changes** from the batch PR. This behavior is intentional for the following reasons:
+
+- **Preserves manual edits**: Prevents accidental removal of changes you may have made directly in the batch PR
+- **Avoids complex conflicts**: Reduces the risk of merge conflicts with other tracked issues
+- **Maintains stability**: Ensures predictable behavior and file states
+
+If you need to remove changes from closed issues, close the current batch PR and re-run the yuki-no action to create a fresh batch PR with only the currently open issues.
