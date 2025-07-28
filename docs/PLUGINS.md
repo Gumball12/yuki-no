@@ -38,13 +38,14 @@ When developing locally, plugins need to be installed as dependencies before the
 Install plugins in one of these locations (using example plugin names):
 
 1. **In the core package** ([packages/core](./packages/core)):
+
    ```bash
-   pnpm add @yuki-no/plugin-release-track @yuki-no/plugin-batch-pr --filter @yuki-no/core
+   pnpm add @yuki-no/plugin-release-tracking @yuki-no/plugin-batch-pr --filter @yuki-no/core
    ```
 
 2. **In the project root**:
    ```bash
-   pnpm add -w @yuki-no/plugin-release-track @yuki-no/plugin-batch-pr
+   pnpm add -w @yuki-no/plugin-release-tracking @yuki-no/plugin-batch-pr
    ```
 
 You can install them as either regular dependencies or devDependencies - both work for local development.
@@ -60,7 +61,7 @@ USER_NAME=your_github_username
 EMAIL=your_github_email
 
 # Plugin configuration
-PLUGINS="@yuki-no/plugin-release-track
+PLUGINS="@yuki-no/plugin-release-tracking
 @yuki-no/plugin-batch-pr"
 ```
 
