@@ -133,3 +133,29 @@ describe('Error handling', () => {
     );
   });
 });
+
+describe('Plugin handling edge cases', () => {
+  it('Filters out empty and whitespace-only plugin strings', () => {
+    process.env.PLUGINS = 'valid-plugin@1.0.0\n\n  \nvalid-plugin2@2.0.0\n   ';
+
+    const config = createConfig();
+
+    expect(config.plugins).toEqual(['valid-plugin@1.0.0', 'valid-plugin2@2.0.0']);
+  });
+
+  it('Returns empty array when all plugin strings are empty or whitespace', () => {
+    process.env.PLUGINS = '\n  \n   \n';
+
+    const config = createConfig();
+
+    expect(config.plugins).toEqual([]);
+  });
+
+  it('Handles single whitespace-only plugin string', () => {
+    process.env.PLUGINS = '   ';
+
+    const config = createConfig();
+
+    expect(config.plugins).toEqual([]);
+  });
+});
