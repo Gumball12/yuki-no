@@ -93,11 +93,10 @@ For more environment variables, see [README](./README.md#configuration).
    ```
 4. Run Yuki-no locally:
    ```bash
-   # If you are using plugins locally, you must install those
-   # plugins as devDependencies. Otherwise, you will encounter
-   # a "Failed to load plugin" error.
    pnpm start:dev # run yuki-no with packages/core/.env
    ```
+   
+   Using plugins locally? Install plugin dependencies first. See [Local Development with Plugins](./docs/PLUGINS.md#local-development-with-plugins) for details.
 5. Format your code:
    ```bash
    pnpm lint

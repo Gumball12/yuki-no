@@ -25,6 +25,48 @@ Specify published npm packages with exact version:
 
 Plugins are automatically installed by Yuki-no during [GitHub Actions execution](../scripts/checkout.sh). You only need to specify them in your workflow configuration.
 
+## Local Development with Plugins
+
+> [!IMPORTANT]
+>
+> **Local development requires manual plugin installation!** Unlike GitHub Actions, when running Yuki-no locally with `pnpm start:dev`, you must manually install plugin dependencies.
+
+When developing locally, plugins need to be installed as dependencies before they can be used:
+
+### Installing Plugin Dependencies
+
+Install plugins in one of these locations (using example plugin names):
+
+1. **In the core package** ([packages/core](./packages/core)):
+
+   ```bash
+   pnpm add @yuki-no/plugin-release-tracking @yuki-no/plugin-batch-pr --filter @yuki-no/core
+   ```
+
+2. **In the project root**:
+   ```bash
+   pnpm add -w @yuki-no/plugin-release-tracking @yuki-no/plugin-batch-pr
+   ```
+
+You can install them as either regular dependencies or devDependencies - both work for local development.
+
+### Configuring Plugins Locally
+
+Configure plugins in your `.env` file located in `packages/core/.env`:
+
+```.env
+# Other configuration...
+ACCESS_TOKEN=your_pat_here
+USER_NAME=your_github_username
+EMAIL=your_github_email
+
+# Plugin configuration
+PLUGINS="@yuki-no/plugin-release-tracking
+@yuki-no/plugin-batch-pr"
+```
+
+The `PLUGINS` environment variable should contain plugin names separated by newlines, similar to the multiline format used in GitHub Actions workflows.
+
 ## Plugin Lifecycle
 
 Yuki-no executes plugins through a well-defined lifecycle that corresponds to the main phases of repository synchronization and issue creation.
