@@ -14,7 +14,6 @@ export const getTrackedIssues = async (
   github: GitHub,
   prNumber: number,
 ): Promise<GetTrackedIssuesReturns> => {
-  const translationIssues = await getOpenedIssues(github);
   const prDetails = await getPrDetails(github, prNumber);
   const { body: prBody } = prDetails;
 
@@ -24,7 +23,13 @@ export const getTrackedIssues = async (
     );
   }
 
+  const pendedTranslationLabels = await getYukiNoReleaseTrackingLabels(github);
+
+  const translationIssues = (await getOpenedIssues(github)).filter(
+    ({ labels }) => labels.every(l => !pendedTranslationLabels.includes(l)),
+  );
   const translationIssueNumbers = translationIssues.map(({ number }) => number);
+
   const trackedIssueNumbers = extractTrackedISsueNumbers(prBody, 'Resolved');
   const openedTrackedIssueNumbers = trackedIssueNumbers.filter(number =>
     translationIssueNumbers.includes(number),
@@ -76,4 +81,22 @@ const extractTrackedISsueNumbers = (
   }
 
   return numbers;
+};
+
+const getYukiNoReleaseTrackingLabels = async (
+  github: GitHub,
+): Promise<string[]> => {
+  try {
+    const { getReleaseTrackingLabels } = await import(
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      '@yuki-no/plugin-release-tracking/getReleaseTrackingLabels'
+    );
+
+    return getReleaseTrackingLabels(github);
+  } catch {
+    // noop
+  }
+
+  return [];
 };

@@ -34,6 +34,11 @@
       "development": "./index.ts",
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./getReleaseTrackingLabels": {
+      "development": "./utils/getReleaseTrackingLabels.ts",
+      "import": "./dist/utils/getReleaseTrackingLabels.js",
+      "types": "./dist/utils/getReleaseTrackingLabels.d.ts"
     }
   },
   "files": [

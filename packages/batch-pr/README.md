@@ -53,3 +53,7 @@ When an issue tracked in a batch PR is closed, **the plugin does not automatical
 - **Maintains stability**: Ensures predictable behavior and file states
 
 If you need to remove changes from closed issues, close the current batch PR and re-run the yuki-no action to create a fresh batch PR with only the currently open issues.
+
+### Release Tracking Integration
+
+When using [`@yuki-no/plugin-release-tracking`](../release-tracking/), **not released issues are automatically excluded** from batch PR collection. If release tracking is not installed, all opened translation issues will be included in the batch as normal.
