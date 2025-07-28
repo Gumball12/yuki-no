@@ -7,7 +7,7 @@ import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues
 
 type GetTrackedIssuesReturns = {
   trackedIssues: Issue[];
-  notTrackedIssues: Issue[];
+  shouldTrackIssues: Issue[];
 };
 
 export const getTrackedIssues = async (
@@ -31,18 +31,18 @@ export const getTrackedIssues = async (
   );
 
   const results = translationIssues.reduce<GetTrackedIssuesReturns>(
-    ({ trackedIssues, notTrackedIssues }, translationIssue) => {
+    ({ trackedIssues, shouldTrackIssues }, translationIssue) => {
       if (openedTrackedIssueNumbers.includes(translationIssue.number)) {
         trackedIssues.push(translationIssue);
       } else {
-        notTrackedIssues.push(translationIssue);
+        shouldTrackIssues.push(translationIssue);
       }
 
-      return { trackedIssues, notTrackedIssues };
+      return { trackedIssues, shouldTrackIssues };
     },
     {
       trackedIssues: [],
-      notTrackedIssues: [],
+      shouldTrackIssues: [],
     },
   );
 

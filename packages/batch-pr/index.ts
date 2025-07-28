@@ -38,13 +38,13 @@ const batchPrPlugin: YukiNoPlugin = {
       BRANCH_NAME,
     );
 
-    const { trackedIssues, notTrackedIssues } = await getTrackedIssues(
+    const { trackedIssues, shouldTrackIssues } = await getTrackedIssues(
       upstreamGitHub,
       prNumber,
     );
 
     const issuesToProcess = uniqueWith(
-      [...notTrackedIssues, ...createdIssues],
+      [...shouldTrackIssues, ...createdIssues],
       ({ number }) => number,
     );
     const fileLineChanges: FileLineChanges[] = [];

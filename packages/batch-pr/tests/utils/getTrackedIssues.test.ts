@@ -80,8 +80,8 @@ describe('getTrackedIssues', () => {
       expect(result.trackedIssues).toHaveLength(2);
       expect(result.trackedIssues[0].number).toBe(1);
       expect(result.trackedIssues[1].number).toBe(2);
-      expect(result.notTrackedIssues).toHaveLength(1);
-      expect(result.notTrackedIssues[0].number).toBe(3);
+      expect(result.shouldTrackIssues).toHaveLength(1);
+      expect(result.shouldTrackIssues[0].number).toBe(3);
     });
 
     test('should handle multiple Resolved patterns correctly', async () => {
@@ -128,7 +128,7 @@ describe('getTrackedIssues', () => {
       // Then
       expect(result.trackedIssues).toHaveLength(3);
       expect(result.trackedIssues.map(i => i.number)).toEqual([10, 20, 30]);
-      expect(result.notTrackedIssues).toHaveLength(0);
+      expect(result.shouldTrackIssues).toHaveLength(0);
     });
 
     test('should handle tracked issue numbers that are not in opened issues', async () => {
@@ -166,8 +166,8 @@ describe('getTrackedIssues', () => {
       // Then
       expect(result.trackedIssues).toHaveLength(1);
       expect(result.trackedIssues[0].number).toBe(1);
-      expect(result.notTrackedIssues).toHaveLength(1);
-      expect(result.notTrackedIssues[0].number).toBe(2);
+      expect(result.shouldTrackIssues).toHaveLength(1);
+      expect(result.shouldTrackIssues[0].number).toBe(2);
     });
   });
 
@@ -207,8 +207,8 @@ describe('getTrackedIssues', () => {
 
       // Then
       expect(result.trackedIssues).toHaveLength(0);
-      expect(result.notTrackedIssues).toHaveLength(2);
-      expect(result.notTrackedIssues.map(i => i.number)).toEqual([1, 2]);
+      expect(result.shouldTrackIssues).toHaveLength(2);
+      expect(result.shouldTrackIssues.map(i => i.number)).toEqual([1, 2]);
     });
   });
 
@@ -306,7 +306,7 @@ describe('getTrackedIssues', () => {
 
       // Then
       expect(result.trackedIssues).toHaveLength(0);
-      expect(result.notTrackedIssues).toHaveLength(0);
+      expect(result.shouldTrackIssues).toHaveLength(0);
     });
   });
 
@@ -382,7 +382,7 @@ describe('getTrackedIssues', () => {
       // Then
       expect(result.trackedIssues).toHaveLength(3);
       expect(result.trackedIssues.map(i => i.number)).toEqual([123, 456, 789]);
-      expect(result.notTrackedIssues).toHaveLength(0);
+      expect(result.shouldTrackIssues).toHaveLength(0);
     });
   });
 });
