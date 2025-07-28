@@ -13,10 +13,29 @@ export const createCommit = (
   git.exec('add .');
 
   const emptyFlag = allowEmpty ? '--allow-empty' : '';
+  const escapedMessage = escapeShellArg(message);
 
   if (needSquash) {
     git.exec(`commit --amend --no-edit ${emptyFlag}`);
   } else {
-    git.exec(`commit ${emptyFlag} -m "${message}"`);
+    git.exec(`commit ${emptyFlag} -m "${escapedMessage}"`);
   }
 };
+
+const escapeShellArg = (arg: string): string =>
+  arg
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
+    .replace(/`/g, '\\`')
+    .replace(/\$/g, '\\$')
+    .replace(/;/g, '\\;')
+    .replace(/&/g, '\\&')
+    .replace(/\|/g, '\\|')
+    .replace(/</g, '\\<')
+    .replace(/>/g, '\\>')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');

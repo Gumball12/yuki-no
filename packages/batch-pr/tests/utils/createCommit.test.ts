@@ -166,8 +166,8 @@ describe('createCommit', () => {
     });
   });
 
-  describe('when message contains special characters', () => {
-    test('should handle double quotes in commit message', () => {
+  describe('command injection prevention', () => {
+    test('should safely escape double quotes in commit message', () => {
       // Given
       const options = {
         message: 'feat: add "special" feature',
@@ -179,11 +179,11 @@ describe('createCommit', () => {
       // Then
       expect(mockGit.exec).toHaveBeenNthCalledWith(
         2,
-        'commit  -m "feat: add "special" feature"',
+        'commit  -m "feat: add \\"special\\" feature"',
       );
     });
 
-    test('should handle single quotes in commit message', () => {
+    test('should safely escape single quotes in commit message', () => {
       // Given
       const options = {
         message: "fix: handle user's input",
@@ -195,7 +195,151 @@ describe('createCommit', () => {
       // Then
       expect(mockGit.exec).toHaveBeenNthCalledWith(
         2,
-        'commit  -m "fix: handle user\'s input"',
+        'commit  -m "fix: handle user\\\'s input"',
+      );
+    });
+
+    test('should safely escape backticks to prevent command substitution', () => {
+      // Given
+      const options = {
+        message: 'feat: add `dangerous` command',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: add \\`dangerous\\` command"',
+      );
+    });
+
+    test('should safely escape dollar signs to prevent variable expansion', () => {
+      // Given
+      const options = {
+        message: 'fix: handle $PATH variable',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "fix: handle \\$PATH variable"',
+      );
+    });
+
+    test('should safely escape semicolons to prevent command chaining', () => {
+      // Given
+      const options = {
+        message: 'feat: add feature; rm -rf /',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: add feature\\; rm -rf /"',
+      );
+    });
+
+    test('should safely escape ampersands to prevent background execution', () => {
+      // Given
+      const options = {
+        message: 'feat: add feature & background command',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: add feature \\& background command"',
+      );
+    });
+
+    test('should safely escape pipes to prevent command piping', () => {
+      // Given
+      const options = {
+        message: 'feat: process | malicious command',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: process \\| malicious command"',
+      );
+    });
+
+    test('should safely escape backslashes', () => {
+      // Given
+      const options = {
+        message: 'fix: handle \\ backslash',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "fix: handle \\\\ backslash"',
+      );
+    });
+
+    test('should safely escape newlines and tabs', () => {
+      // Given
+      const options = {
+        message: 'feat: multiline\ncommit\tmessage',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: multiline\\ncommit\\tmessage"',
+      );
+    });
+
+    test('should safely handle parentheses and redirects', () => {
+      // Given
+      const options = {
+        message: 'feat: (sub) command > output < input',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "feat: \\(sub\\) command \\> output \\< input"',
+      );
+    });
+
+    test('should prevent command injection with multiple attack vectors', () => {
+      // Given
+      const options = {
+        message: 'test`whoami`$USER; cat /etc/passwd & rm -rf / | evil',
+      };
+
+      // When
+      createCommit(mockGit, options);
+
+      // Then
+      expect(mockGit.exec).toHaveBeenNthCalledWith(
+        2,
+        'commit  -m "test\\`whoami\\`\\$USER\\; cat /etc/passwd \\& rm -rf / \\| evil"',
       );
     });
   });
