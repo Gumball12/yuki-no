@@ -7,21 +7,28 @@
   "scripts": {
     "type-check": "tsc --build -noEmit",
     "test": "vitest --coverage --run",
-    "lint": "pnpm lint:prettier && pnpm type-check",
+    "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm type-check",
+    "lint:eslint": "eslint .",
+    "lint:eslint:fix": "eslint . --fix",
     "lint:prettier": "prettier --check --write --parser typescript \"**/*.ts\" --ignore-path .gitignore",
     "start": "pnpm --filter @yuki-no/plugin-sdk start",
     "start:dev": "pnpm --filter @yuki-no/plugin-sdk start:dev"
   },
   "devDependencies": {
+    "@eslint/js": "^9.32.0",
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/node": "^22.12.0",
     "@types/picomatch": "^3.0.2",
     "@types/shelljs": "^0.8.15",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
     "@vitest/coverage-v8": "2.1.8",
     "@vitest/ui": "^2.1.8",
+    "eslint": "^9.32.0",
     "prettier": "^3.4.2",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.38.0",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^2.1.8"
   }
