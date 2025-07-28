@@ -1,0 +1,36 @@
+import { Git } from '@yuki-no/plugin-sdk/infra/git';
+
+type CreateCommitOptions = {
+  message: string;
+  allowEmpty?: boolean;
+  needSquash?: boolean;
+};
+
+export const createCommit = (
+  git: Git,
+  { message, allowEmpty = false }: CreateCommitOptions,
+): void => {
+  const emptyFlag = allowEmpty ? '--allow-empty' : '';
+  const escapedMessage = escapeShellArg(message);
+
+  git.exec('add .');
+  git.exec(`commit ${emptyFlag} -m "${escapedMessage}"`);
+};
+
+const escapeShellArg = (arg: string): string =>
+  arg
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/'/g, "\\'")
+    .replace(/`/g, '\\`')
+    .replace(/\$/g, '\\$')
+    .replace(/;/g, '\\;')
+    .replace(/&/g, '\\&')
+    .replace(/\|/g, '\\|')
+    .replace(/</g, '\\<')
+    .replace(/>/g, '\\>')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t');

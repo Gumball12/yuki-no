@@ -22,6 +22,8 @@ interface YukiNoPluginHooks {
   onAfterCreateIssue?(
     ctx: YukiNoContext & { commit: Commit; issue: Issue },
   ): Promise<void> | void;
-  onFinally?(ctx: YukiNoContext & { success: boolean }): Promise<void> | void;
+  onFinally?(
+    ctx: YukiNoContext & { success: boolean; createdIssues: Issue[] },
+  ): Promise<void> | void;
   onError?(ctx: YukiNoContext & { error: Error }): Promise<void> | void;
 }

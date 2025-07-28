@@ -17,12 +17,6 @@ importers:
       '@types/node':
         specifier: ^22.12.0
         version: 22.16.5
-      '@types/picomatch':
-        specifier: ^3.0.2
-        version: 3.0.2
-      '@types/shelljs':
-        specifier: ^0.8.15
-        version: 0.8.17
       '@typescript-eslint/eslint-plugin':
         specifier: ^8.38.0
         version: 8.38.0(@typescript-eslint/parser@8.38.0(eslint@9.32.0)(typescript@5.8.3))(eslint@9.32.0)(typescript@5.8.3)
@@ -56,6 +50,22 @@ importers:
       vitest:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@22.16.5)(@vitest/ui@2.1.9)
+
+  packages/batch-pr:
+    dependencies:
+      picomatch:
+        specifier: ^4.0.3
+        version: 4.0.3
+    devDependencies:
+      '@octokit/rest':
+        specifier: ^21.1.1
+        version: 21.1.1
+      '@types/picomatch':
+        specifier: ^3.0.2
+        version: 3.0.2
+      '@yuki-no/plugin-sdk':
+        specifier: workspace:*
+        version: link:../core
 
   packages/core:
     dependencies:

@@ -6,6 +6,7 @@ const TEST_REPO = {
   repo: 'yuki-no',
 };
 const TEST_ISSUE_NUM = 1;
+const TEST_LABEL = 'test-label';
 
 const isCI = process.env.CI === 'true';
 const currRepo = process.env.GITHUB_REPOSITORY || '';
@@ -27,6 +28,7 @@ describe('GitHub API Integration Tests', () => {
     it('Should list repository issues with the expected structure', async () => {
       const { data } = await octokit.issues.listForRepo({
         ...TEST_REPO,
+        labels: TEST_LABEL,
         per_page: 1,
       });
 

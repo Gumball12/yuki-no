@@ -31,7 +31,7 @@ For new projects, we recommend using the explicit plugin syntax with environment
       needs-release
   with:
     plugins: |
-      @yuki-no/plugin-release-tracking@1.0.0
+      @yuki-no/plugin-release-tracking@latest
 ```
 
 ### Key Changes

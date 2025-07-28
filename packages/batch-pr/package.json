@@ -1,0 +1,60 @@
+{
+  "name": "@yuki-no/plugin-batch-pr",
+  "version": "1.0.0",
+  "description": "Batch PR plugin for yuki-no - Collects opened Yuki-no translation issues and creates a single pull request",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Gumball12/yuki-no.git",
+    "directory": "packages/batch-pr"
+  },
+  "author": {
+    "name": "Gumball12",
+    "email": "to@shj.rip",
+    "url": "https://github.com/Gumball12"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Gumball12/yuki-no/issues"
+  },
+  "homepage": "https://github.com/Gumball12/yuki-no/tree/main/packages/batch-pr#readme",
+  "keywords": [
+    "yuki-no",
+    "plugins",
+    "batch",
+    "pull-request",
+    "sync",
+    "documentation",
+    "automatically",
+    "translation",
+    "github-actions",
+    "issue-management"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "development": "./index.ts",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "@yuki-no/plugin-sdk": "^1.0.0"
+  },
+  "dependencies": {
+    "picomatch": "^4.0.3"
+  },
+  "devDependencies": {
+    "@octokit/rest": "^21.1.1",
+    "@types/picomatch": "^3.0.2",
+    "@yuki-no/plugin-sdk": "workspace:*"
+  }
+}
