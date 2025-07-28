@@ -62,13 +62,31 @@ runs:
       shell: bash
       run: |
         echo "YUKI_NO_VERSION=${action_ref}" >> $GITHUB_ENV
-
-        echo "PLUGINS<<EOF" >> $GITHUB_ENV
-        echo "${plugins}" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
       env:
         action_ref: ${{ github.action_ref }}
+
+    - name: Normalize plugins configuration
+      shell: bash
+      run: |
+        if [ "${release_tracking}" = "true" ]; then
+          echo "⚠️ Warning: RELEASE_TRACKING is deprecated..."
+
+          NORMALIZED_PLUGINS="${plugins}"
+          if [ ! -z "$NORMALIZED_PLUGINS" ]; then
+            NORMALIZED_PLUGINS="$NORMALIZED_PLUGINS"$'\n'"@yuki-no/plugin-release-tracking@latest"
+          else
+            NORMALIZED_PLUGINS="@yuki-no/plugin-release-tracking@latest"
+          fi
+        else
+          NORMALIZED_PLUGINS="${plugins}"
+        fi
+
+        echo "PLUGINS<<EOF" >> $GITHUB_ENV
+        echo "$NORMALIZED_PLUGINS" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+      env:
         plugins: ${{ inputs.plugins }}
+        release_tracking: ${{ inputs.release-tracking }}
 
     - name: Checkout Yuki-no
       run: ${{ github.action_path }}/scripts/checkout.sh
@@ -85,7 +103,7 @@ runs:
         TRACK_FROM: ${{ inputs.track-from }}
         INCLUDE: ${{ inputs.include }}
         EXCLUDE: ${{ inputs.exclude }}
-        PLUGINS: ${{ inputs.plugins }}
+        PLUGINS: ${{ env.PLUGINS }}
         LABELS: ${{ inputs.labels }}
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
