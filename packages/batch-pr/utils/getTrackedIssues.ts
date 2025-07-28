@@ -30,12 +30,6 @@ export const getTrackedIssues = async (
     translationIssueNumbers.includes(number),
   );
 
-  console.log('in', {
-    translationIssueNumbers,
-    trackedIssueNumbers,
-    openedTrackedIssueNumbers,
-  });
-
   const results = translationIssues.reduce<GetTrackedIssuesReturns>(
     ({ trackedIssues, shouldTrackIssues }, translationIssue) => {
       if (openedTrackedIssueNumbers.includes(translationIssue.number)) {

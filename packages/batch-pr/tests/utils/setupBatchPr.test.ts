@@ -68,7 +68,6 @@ describe('setupBatchPr', () => {
       // Then
       expect(result).toEqual({
         prNumber: 123,
-        existedPr: true,
       });
 
       expect(mockGitHub.api.search.issuesAndPullRequests).toHaveBeenCalledWith({
@@ -109,7 +108,6 @@ describe('setupBatchPr', () => {
       // Then
       expect(result).toEqual({
         prNumber: 456,
-        existedPr: false,
       });
 
       expect(mockGit.exec).toHaveBeenNthCalledWith(

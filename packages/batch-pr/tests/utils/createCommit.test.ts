@@ -96,7 +96,7 @@ describe('createCommit', () => {
       expect(mockGit.exec).toHaveBeenNthCalledWith(1, 'add .');
       expect(mockGit.exec).toHaveBeenNthCalledWith(
         2,
-        'commit --amend --no-edit ',
+        'commit  -m "feat: squash commit"',
       );
     });
   });
@@ -139,7 +139,7 @@ describe('createCommit', () => {
       expect(mockGit.exec).toHaveBeenNthCalledWith(1, 'add .');
       expect(mockGit.exec).toHaveBeenNthCalledWith(
         2,
-        'commit --amend --no-edit --allow-empty',
+        'commit --allow-empty -m "test: squash empty commit"',
       );
     });
   });
