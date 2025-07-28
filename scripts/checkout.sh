@@ -45,8 +45,8 @@ if [ ! -z "${PLUGINS:-}" ]; then
   echo "🔌 Installing plugins with exact version requirement..."
   
   while IFS= read -r plugin; do
-    # Skip empty lines
-    [[ -z "$plugin" ]] && continue
+    # Skip empty lines and whitespace-only lines
+    [[ -z "${plugin// }" ]] && continue
     
     # Check for range versions (not allowed)
     if [[ "$plugin" =~ [~^] ]]; then
