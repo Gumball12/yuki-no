@@ -95,7 +95,6 @@ For more environment variables, see [README](./README.md#configuration).
    ```bash
    pnpm start:dev # run yuki-no with packages/core/.env
    ```
-   
    Using plugins locally? Install plugin dependencies first. See [Local Development with Plugins](./docs/PLUGINS.md#local-development-with-plugins) for details.
 5. Format your code:
    ```bash
