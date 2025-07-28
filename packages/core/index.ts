@@ -37,12 +37,15 @@ const start = async () => {
   const pluginCtx: YukiNoContext = { config };
 
   let success = false;
+  let createdIssues: Issue[] = [];
+
   try {
     for (const plugin of plugins) {
       await plugin.onInit?.({ ...pluginCtx });
     }
 
-    await syncCommits(github, git, config, plugins, pluginCtx);
+    createdIssues = await syncCommits(github, git, config, plugins, pluginCtx);
+    success = true;
 
     const endTime = new Date();
     const duration = (endTime.getTime() - startTime.getTime()) / 1000;
@@ -50,7 +53,6 @@ const start = async () => {
       'S',
       `Yuki-No completed (${endTime.toISOString()}) - Duration: ${duration}s`,
     );
-    success = true;
   } catch (error) {
     const err = error as Error;
     for (const plugin of plugins) {
@@ -59,7 +61,7 @@ const start = async () => {
     throw err;
   } finally {
     for (const plugin of plugins) {
-      await plugin.onFinally?.({ ...pluginCtx, success });
+      await plugin.onFinally?.({ ...pluginCtx, success, createdIssues });
     }
   }
 };

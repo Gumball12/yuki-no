@@ -139,7 +139,7 @@ For error handling, even if one plugin encounters an error, the `onError` hooks 
 
 ### Installing Plugin SDK
 
-[![NPM Version](https://img.shields.io/npm/v/%40gumball12%2Fyuki-no?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@yuki-no/plugin-sdk)
+[![NPM Version](https://img.shields.io/npm/v/%40yuki-no%2Fplugin-sdk?style=flat-square&label=yuki-no)](https://www.npmjs.com/package/@yuki-no/plugin-sdk)
 
 We provide the [@yuki-no/plugin-sdk](https://www.npmjs.com/package/@yuki-no/plugin-sdk) library that includes types, helper functions, and other utilities to assist with Yuki-no plugin development:
 
@@ -155,7 +155,7 @@ npm install @yuki-no/plugin-sdk
 Create a plugin by implementing the `YukiNoPlugin` interface:
 
 ```ts
-import type { YukiNoPlugin } from '@yuki-no/plugin-sdk';
+import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 
 const myPlugin: YukiNoPlugin = {
   name: 'my-plugin',
