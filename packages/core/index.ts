@@ -61,7 +61,11 @@ const start = async () => {
     throw err;
   } finally {
     for (const plugin of plugins) {
-      await plugin.onFinally?.({ ...pluginCtx, success, createdIssues });
+      await plugin.onFinally?.({
+        ...pluginCtx,
+        success,
+        createdIssues: [...createdIssues],
+      });
     }
   }
 };

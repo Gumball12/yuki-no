@@ -13,6 +13,23 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
       @yuki-no/plugin-batch-pr@latest
 ```
 
+## Permissions
+
+**This plugin requires additional permissions** beyond the default yuki-no setup:
+
+```yaml
+permissions:
+  # Default yuki-no permissions
+  issues: write
+  actions: read
+
+  # Required for branch creation and push operations
+  contents: write
+
+  # Required for batch PR creation
+  pull-requests: write
+```
+
 ## Configuration
 
 This plugin uses yuki-no's built-in `include` and `exclude` options to determine which files to track.

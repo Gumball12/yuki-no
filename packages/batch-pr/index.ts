@@ -44,7 +44,7 @@ const batchPrPlugin: YukiNoPlugin = {
     );
 
     const issuesToProcess = uniqueWith(
-      [...shouldTrackIssues, ...createdIssues],
+      [...shouldTrackIssues, ...(createdIssues ?? [])],
       ({ number }) => number,
     );
     const fileLineChanges: FileLineChanges[] = [];
