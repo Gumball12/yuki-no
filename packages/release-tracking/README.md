@@ -14,6 +14,8 @@ This plugin tracks the release status for each commit and automatically updates 
 ```yaml
 - uses: Gumball12/yuki-no@v1
   env:
+    # [optional]
+    # Labels to add for unreleased changes
     YUKI_NO_RELEASE_TRACKING_LABELS: |
       pending
       needs-release
@@ -22,11 +24,11 @@ This plugin tracks the release status for each commit and automatically updates 
       @yuki-no/plugin-release-tracking@latest
 ```
 
-## Configuration
+### Configuration
 
 This plugin reads configuration from environment variables:
 
-- `YUKI_NO_RELEASE_TRACKING_LABELS`: Labels to add for unreleased changes. (default: `pending`)
+- `YUKI_NO_RELEASE_TRACKING_LABELS` (_optional_): Labels to add for unreleased changes (default: `pending`)
 
 To avoid conflicts, overlapping labels in `YUKI_NO_RELEASE_TRACKING_LABELS` with yuki-no `labels` option are automatically excluded.
 
