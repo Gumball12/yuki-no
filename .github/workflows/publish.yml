@@ -6,8 +6,8 @@ on:
 
 jobs:
   publish:
-    # <package_name>-v-<version>
-    if: startsWith(github.event.release.tag_name, '-v')
+    # <package_name>-v<version>
+    if: contains(github.event.release.tag_name, '-v')
 
     runs-on: ubuntu-latest
     permissions:
@@ -29,6 +29,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
+          ref: main
 
       - run: corepack enable
 
@@ -54,7 +55,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore: bump ${{ steps.package.outputs.path }} to v${{ steps.package.outputs.version }}"
-          git push
+          git push origin HEAD:main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
