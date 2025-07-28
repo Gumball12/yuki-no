@@ -2,7 +2,8 @@
   "extends": "./tsconfig.base.json",
   "references": [
     { "path": "./packages/core" },
-    { "path": "./packages/release-tracking" }
+    { "path": "./packages/release-tracking" },
+    { "path": "./packages/batch-pr" }
   ],
   "files": []
 }

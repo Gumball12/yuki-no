@@ -145,6 +145,7 @@ Yuki-no supports a plugin system for extending functionality. For detailed infor
 | Plugin             | version                                                                                                                                                                                                  | Description                                                                       | Documentation                                    |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `release-tracking` | [![NPM Version](https://img.shields.io/npm/v/@yuki-no/plugin-release-tracking?style=flat-square&label=@yuki-no/plugin-release-tracking)](https://www.npmjs.com/package/@yuki-no/plugin-release-tracking) | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/release-tracking/README.md) |
+| `batch-pr`         | [![NPM Version](https://img.shields.io/npm/v/@yuki-no/plugin-batch-pr?style=flat-square&label=@yuki-no/plugin-batch-pr)](https://www.npmjs.com/package/@yuki-no/plugin-batch-pr)                         | Tracks release status for commits and manages issue labels/comments automatically | [📖 Docs](./packages/batch-pr/README.md)         |
 
 ## Compatibility
 

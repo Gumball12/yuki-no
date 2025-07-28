@@ -137,6 +137,7 @@ For detailed information about each package, see their individual documentation:
 
 - **[Core Package](./packages/core/README.md)** (`@yuki-no/plugin-sdk`) - Yuki-no Plugin SDK
 - **[Release Tracking Plugin](./packages/release-tracking/README.md)** (`@yuki-no/plugin-release-tracking`)
+- **[Release Tracking Plugin](./packages/batch-pr/README.md)** (`@yuki-no/plugin-batch-pr`)
 
 ### Flow
 
