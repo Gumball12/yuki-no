@@ -1,6 +1,6 @@
 {
   "name": "@yuki-no/plugin-release-tracking",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Release tracking plugin for yuki-no - Tracks release status for commits and manages issue labels/comments automatically",
   "repository": {
     "type": "git",
