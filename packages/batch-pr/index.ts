@@ -32,7 +32,7 @@ const batchPrPlugin: YukiNoPlugin = {
       withClone: true,
     });
 
-    const { prNumber, existedPr } = await setupBatchPr(
+    const { prNumber } = await setupBatchPr(
       upstreamGitHub,
       upstreamGit,
       BRANCH_NAME,
@@ -68,8 +68,7 @@ const batchPrPlugin: YukiNoPlugin = {
 
     await applyFileLineChanges({ fileLineChanges, targetGit: upstreamGit });
     createCommit(upstreamGit, {
-      message: 'Apply changes before translation',
-      needSquash: existedPr,
+      message: 'Apply origin changes',
     });
 
     upstreamGit.exec(`push -f origin ${BRANCH_NAME}`);

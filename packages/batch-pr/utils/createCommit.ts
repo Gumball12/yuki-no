@@ -8,18 +8,13 @@ type CreateCommitOptions = {
 
 export const createCommit = (
   git: Git,
-  { message, allowEmpty = false, needSquash = false }: CreateCommitOptions,
+  { message, allowEmpty = false }: CreateCommitOptions,
 ): void => {
-  git.exec('add .');
-
   const emptyFlag = allowEmpty ? '--allow-empty' : '';
   const escapedMessage = escapeShellArg(message);
 
-  if (needSquash) {
-    git.exec(`commit --amend --no-edit ${emptyFlag}`);
-  } else {
-    git.exec(`commit ${emptyFlag} -m "${escapedMessage}"`);
-  }
+  git.exec('add .');
+  git.exec(`commit ${emptyFlag} -m "${escapedMessage}"`);
 };
 
 const escapeShellArg = (arg: string): string =>

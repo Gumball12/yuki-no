@@ -12,12 +12,12 @@ export const setupBatchPr = async (
   github: GitHub,
   git: Git,
   branchName: string,
-): Promise<{ prNumber: number; existedPr: boolean }> => {
+): Promise<{ prNumber: number }> => {
   const existingPr = await findPrByLabelAndTitle(github, PR_LABEL, PR_TITLE);
 
   if (existingPr) {
     git.exec(`checkout ${branchName}`);
-    return { prNumber: existingPr.number, existedPr: true };
+    return { prNumber: existingPr.number };
   }
 
   git.exec(`checkout -B ${branchName}`);
@@ -36,7 +36,7 @@ export const setupBatchPr = async (
     labels: [PR_LABEL],
   });
 
-  return { prNumber: pr.number, existedPr: false };
+  return { prNumber: pr.number };
 };
 
 type SearchedPrData =
