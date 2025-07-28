@@ -21,15 +21,19 @@ export function log(type: LogType, message: string): void {
 
   switch (type) {
     case 'I':
+      // eslint-disable-next-line no-console
       console.info('[INFO]', colors.blue(message));
       break;
     case 'S':
+      // eslint-disable-next-line no-console
       console.info('[SUCCESS]', colors.green(message));
       break;
     case 'W':
+      // eslint-disable-next-line no-console
       console.warn('[WARNING]', colors.yellow(message));
       break;
     case 'E':
+      // eslint-disable-next-line no-console
       console.error('[ERROR]', colors.red(message));
       break;
   }

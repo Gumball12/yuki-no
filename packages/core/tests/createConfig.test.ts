@@ -140,7 +140,10 @@ describe('Plugin handling edge cases', () => {
 
     const config = createConfig();
 
-    expect(config.plugins).toEqual(['valid-plugin@1.0.0', 'valid-plugin2@2.0.0']);
+    expect(config.plugins).toEqual([
+      'valid-plugin@1.0.0',
+      'valid-plugin2@2.0.0',
+    ]);
   });
 
   it('Returns empty array when all plugin strings are empty or whitespace', () => {
