@@ -14,7 +14,7 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-var-requires': 'error',
-      
+
       // General rules
       'no-console': 'warn',
       'no-debugger': 'error',
@@ -31,6 +31,7 @@ export default tseslint.config(
       'coverage/',
       '.pnpm-store/',
       'packages/*/dist/',
+      './**/tests/**/*.ts',
     ],
   },
 );
