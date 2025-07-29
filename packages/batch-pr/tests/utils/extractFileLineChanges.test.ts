@@ -630,5 +630,17 @@ describe('resolveFileNameWithRootDir', () => {
       // Then
       expect(result).toBe('docs');
     });
+
+    test('should return fileName when fileName is similar but not prefixed by normalizedRootDir', () => {
+      // Given
+      const fileName = 'docs-other';
+      const rootDir = 'docs';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('docs-other');
+    });
   });
 });
