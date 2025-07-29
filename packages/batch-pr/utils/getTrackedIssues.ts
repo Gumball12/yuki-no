@@ -4,6 +4,7 @@ import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
+import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 type GetTrackedIssuesReturns = {
   trackedIssues: Issue[];
@@ -14,23 +15,37 @@ export const getTrackedIssues = async (
   github: GitHub,
   prNumber: number,
 ): Promise<GetTrackedIssuesReturns> => {
+  log('I', `getTrackedIssues :: Processing PR #${prNumber}`);
+
   const prDetails = await getPrDetails(github, prNumber);
   const { body: prBody } = prDetails;
 
   if (!prBody?.length) {
+    log('E', `getTrackedIssues :: PR #${prNumber} body is empty or missing`);
     throw new Error(
       `PR #${prNumber} body is empty or missing. Cannot extract tracked issue numbers.`,
     );
   }
 
+  log('I', `getTrackedIssues :: Getting release tracking labels`);
   const pendedTranslationLabels = await getYukiNoReleaseTrackingLabels(github);
 
+  log('I', `getTrackedIssues :: Filtering translation issues`);
   const translationIssues = (await getOpenedIssues(github)).filter(
     ({ labels }) => labels.every(l => !pendedTranslationLabels.includes(l)),
   );
   const translationIssueNumbers = translationIssues.map(({ number }) => number);
+  log(
+    'I',
+    `getTrackedIssues :: Found ${translationIssues.length} translation issues`,
+  );
 
   const trackedIssueNumbers = extractTrackedISsueNumbers(prBody, 'Resolved');
+  log(
+    'I',
+    `getTrackedIssues :: Found ${trackedIssueNumbers.length} tracked issue numbers in PR body`,
+  );
+
   const openedTrackedIssueNumbers = trackedIssueNumbers.filter(number =>
     translationIssueNumbers.includes(number),
   );
@@ -51,6 +66,10 @@ export const getTrackedIssues = async (
     },
   );
 
+  log(
+    'S',
+    `getTrackedIssues :: Found ${results.trackedIssues.length} tracked issues and ${results.shouldTrackIssues.length} issues to track`,
+  );
   return results;
 };
 

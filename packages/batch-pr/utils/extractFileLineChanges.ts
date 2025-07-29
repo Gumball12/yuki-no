@@ -1,5 +1,6 @@
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { isNotEmpty } from '@yuki-no/plugin-sdk/utils/common';
+import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 export type LineChange =
   | {
@@ -32,6 +33,11 @@ export const extractFileLineChanges = ({
   fileNameFilter,
   rootDir,
 }: ExtractFileLineChangesOptions): FileLineChanges[] => {
+  log(
+    'I',
+    `extractFileLineChanges :: Starting file line changes extraction for commit ${hash.substring(0, 8)}`,
+  );
+
   const fileNamesString = headGit.exec(`show --name-only --format="" ${hash}`);
   const changedFileNames = fileNamesString
     .split('\n')
@@ -39,23 +45,42 @@ export const extractFileLineChanges = ({
     .filter(isNotEmpty)
     .filter(fileNameFilter);
 
+  log(
+    'I',
+    `extractFileLineChanges :: Found ${changedFileNames.length} changed files after filtering`,
+  );
+
   if (changedFileNames.length === 0) {
+    log('I', 'extractFileLineChanges :: No files to process');
     return [];
   }
 
   const fileLineChanges: FileLineChanges[] = [];
 
   for (const fileName of changedFileNames) {
+    log('I', `extractFileLineChanges :: Processing file: ${fileName}`);
     const changes = extractLineChangesFromFile(headGit, hash, fileName);
 
     if (changes.length === 0) {
+      log(
+        'I',
+        `extractFileLineChanges :: No changes found for file: ${fileName}`,
+      );
       continue;
     }
 
     const resolvedFileName = resolveFileNameWithRootDir(fileName, rootDir);
+    log(
+      'I',
+      `extractFileLineChanges :: Added ${changes.length} changes for file: ${resolvedFileName}`,
+    );
     fileLineChanges.push({ fileName: resolvedFileName, changes });
   }
 
+  log(
+    'S',
+    `extractFileLineChanges :: Successfully extracted changes from ${fileLineChanges.length} files`,
+  );
   return fileLineChanges;
 };
 

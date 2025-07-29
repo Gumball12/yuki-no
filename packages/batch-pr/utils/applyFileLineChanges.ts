@@ -1,6 +1,7 @@
 import type { FileLineChanges, LineChange } from './extractFileLineChanges';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
+import { log } from '@yuki-no/plugin-sdk/utils/log';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -14,13 +15,22 @@ export const applyFileLineChanges = async ({
   targetGit,
 }: ApplyFileLineChangesOptions): Promise<void> => {
   if (fileLineChanges.length === 0) {
+    log('I', 'applyFileLineChanges :: No file changes to apply');
     return;
   }
 
+  log(
+    'I',
+    `applyFileLineChanges :: Applying changes to ${fileLineChanges.length} files`,
+  );
   const repoDirName = targetGit.dirName;
 
   for (const fileChange of fileLineChanges) {
     const filePath = path.join(repoDirName, fileChange.fileName);
+    log(
+      'I',
+      `applyFileLineChanges :: Processing file: ${fileChange.fileName} with ${fileChange.changes.length} changes`,
+    );
 
     let lines = readFileSync(filePath);
 
@@ -40,7 +50,16 @@ export const applyFileLineChanges = async ({
 
     const newContent = lines.join('\n');
     writeFileSync(filePath, newContent);
+    log(
+      'I',
+      `applyFileLineChanges :: Successfully applied changes to ${fileChange.fileName}`,
+    );
   }
+
+  log(
+    'S',
+    `applyFileLineChanges :: Successfully applied changes to all ${fileLineChanges.length} files`,
+  );
 };
 
 const applyLineChanges = (lines: string[], changes: LineChange[]): string[] => {
@@ -68,6 +87,10 @@ const applyLineChanges = (lines: string[], changes: LineChange[]): string[] => {
 
 const readFileSync = (filePath: string): string[] => {
   if (!fs.existsSync(filePath)) {
+    log(
+      'I',
+      `applyFileLineChanges :: File does not exist, creating new: ${filePath}`,
+    );
     return [];
   }
 
@@ -82,6 +105,7 @@ const writeFileSync = (
 ): void => {
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) {
+    log('I', `applyFileLineChanges :: Creating directory: ${dir}`);
     fs.mkdirSync(dir, { recursive: true });
   }
 

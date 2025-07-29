@@ -1,3 +1,5 @@
+import { log } from '@yuki-no/plugin-sdk/utils/log';
+
 export type BatchIssueType = 'Resolved';
 
 type BatchIssueStatus = {
@@ -6,6 +8,8 @@ type BatchIssueStatus = {
 };
 
 export const createPrBody = (issueStatus: BatchIssueStatus[]): string => {
+  log('I', `createPrBody :: Creating PR body for ${issueStatus.length} issues`);
+
   const resolvedIssueComments = issueStatus.map(createIssueComment);
 
   return `
