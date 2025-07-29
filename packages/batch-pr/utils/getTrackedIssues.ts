@@ -27,8 +27,11 @@ export const getTrackedIssues = async (
     );
   }
 
-  log('I', `getTrackedIssues :: Getting release tracking labels`);
   const pendedTranslationLabels = await getYukiNoReleaseTrackingLabels(github);
+  log(
+    'I',
+    `getTrackedIssues :: Getting release tracking labels [${pendedTranslationLabels.join(', ')}]`,
+  );
 
   log('I', `getTrackedIssues :: Filtering translation issues`);
   const translationIssues = (await getOpenedIssues(github)).filter(
@@ -110,6 +113,11 @@ const getYukiNoReleaseTrackingLabels = async (
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       '@yuki-no/plugin-release-tracking/getReleaseTrackingLabels'
+    );
+
+    log(
+      'I',
+      'getYukiNoReleaseTrackingLabels :: use @yuki-no/plugin-release-tracking',
     );
 
     return getReleaseTrackingLabels(github);
