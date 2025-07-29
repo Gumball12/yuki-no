@@ -14,7 +14,7 @@ import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Config } from '@yuki-no/plugin-sdk/types/config';
 import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
-import { getInput } from '@yuki-no/plugin-sdk/utils/input';
+import { getInput, getMultilineInput } from '@yuki-no/plugin-sdk/utils/input';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 import picomatch from 'picomatch';
 
@@ -60,11 +60,25 @@ const batchPrPlugin: YukiNoPlugin = {
     );
 
     const fileLineChanges: FileLineChanges[] = [];
-    const fileNameFilter = createFileNameFilter(config);
+    const batchPrExcludePatterns = getMultilineInput(
+      'YUKI_NO_BATCH_PR_EXCLUDE',
+    );
+    const extendedConfig = {
+      ...config,
+      exclude: [...config.exclude, ...batchPrExcludePatterns],
+    };
+    const fileNameFilter = createFileNameFilter(extendedConfig);
     const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
 
     if (rootDir) {
       log('I', `batchPr :: Using root directory filter: ${rootDir}`);
+    }
+
+    if (batchPrExcludePatterns.length > 0) {
+      log(
+        'I',
+        `batchPr :: Using batch PR exclude patterns: ${batchPrExcludePatterns.join(', ')}`,
+      );
     }
 
     const headGit = new Git({

@@ -22,6 +22,7 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
 This plugin reads configuration from environment variables:
 
 - `YUKI_NO_BATCH_PR_ROOT_DIR` (_optional_): Specifies the root directory path in the `head-repo` that should be stripped from file paths when applying changes to the `upstream-repo`. When set, this prefix will be removed from head-repo file paths before applying changes. If not specified, files will be applied with their original paths.
+- `YUKI_NO_BATCH_PR_EXCLUDE` (_optional_): Specifies file patterns to exclude from batch PR processing. Supports glob patterns and multiple patterns separated by newlines.
 
 ### `YUKI_NO_BATCH_PR_ROOT_DIR`
 
@@ -35,6 +36,24 @@ env:
 ```
 
 This will ensure that when applying changes from `docs/README.md` in your head repository, they will be applied to `README.md` in the upstream repository (the `docs/` prefix is stripped).
+
+### `YUKI_NO_BATCH_PR_EXCLUDE`
+
+The `YUKI_NO_BATCH_PR_EXCLUDE` option allows you to specify file patterns that should be excluded from batch PR processing. This is useful when you want to exclude certain files like build artifacts, temporary files, or sensitive files from being included in the batch PR.
+
+The option supports glob patterns and can accept multiple patterns, each on a separate line:
+
+```yaml
+env:
+  YUKI_NO_BATCH_PR_EXCLUDE: |
+    *.log
+    temp/**
+    build/*
+    .env*
+    **/*.tmp
+```
+
+Note that this behaves slightly differently from Yuki-no's `exclude` option. The `exclude` option is used when creating issues from `head-repo` changes. For more details, please refer to the [Yuki-no Configuration](../../README.md#configuration) section.
 
 ## Permissions
 

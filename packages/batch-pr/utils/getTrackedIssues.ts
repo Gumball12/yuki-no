@@ -121,9 +121,15 @@ const getYukiNoReleaseTrackingLabels = async (
     );
 
     return getReleaseTrackingLabels(github);
-  } catch {
+  } catch (error) {
     // noop
+    log('I', (error as Error).message); // TODO: debugging
   }
+
+  log(
+    'I',
+    'getYukiNoReleaseTrackingLabels :: cannot find @yuki-no/plugin-release-tracking',
+  );
 
   return [];
 };
