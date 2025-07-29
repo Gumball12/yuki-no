@@ -19,11 +19,19 @@ export type FileLineChanges = {
 
 export type FileNameFilter = (fileName: string) => boolean;
 
-export const extractFileLineChanges = (
-  headGit: Git,
-  hash: string,
-  fileNameFilter: FileNameFilter,
-): FileLineChanges[] => {
+type ExtractFileLineChangesOptions = {
+  headGit: Git;
+  hash: string;
+  fileNameFilter: FileNameFilter;
+  rootDir?: string;
+};
+
+export const extractFileLineChanges = ({
+  headGit,
+  hash,
+  fileNameFilter,
+  rootDir,
+}: ExtractFileLineChangesOptions): FileLineChanges[] => {
   const fileNamesString = headGit.exec(`show --name-only --format="" ${hash}`);
   const changedFileNames = fileNamesString
     .split('\n')
@@ -39,9 +47,13 @@ export const extractFileLineChanges = (
 
   for (const fileName of changedFileNames) {
     const changes = extractLineChangesFromFile(headGit, hash, fileName);
-    if (changes.length > 0) {
-      fileLineChanges.push({ fileName, changes });
+
+    if (changes.length === 0) {
+      continue;
     }
+
+    const resolvedFileName = resolveFileNameWithRootDir(fileName, rootDir);
+    fileLineChanges.push({ fileName: resolvedFileName, changes });
   }
 
   return fileLineChanges;
@@ -49,6 +61,15 @@ export const extractFileLineChanges = (
 
 // hunk header format: @@ -old_start,old_count +new_start,new_count @@
 const HUNK_HEADER_REGEX = /^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@/;
+
+const FILE_HEADER_PREFIX = [
+  '+++',
+  '---',
+  'diff',
+  'index',
+  'new file mode ',
+  'deleted file mode ',
+];
 
 const extractLineChangesFromFile = (
   headGit: Git,
@@ -70,13 +91,7 @@ const extractLineChangesFromFile = (
   let newLineNumber = 0;
 
   for (const line of diffLines) {
-    const isFileHeader =
-      line.startsWith('+++') ||
-      line.startsWith('---') ||
-      line.startsWith('diff') ||
-      line.startsWith('index') ||
-      line.startsWith('new file mode ') ||
-      line.startsWith('deleted file mode ');
+    const isFileHeader = FILE_HEADER_PREFIX.some(v => line.startsWith(v));
     if (isFileHeader) {
       continue;
     }
@@ -119,4 +134,25 @@ const extractLineChangesFromFile = (
   }
 
   return changes;
+};
+
+export const resolveFileNameWithRootDir = (
+  fileName: string,
+  rootDir?: string,
+): string => {
+  if (!rootDir) {
+    return fileName;
+  }
+
+  if (fileName === rootDir) {
+    return '';
+  }
+
+  const normalizedRootDir = rootDir.endsWith('/') ? rootDir : `${rootDir}/`;
+
+  if (!fileName.startsWith(normalizedRootDir)) {
+    return fileName;
+  }
+
+  return fileName.substring(normalizedRootDir.length);
 };

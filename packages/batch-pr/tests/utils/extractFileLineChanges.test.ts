@@ -1,6 +1,7 @@
 import {
   extractFileLineChanges,
   type FileLineChanges,
+  resolveFileNameWithRootDir,
 } from '../../utils/extractFileLineChanges';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
@@ -28,7 +29,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       expect(result).toEqual([]);
@@ -46,7 +51,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = (fileName: string) => fileName.endsWith('.ts');
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       expect(result).toEqual([]);
@@ -67,7 +76,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -105,7 +118,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -143,7 +160,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -183,7 +204,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -223,7 +248,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -261,7 +290,11 @@ describe('extractFileLineChanges', () => {
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       expect(result).toEqual([]);
@@ -286,7 +319,11 @@ index 1234567..abcdefg 100644
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -326,7 +363,11 @@ index 0000000..1234567
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -367,7 +408,11 @@ index 1234567..0000000
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -397,7 +442,11 @@ index 1234567..0000000
       const fileNameFilter = (fileName: string) => fileName.endsWith('.ts');
 
       // When
-      extractFileLineChanges(mockGit, hash, fileNameFilter);
+      extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       expect(mockGitExec).toHaveBeenCalledTimes(2);
@@ -424,7 +473,11 @@ index 1234567..0000000
       const fileNameFilter = () => true;
 
       // When
-      const result = extractFileLineChanges(mockGit, hash, fileNameFilter);
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+      });
 
       // Then
       const expected: FileLineChanges[] = [
@@ -444,6 +497,138 @@ index 1234567..0000000
         },
       ];
       expect(result).toEqual(expected);
+    });
+  });
+
+  describe('when rootDir is provided', () => {
+    test('should resolve fileName with rootDir', () => {
+      // Given
+      mockGitExec.mockReturnValueOnce('docs/a/b/c.md\n')
+        .mockReturnValueOnce(`--- a/docs/a/b/c.md
++++ b/docs/a/b/c.md
+@@ -1,0 +1,1 @@
++test content`);
+
+      const hash = 'abc123';
+      const fileNameFilter = () => true;
+      const rootDir = 'docs';
+
+      // When
+      const result = extractFileLineChanges({
+        headGit: mockGit,
+        hash,
+        fileNameFilter,
+        rootDir,
+      });
+
+      // Then
+      const expected: FileLineChanges[] = [
+        {
+          fileName: 'a/b/c.md',
+          changes: [
+            {
+              type: 'insert',
+              lineNumber: 1,
+              content: 'test content',
+            },
+          ],
+        },
+      ];
+      expect(result).toEqual(expected);
+    });
+  });
+});
+
+describe('resolveFileNameWithRootDir', () => {
+  describe('when rootDir is undefined', () => {
+    test('should return original fileName', () => {
+      // Given
+      const fileName = 'docs/a/b/c.md';
+      const rootDir = undefined;
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('docs/a/b/c.md');
+    });
+  });
+
+  describe('when rootDir is provided and fileName starts with rootDir', () => {
+    test('should remove rootDir from fileName', () => {
+      // Given
+      const fileName = 'docs/a/b/c.md';
+      const rootDir = 'docs';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('a/b/c.md');
+    });
+
+    test('should handle nested rootDir', () => {
+      // Given
+      const fileName = 'docs/a/b/c.md';
+      const rootDir = 'docs/a';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('b/c.md');
+    });
+
+    test('should handle rootDir with trailing slash', () => {
+      // Given
+      const fileName = 'docs/a/b/c.md';
+      const rootDir = 'docs/';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('a/b/c.md');
+    });
+  });
+
+  describe('when fileName equals rootDir exactly', () => {
+    test('should return empty string', () => {
+      // Given
+      const fileName = 'docs';
+      const rootDir = 'docs';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('');
+    });
+  });
+
+  describe('when fileName does not start with rootDir', () => {
+    test('should return original fileName', () => {
+      // Given
+      const fileName = 'other/file.md';
+      const rootDir = 'docs';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('other/file.md');
+    });
+
+    test('should return fileName when rootDir is longer', () => {
+      // Given
+      const fileName = 'docs';
+      const rootDir = 'docs/a';
+
+      // When
+      const result = resolveFileNameWithRootDir(fileName, rootDir);
+
+      // Then
+      expect(result).toBe('docs');
     });
   });
 });

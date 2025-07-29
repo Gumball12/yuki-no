@@ -14,6 +14,7 @@ import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Config } from '@yuki-no/plugin-sdk/types/config';
 import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
+import { getInput } from '@yuki-no/plugin-sdk/utils/input';
 import picomatch from 'picomatch';
 
 const BRANCH_NAME = '__yuki-no-batch-pr';
@@ -49,6 +50,7 @@ const batchPrPlugin: YukiNoPlugin = {
     );
     const fileLineChanges: FileLineChanges[] = [];
     const fileNameFilter = createFileNameFilter(config);
+    const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
 
     const headGit = new Git({
       ...config,
@@ -58,7 +60,12 @@ const batchPrPlugin: YukiNoPlugin = {
 
     for (const { hash } of issuesToProcess) {
       fileLineChanges.push(
-        ...extractFileLineChanges(headGit, hash, fileNameFilter),
+        ...extractFileLineChanges({
+          headGit,
+          hash,
+          fileNameFilter,
+          rootDir,
+        }),
       );
     }
 

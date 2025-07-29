@@ -8,10 +8,33 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
 
 ```yaml
 - uses: Gumball12/yuki-no@v1
+  env:
+    # [optional] Specifies the root directory path in the `head-repo`
+    # that should be stripped when applying changes to `upstream-repo`
+    YUKI_NO_BATCH_PR_ROOT_DIR: docs
   with:
     plugins: |
       @yuki-no/plugin-batch-pr@latest
 ```
+
+### Configuration
+
+This plugin reads configuration from environment variables:
+
+- `YUKI_NO_BATCH_PR_ROOT_DIR` (_optional_): Specifies the root directory path in the `head-repo` that should be stripped from file paths when applying changes to the `upstream-repo`. When set, this prefix will be removed from head-repo file paths before applying changes. If not specified, files will be applied with their original paths.
+
+### `YUKI_NO_BATCH_PR_ROOT_DIR`
+
+The `YUKI_NO_BATCH_PR_ROOT_DIR` option allows you to specify a root directory path in the head repository that should be stripped when applying changes to the upstream repository. This is particularly useful when your head repository has a different directory structure than your upstream repository.
+
+For example, if your head repository has documentation in a `docs/` folder, but your upstream repository expects the files at the root level, you can configure:
+
+```yaml
+env:
+  YUKI_NO_BATCH_PR_ROOT_DIR: docs
+```
+
+This will ensure that when applying changes from `docs/README.md` in your head repository, they will be applied to `README.md` in the upstream repository (the `docs/` prefix is stripped).
 
 ## Permissions
 
