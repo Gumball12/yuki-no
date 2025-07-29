@@ -112,7 +112,7 @@ const getYukiNoReleaseTrackingLabels = async (
     const { getReleaseTrackingLabels } = await import(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      '@yuki-no/plugin-release-tracking/getReleaseTrackingLabels'
+      '@yuki-no/plugin-release-tracking/utils/getReleaseTrackingLabels'
     );
 
     log(
@@ -121,9 +121,8 @@ const getYukiNoReleaseTrackingLabels = async (
     );
 
     return getReleaseTrackingLabels(github);
-  } catch (error) {
+  } catch {
     // noop
-    log('I', (error as Error).message); // TODO: debugging
   }
 
   log(
