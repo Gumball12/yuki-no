@@ -9,9 +9,15 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
 ```yaml
 - uses: Gumball12/yuki-no@v1
   env:
-    # [optional] Specifies the root directory path in the `head-repo`
+    # [optional]
+    # Specifies the root directory path in the `head-repo`
     # that should be stripped when applying changes to `upstream-repo`
-    YUKI_NO_BATCH_PR_ROOT_DIR: docs
+    YUKI_NO_BATCH_PR_ROOT_DIR: head-repo-dirname
+
+    # [optional]
+    # file patterns that should be excluded from batch PR
+    YUKI_NO_BATCH_PR_EXCLUDE: |
+      head-repo-patterns
   with:
     plugins: |
       @yuki-no/plugin-batch-pr@latest
