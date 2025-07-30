@@ -17,7 +17,7 @@ describe('setupBatchPr', () => {
   let mockGitHub: GitHub;
   let mockGit: Git;
   const testBranchName = 'test-batch-branch';
-  const expectedPrTitle = `❄️ Translation Batch - ${new Date().toISOString().split('T')[0]}`;
+  const expectedPrTitle = `❄️ Translation Batch`;
   const expectedPrLabel = '__translation-batch';
 
   beforeEach(() => {
@@ -126,7 +126,7 @@ describe('setupBatchPr', () => {
       expect(mockGitHub.api.pulls.create).toHaveBeenCalledWith({
         owner: 'test-owner',
         repo: 'test-repo',
-        title: expectedPrTitle,
+        title: `${expectedPrTitle} - ${new Date().toISOString().split('T')[0]}`,
         body: 'Test PR body',
         head: testBranchName,
         base: 'main',
@@ -275,7 +275,7 @@ describe('setupBatchPr', () => {
       // Then
       expect(mockGitHub.api.pulls.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          title: expectedPrTitle,
+          title: `${expectedPrTitle} - ${new Date().toISOString().split('T')[0]}`,
         }),
       );
     });

@@ -7,7 +7,7 @@ import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 const PR_LABEL = '__translation-batch';
-const PR_TITLE = `❄️ Translation Batch - ${new Date().toISOString().split('T')[0]}`;
+const PR_TITLE_PREFIX = `❄️ Translation Batch`;
 
 export const setupBatchPr = async (
   github: GitHub,
@@ -16,7 +16,11 @@ export const setupBatchPr = async (
 ): Promise<{ prNumber: number }> => {
   log('I', `setupBatchPr :: Setting up batch PR with branch ${branchName}`);
 
-  const existingPr = await findPrByLabelAndTitle(github, PR_LABEL, PR_TITLE);
+  const existingPr = await findPrByLabelAndTitle(
+    github,
+    PR_LABEL,
+    PR_TITLE_PREFIX,
+  );
 
   if (existingPr) {
     log(
@@ -46,7 +50,7 @@ export const setupBatchPr = async (
 
   const pr = await createPr(github, {
     branch: branchName,
-    title: PR_TITLE,
+    title: `${PR_TITLE_PREFIX} - ${new Date().toISOString().split('T')[0]}`,
     body: createPrBody([]),
     labels: [PR_LABEL],
   });
