@@ -1,4 +1,4 @@
-import { getTrackedIssues } from '../../utils/getTrackedIssues';
+import { getTrackedIssues } from '../utils/getTrackedIssues';
 
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';

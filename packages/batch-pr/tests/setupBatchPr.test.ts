@@ -1,15 +1,15 @@
-import { setupBatchPr } from '../../utils/setupBatchPr';
+import { setupBatchPr } from '../utils/setupBatchPr';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 // Mock dependencies
-vi.mock('../../utils/createCommit');
-vi.mock('../../utils/createPrBody');
+vi.mock('../utils/createCommit');
+vi.mock('../utils/createPrBody');
 
-const { createCommit } = await import('../../utils/createCommit');
-const { createPrBody } = await import('../../utils/createPrBody');
+const { createCommit } = await import('../utils/createCommit');
+const { createPrBody } = await import('../utils/createPrBody');
 const mockCreateCommit = vi.mocked(createCommit);
 const mockCreatePrBody = vi.mocked(createPrBody);
 

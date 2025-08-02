@@ -1,8 +1,8 @@
 import type { Config, RepoSpec } from '../types/config';
+import { createTempFilePath } from '../utils/common';
 import { log } from '../utils/log';
 
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import shell from 'shelljs';
 
@@ -29,9 +29,10 @@ export class Git {
       return this.#dirName;
     }
 
-    this.#dirName = createTempDir(
-      `cloned-by-yuki-no__${this.config.repoSpec.name}__`,
+    this.#dirName = fs.mkdtempSync(
+      createTempFilePath(`cloned-by-yuki-no__${this.config.repoSpec.name}__`),
     );
+
     return this.#dirName;
   }
 
@@ -83,9 +84,6 @@ export class Git {
     return `https://github.com/${this.config.repoSpec.owner}/${this.config.repoSpec.name}`;
   }
 }
-
-const createTempDir = (prefix: string): string =>
-  fs.mkdtempSync(path.join(os.tmpdir(), prefix));
 
 const createAuthorizedRepoUrl = (
   repoUrl: string,

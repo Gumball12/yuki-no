@@ -1,3 +1,6 @@
+import os from 'node:os';
+import path from 'node:path';
+
 export const assert = (condition: boolean, message: string): void => {
   if (!condition) {
     throw new Error(message);
@@ -82,3 +85,6 @@ export const extractHashFromIssue = (issue: {
   const match = issue.body?.match(COMMIT_URL_REGEX);
   return match?.[1];
 };
+
+export const createTempFilePath = (prefix: string): string =>
+  path.join(os.tmpdir(), prefix);
