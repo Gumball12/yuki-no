@@ -1,7 +1,7 @@
+import type { FileChange, FileNameFilter } from './types';
 import { applyFileChanges } from './utils/applyFileChanges';
 import { createCommit } from './utils/createCommit';
 import { createPrBody } from './utils/createPrBody';
-import type { FileChange, FileNameFilter } from './utils/extractFileChanges';
 import { extractFileChanges } from './utils/extractFileChanges';
 import { getTrackedIssues } from './utils/getTrackedIssues';
 import { setupBatchPr } from './utils/setupBatchPr';

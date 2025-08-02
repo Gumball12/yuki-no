@@ -1,7 +1,5 @@
-import {
-  extractFileChanges,
-  type FileNameFilter,
-} from '../utils/extractFileChanges';
+import { type FileNameFilter } from '../types';
+import { extractFileChanges } from '../utils/extractFileChanges';
 
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
 // Import mocked dependencies
