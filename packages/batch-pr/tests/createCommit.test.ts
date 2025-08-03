@@ -1,4 +1,4 @@
-import { createCommit } from '../../utils/createCommit';
+import { createCommit } from '../utils/createCommit';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

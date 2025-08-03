@@ -1,11 +1,8 @@
-import { applyFileLineChanges } from './utils/applyFileLineChanges';
+import type { FileChange, FileNameFilter } from './types';
+import { applyFileChanges } from './utils/applyFileChanges';
 import { createCommit } from './utils/createCommit';
 import { createPrBody } from './utils/createPrBody';
-import {
-  extractFileLineChanges,
-  type FileLineChanges,
-  type FileNameFilter,
-} from './utils/extractFileLineChanges';
+import { extractFileChanges } from './utils/extractFileChanges';
 import { getTrackedIssues } from './utils/getTrackedIssues';
 import { setupBatchPr } from './utils/setupBatchPr';
 
@@ -59,7 +56,7 @@ const batchPrPlugin: YukiNoPlugin = {
       `batchPr :: Processing ${issuesToProcess.length} issues (${trackedIssues.length} tracked + ${shouldTrackIssues.length} new)`,
     );
 
-    const fileLineChanges: FileLineChanges[] = [];
+    const fileChanges: FileChange[] = [];
     const batchPrExcludePatterns = getMultilineInput(
       'YUKI_NO_BATCH_PR_EXCLUDE',
     );
@@ -87,31 +84,37 @@ const batchPrPlugin: YukiNoPlugin = {
       withClone: true,
     });
 
-    log('I', 'batchPr :: Extracting file line changes from commits');
+    log('I', 'batchPr :: Extracting file changes from commits');
     for (const { hash } of issuesToProcess) {
-      const changes = extractFileLineChanges({
+      // const changes = extractFileChanges({
+      //   headGit,
+      //   hash,
+      //   fileNameFilter,
+      //   rootDir,
+      // });
+      const changes = extractFileChanges(
         headGit,
         hash,
         fileNameFilter,
         rootDir,
-      });
-      fileLineChanges.push(...changes);
+      );
+      fileChanges.push(...changes);
       log(
         'I',
         `batchPr :: Extracted ${changes.length} file changes from commit ${hash.substring(0, 8)}`,
       );
     }
 
-    if (!fileLineChanges.length) {
+    if (!fileChanges.length) {
       log('W', 'batchPr :: No file changes found, skipping batch PR update');
       return;
     }
 
     log(
       'I',
-      `batchPr :: Applying ${fileLineChanges.length} file line changes to upstream repository`,
+      `batchPr :: Applying ${fileChanges.length} file changes to upstream repository`,
     );
-    await applyFileLineChanges({ fileLineChanges, targetGit: upstreamGit });
+    await applyFileChanges(upstreamGit, fileChanges);
 
     log('I', 'batchPr :: Creating commit with applied changes');
     createCommit(upstreamGit, {
@@ -141,7 +144,7 @@ const batchPrPlugin: YukiNoPlugin = {
 
     log(
       'S',
-      `batchPr :: Batch PR #${prNumber} updated successfully with ${fileLineChanges.length} file changes`,
+      `batchPr :: Batch PR #${prNumber} updated successfully with ${fileChanges.length} file changes`,
     );
   },
 };

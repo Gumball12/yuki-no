@@ -93,4 +93,63 @@ describe('splitByNewline', () => {
   it('Should remove leading and trailing whitespace', () => {
     expect(splitByNewline('  a\nb  ')).toEqual(['a', 'b']);
   });
+
+  describe('when trim=true (explicit)', () => {
+    it('should trim whitespace from each line', () => {
+      // Given
+      const input = '  a\n  b  \n  c  ';
+
+      // When
+      const result = splitByNewline(input, true);
+
+      // Then
+      expect(result).toEqual(['a', 'b', 'c']);
+    });
+
+    it('should remove blank lines containing only whitespace', () => {
+      // Given
+      const input = 'a\n  \nb';
+
+      // When
+      const result = splitByNewline(input, true);
+
+      // Then
+      expect(result).toEqual(['a', 'b']);
+    });
+  });
+
+  describe('when trim=false', () => {
+    it('should preserve leading and trailing whitespace in lines', () => {
+      // Given
+      const input = '  a\n  b  \n  c  ';
+
+      // When
+      const result = splitByNewline(input, false);
+
+      // Then
+      expect(result).toEqual(['  a', '  b  ', '  c  ']);
+    });
+
+    it('should preserve whitespace-only lines', () => {
+      // Given
+      const input = 'a\n  \nb';
+
+      // When
+      const result = splitByNewline(input, false);
+
+      // Then
+      expect(result).toEqual(['a', '  ', 'b']);
+    });
+
+    it('should still remove completely empty lines', () => {
+      // Given
+      const input = 'a\n\nb';
+
+      // When
+      const result = splitByNewline(input, false);
+
+      // Then
+      expect(result).toEqual(['a', 'b']);
+    });
+  });
 });

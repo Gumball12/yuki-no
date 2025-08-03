@@ -1,3 +1,5 @@
+import { isNotEmpty } from './common';
+
 export function getInput(name: string): string | undefined;
 export function getInput(name: string, defaultValue: string): string;
 export function getInput(name: string, defaultValue?: string | undefined) {
@@ -30,12 +32,17 @@ export const getMultilineInput = (
   return splitByNewline(value);
 };
 
-export const splitByNewline = (text?: string): string[] => {
-  const trimText = text?.trim();
-
-  if (!trimText) {
+export const splitByNewline = (text?: string, trim = true): string[] => {
+  const normalizedText = trim ? text?.trim() : text;
+  if (!normalizedText) {
     return [];
   }
 
-  return trimText.split('\n').filter(line => line.trim() !== '');
+  let splittedByNewline = normalizedText.split('\n');
+
+  if (trim) {
+    splittedByNewline = splittedByNewline.map(line => line.trim());
+  }
+
+  return splittedByNewline.filter(isNotEmpty);
 };

@@ -42,7 +42,7 @@ export const getCommits = (
   const commits = result
     .split(COMMIT_SEP)
     .filter(isNotEmpty)
-    .map(splitByNewline)
+    .map(commitString => splitByNewline(commitString))
     .map(createCommitFromLog)
     .filter(useIsIncludedCommit(config));
 
