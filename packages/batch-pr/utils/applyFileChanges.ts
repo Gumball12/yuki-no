@@ -95,26 +95,26 @@ const applyLineChanges = (lines: string[], changes: LineChange[]): string[] => {
     return lines;
   }
 
-  return changes.reduce(applyLineChange, lines);
+  const nextLines = [...lines];
+  return changes.reduce(applyLineChange, nextLines);
 };
 
 const applyLineChange = (lines: string[], lineChange: LineChange): string[] => {
   const index = lineChange.lineNumber - 1; // 1-based to 0-based
-  const nextLines = [...lines];
 
   switch (lineChange.type) {
     case 'insert-line':
-      nextLines.splice(Math.max(index, 0), 0, lineChange.content);
+      lines.splice(Math.max(index, 0), 0, lineChange.content);
       break;
 
     case 'delete-line':
-      if (index >= 0 && index < nextLines.length) {
-        nextLines.splice(index, 1);
+      if (index >= 0 && index < lines.length) {
+        lines.splice(index, 1);
       }
       break;
   }
 
-  return nextLines;
+  return lines;
 };
 
 const writeFileSync = (
