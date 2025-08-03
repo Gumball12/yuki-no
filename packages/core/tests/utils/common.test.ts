@@ -240,3 +240,16 @@ describe('mergeArray', () => {
     expect(mergeArray(a, b)).toEqual([]);
   });
 });
+
+describe('formatError', () => {
+  it('Should format error', () => {
+    const msg = 'formatted error';
+    const error = new Error(msg);
+    expect(formatError(error)).toBe(msg);
+  });
+
+  it('Should not format error', () => {
+    const msg = { message: 'msg' };
+    expect(formatError(msg)).toBe('');
+  });
+});
