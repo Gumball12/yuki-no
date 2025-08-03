@@ -86,12 +86,6 @@ const batchPrPlugin: YukiNoPlugin = {
 
     log('I', 'batchPr :: Extracting file changes from commits');
     for (const { hash } of issuesToProcess) {
-      // const changes = extractFileChanges({
-      //   headGit,
-      //   hash,
-      //   fileNameFilter,
-      //   rootDir,
-      // });
       const changes = extractFileChanges(
         headGit,
         hash,
