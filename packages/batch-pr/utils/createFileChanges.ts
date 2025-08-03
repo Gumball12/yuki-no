@@ -274,8 +274,10 @@ const extractBinaryChangeSafely = (headGit: Git, blobHash: string): Buffer => {
     }
 
     return fs.readFileSync(randomTempPath);
-  } catch {
-    throw new Error(`Failed to extract binary change for blob ${blobHash}`);
+  } catch (error) {
+    throw new Error(
+      `Failed to extract binary change for blob ${blobHash}: ${(error as Error).message}`,
+    );
   } finally {
     if (fs.existsSync(randomTempPath)) {
       fs.unlinkSync(randomTempPath);
