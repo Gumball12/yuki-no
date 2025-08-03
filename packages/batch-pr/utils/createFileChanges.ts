@@ -38,12 +38,14 @@ export const createFileChanges = (
   ];
 };
 
+const PERFECT_SIMILARITY = 100;
+
 // !['D', 'R', 'C', 'T']
 const shouldLineChangeProcessing = (fileStatus: FileStatus): boolean =>
   fileStatus.status === 'M' ||
   fileStatus.status === 'A' ||
   ((fileStatus.status === 'R' || fileStatus.status === 'C') &&
-    fileStatus.similarity < 100);
+    fileStatus.similarity < PERFECT_SIMILARITY);
 
 const createSimpleFileChange = (
   fileStatus: FileStatus, // D, R100, C100, T
