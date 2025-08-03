@@ -1,3 +1,6 @@
+/*
+NOTE: This file is not exported outside the @yuki-no/core module
+*/
 import colors from 'colors/safe';
 
 /**
@@ -38,11 +41,3 @@ export function log(type: LogType, message: string): void {
       break;
   }
 }
-
-export const formatError = (error: unknown) => {
-  if (!(error instanceof Error)) {
-    return '';
-  }
-
-  return error.message;
-};

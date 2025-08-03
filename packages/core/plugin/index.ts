@@ -27,6 +27,7 @@ export const loadPlugins = async (names: string[]): Promise<YukiNoPlugin[]> => {
         `Failed to load plugin "${name}": ${err.message}`,
         `Resolved ID: ${resolvedId}`,
         `Original plugin specification: ${name}`,
+        `Error Stack: ${err.stack}`,
       ];
 
       // Add version info if available
