@@ -1,6 +1,7 @@
 import type { FileChange, LineChange } from '../types';
 
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
+import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -8,7 +9,13 @@ export const applyFileChanges = (
   upstreamGit: Git,
   fileChanges: FileChange[],
 ): void => {
+  log(
+    'I',
+    `applyFileChanges :: Starting to apply ${fileChanges.length} file changes`,
+  );
+
   if (fileChanges.length === 0) {
+    log('I', 'applyFileChanges :: No file changes to apply, returning');
     return;
   }
 
@@ -20,47 +27,95 @@ export const applyFileChanges = (
       fileChange.upstreamFileName,
     );
 
-    switch (fileChange.type) {
-      case 'update':
-        handleUpdateFile(absoluteFileName, fileChange);
-        break;
+    log(
+      'I',
+      `applyFileChanges :: Processing ${fileChange.type} for ${fileChange.upstreamFileName}`,
+    );
 
-      case 'delete':
-        deleteFileSync(absoluteFileName);
-        break;
+    try {
+      switch (fileChange.type) {
+        case 'update':
+          handleUpdateFile(absoluteFileName, fileChange);
+          break;
 
-      case 'rename':
-      case 'copy':
-        handleMoveFile(absoluteFileName, repoDirName, fileChange);
-        break;
+        case 'delete':
+          deleteFileSync(absoluteFileName);
+          break;
 
-      case 'type':
-        // noop (ignore)
-        break;
+        case 'rename':
+        case 'copy':
+          handleMoveFile(absoluteFileName, repoDirName, fileChange);
+          break;
+
+        case 'type':
+          // noop (ignore)
+          log(
+            'I',
+            `applyFileChanges :: Ignoring type change for ${fileChange.upstreamFileName}`,
+          );
+          break;
+      }
+    } catch (error) {
+      log(
+        'E',
+        `applyFileChanges :: Failed to process ${fileChange.type} for ${fileChange.upstreamFileName}: ${formatError(error)}`,
+      );
+      throw error;
     }
   }
+
+  log(
+    'S',
+    `applyFileChanges :: Successfully applied all ${fileChanges.length} file changes`,
+  );
 };
 
 const deleteFileSync = (absoluteFileName: string): void => {
   if (!fs.existsSync(absoluteFileName)) {
+    log(
+      'I',
+      `deleteFileSync :: File ${absoluteFileName} does not exist, skipping deletion`,
+    );
     return;
   }
 
-  fs.unlinkSync(absoluteFileName);
+  try {
+    fs.unlinkSync(absoluteFileName);
+    log('S', `deleteFileSync :: Successfully deleted ${absoluteFileName}`);
+  } catch (error) {
+    log(
+      'E',
+      `deleteFileSync :: Failed to delete ${absoluteFileName}: ${formatError(error)}`,
+    );
+    throw error;
+  }
 };
 
 const handleUpdateFile = (
   absoluteFileName: string,
   { changes }: Pick<Extract<FileChange, { type: 'update' }>, 'changes'>,
 ): void => {
+  log('I', `handleUpdateFile :: Updating file ${absoluteFileName}`);
+
   if (Buffer.isBuffer(changes)) {
+    log(
+      'I',
+      `handleUpdateFile :: Writing binary content (${changes.length} bytes)`,
+    );
     writeFileSync(absoluteFileName, changes);
     return;
   }
 
+  log('I', `handleUpdateFile :: Processing ${changes.length} line changes`);
+
   // To avoid index shifting
   const deleteChanges = changes.filter(({ type }) => type === 'delete-line');
   const insertChanges = changes.filter(({ type }) => type === 'insert-line');
+
+  log(
+    'I',
+    `handleUpdateFile :: ${deleteChanges.length} deletions, ${insertChanges.length} insertions`,
+  );
 
   const sortedDeletes = deleteChanges.sort(
     (a, b) => b.lineNumber - a.lineNumber,
@@ -75,6 +130,7 @@ const handleUpdateFile = (
 
   const nextContent = lines.join('\n');
   writeFileSync(absoluteFileName, nextContent);
+  log('S', `handleUpdateFile :: Successfully updated ${absoluteFileName}`);
 };
 
 const readFileSync = (fileName: string): string[] => {
@@ -142,21 +198,47 @@ const handleMoveFile = (
   }: Extract<FileChange, { type: 'rename' | 'copy' }>,
 ): void => {
   if (!fs.existsSync(absoluteFileName)) {
+    log(
+      'I',
+      `handleMoveFile :: Source file ${absoluteFileName} does not exist, skipping ${type}`,
+    );
     return;
   }
 
   const absoluteNextFileName = path.join(repoDirName, nextUpstreamFileName);
+  log(
+    'I',
+    `handleMoveFile :: ${type === 'rename' ? 'Renaming' : 'Copying'} ${absoluteFileName} to ${absoluteNextFileName}`,
+  );
+
   const nextDirName = path.dirname(absoluteNextFileName);
   createDirIfNotExists(nextDirName);
 
-  if (type === 'rename') {
-    fs.renameSync(absoluteFileName, absoluteNextFileName);
-  } else {
-    fs.copyFileSync(absoluteFileName, absoluteNextFileName);
-  }
+  try {
+    if (type === 'rename') {
+      fs.renameSync(absoluteFileName, absoluteNextFileName);
+    } else {
+      fs.copyFileSync(absoluteFileName, absoluteNextFileName);
+    }
 
-  if (changes.length > 0) {
-    handleUpdateFile(absoluteNextFileName, { changes });
+    log(
+      'S',
+      `handleMoveFile :: Successfully ${type === 'rename' ? 'renamed' : 'copied'} to ${absoluteNextFileName}`,
+    );
+
+    if (changes.length > 0) {
+      log(
+        'I',
+        `handleMoveFile :: Applying ${changes.length} additional changes to moved file`,
+      );
+      handleUpdateFile(absoluteNextFileName, { changes });
+    }
+  } catch (error) {
+    log(
+      'E',
+      `handleMoveFile :: Failed to ${type} ${absoluteFileName}: ${formatError(error)}`,
+    );
+    throw error;
   }
 };
 

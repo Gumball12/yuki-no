@@ -8,6 +8,7 @@ import { resolveFileNameWithRootDir } from './resolveFileNameWithRootDir';
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { createTempFilePath } from '@yuki-no/plugin-sdk/utils/common';
 import { splitByNewline } from '@yuki-no/plugin-sdk/utils/input';
+import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 import fs from 'node:fs';
 
 export const createFileChanges = (
@@ -19,15 +20,23 @@ export const createFileChanges = (
   const { headFileName } = fileStatus;
   const upstreamFileName = resolveFileNameWithRootDir(headFileName, rootDir);
 
+  log(
+    'I',
+    `createFileChanges :: Processing ${fileStatus.status} for ${headFileName}`,
+  );
+
   if (!shouldLineChangeProcessing(fileStatus)) {
+    log('I', 'createFileChanges :: Using simple processing (no line changes)');
     return [createSimpleFileChange(fileStatus, upstreamFileName, rootDir)];
   }
 
   if (isBinaryFile(headFileName)) {
+    log('I', 'createFileChanges :: File is binary, using binary processing');
     return createBinaryFileChanges(headGit, hash, fileStatus, upstreamFileName);
   }
 
-  return [
+  log('I', 'createFileChanges :: File is text, using complex processing');
+  const result = [
     createComplexFileChange(
       headGit,
       hash,
@@ -36,6 +45,9 @@ export const createFileChanges = (
       rootDir,
     ),
   ];
+
+  log('S', `createFileChanges :: Generated ${result.length} file changes`);
+  return result;
 };
 
 const PERFECT_SIMILARITY = 100;
@@ -120,9 +132,13 @@ const createLineChanges = (
   hash: string,
   fileName: string,
 ): LineChange[] => {
+  log('I', `createLineChanges :: Extracting changes for ${fileName}`);
+
   const blobHash = extractBlobHash(headGit, hash, fileName);
   const diffString = headGit.exec(`show -U0 --format= ${hash} ${blobHash}`);
   const diffLines = splitByNewline(diffString, false);
+
+  log('I', `createLineChanges :: Processing ${diffLines.length} diff lines`);
 
   const lineChanges: LineChange[] = [];
   let oldLineNumber = 0;
@@ -151,6 +167,7 @@ const createLineChanges = (
     newLineNumber = nextNewLineNumber;
   }
 
+  log('S', `createLineChanges :: Generated ${lineChanges.length} line changes`);
   return lineChanges;
 };
 
@@ -242,16 +259,30 @@ const createBinaryFileChanges = (
   { headFileName, status }: FileStatus,
   upstreamFileName: string,
 ): BinaryFileChange[] => {
+  log('I', `createBinaryFileChanges :: Processing binary file ${headFileName}`);
+
   const fileChanges: BinaryFileChange[] = [];
 
   if (SHOULD_DELETE_STATUS.includes(status)) {
+    log(
+      'I',
+      `createBinaryFileChanges :: Adding delete operation for ${upstreamFileName}`,
+    );
     fileChanges.push({ type: 'delete', upstreamFileName });
   }
 
   if (!SHOULD_ADD_STATUS.includes(status)) {
+    log(
+      'I',
+      `createBinaryFileChanges :: Skipping add operation for status ${status}`,
+    );
     return fileChanges;
   }
 
+  log(
+    'I',
+    `createBinaryFileChanges :: Adding update operation for ${upstreamFileName}`,
+  );
   const blobHash = extractBlobHash(headGit, hash, headFileName);
   const binaryChange = extractBinaryChangeSafely(headGit, blobHash);
   fileChanges.push({
@@ -260,28 +291,54 @@ const createBinaryFileChanges = (
     changes: binaryChange,
   });
 
+  log(
+    'S',
+    `createBinaryFileChanges :: Generated ${fileChanges.length} binary changes`,
+  );
   return fileChanges;
 };
 
 const extractBinaryChangeSafely = (headGit: Git, blobHash: string): Buffer => {
+  log(
+    'I',
+    `extractBinaryChangeSafely :: Extracting binary data for blob ${blobHash}`,
+  );
+
   const randomTempPath = createTempFilePath(
     `yuki-no-binary__${Date.now()}-${Math.random()}.tmp`,
   );
 
   try {
+    log(
+      'I',
+      `extractBinaryChangeSafely :: Creating temp file ${randomTempPath}`,
+    );
     headGit.exec(`show ${blobHash} > "${randomTempPath}"`);
 
     if (!fs.existsSync(randomTempPath)) {
       throw new Error();
     }
 
-    return fs.readFileSync(randomTempPath);
+    const buffer = fs.readFileSync(randomTempPath);
+    log(
+      'S',
+      `extractBinaryChangeSafely :: Successfully extracted ${buffer.length} bytes for blob ${blobHash}`,
+    );
+    return buffer;
   } catch (error) {
+    log(
+      'E',
+      `extractBinaryChangeSafely :: Failed to extract blob ${blobHash}: ${formatError(error)}`,
+    );
     throw new Error(
-      `Failed to extract binary change for blob ${blobHash}: ${(error as Error).message}`,
+      `Failed to extract binary change for blob ${blobHash} / error: ${formatError(error)}`,
     );
   } finally {
     if (fs.existsSync(randomTempPath)) {
+      log(
+        'I',
+        `extractBinaryChangeSafely :: Cleaning up temp file ${randomTempPath}`,
+      );
       fs.unlinkSync(randomTempPath);
     }
   }

@@ -4,7 +4,7 @@ import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
-import { log } from '@yuki-no/plugin-sdk/utils/log';
+import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 
 type GetTrackedIssuesReturns = {
   trackedIssues: Issue[];
@@ -105,6 +105,7 @@ const extractTrackedISsueNumbers = (
   return numbers;
 };
 
+// TODO: 이거 제대로 라벨 못가져오고있다 (뭔가 계속)
 const getYukiNoReleaseTrackingLabels = async (
   github: GitHub,
 ): Promise<string[]> => {
@@ -121,14 +122,12 @@ const getYukiNoReleaseTrackingLabels = async (
     );
 
     return getReleaseTrackingLabels(github);
-  } catch {
-    // noop
+  } catch (error) {
+    log(
+      'I',
+      `getYukiNoReleaseTrackingLabels :: cannot find @yuki-no/plugin-release-tracking / ${formatError(error)}`,
+    );
   }
-
-  log(
-    'I',
-    'getYukiNoReleaseTrackingLabels :: cannot find @yuki-no/plugin-release-tracking',
-  );
 
   return [];
 };
