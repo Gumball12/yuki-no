@@ -106,7 +106,6 @@ const extractTrackedISsueNumbers = (
   return numbers;
 };
 
-// TODO: 이거 제대로 라벨 못가져오고있다 (뭔가 계속)
 const getYukiNoReleaseTrackingLabels = async (
   github: GitHub,
 ): Promise<string[]> => {
@@ -114,7 +113,7 @@ const getYukiNoReleaseTrackingLabels = async (
     const { getReleaseTrackingLabels } = await import(
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      '@yuki-no/plugin-release-tracking/utils/getReleaseTrackingLabels'
+      '@yuki-no/plugin-release-tracking/getReleaseTrackingLabels'
     );
 
     log(
