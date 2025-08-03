@@ -1,4 +1,4 @@
-import { log } from '../../utils/log';
+import { formatError, log } from '../../utils/log';
 
 import colors from 'colors/safe';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -62,5 +62,18 @@ describe('log', () => {
     process.env.VERBOSE = 'TRUE';
     log('I', 'Test message');
     expect(console.info).toHaveBeenCalled();
+  });
+});
+
+describe('formatError', () => {
+  it('Should format error', () => {
+    const msg = 'formatted error';
+    const error = new Error(msg);
+    expect(formatError(error)).toBe(msg);
+  });
+
+  it('Should not format error', () => {
+    const msg = { message: 'msg' };
+    expect(formatError(msg)).toBe('');
   });
 });
