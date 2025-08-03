@@ -1,9 +1,8 @@
 import { FILE_STATUS_REGEX } from '../constants';
 import type { FileNameFilter, FileStatus } from '../types';
 
-import { formatError } from '@yuki-no/plugin-sdk/utils/common';
 import { splitByNewline } from '@yuki-no/plugin-sdk/utils/input';
-import { log } from '@yuki-no/plugin-sdk/utils/log';
+import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 
 export const parseFileStatuses = (
   statusString: string,

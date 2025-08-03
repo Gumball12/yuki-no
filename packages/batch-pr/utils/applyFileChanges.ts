@@ -1,8 +1,7 @@
 import type { FileChange, LineChange } from '../types';
 
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
-import { formatError } from '@yuki-no/plugin-sdk/utils/common';
-import { log } from '@yuki-no/plugin-sdk/utils/log';
+import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 import fs from 'node:fs';
 import path from 'node:path';
 

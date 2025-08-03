@@ -88,11 +88,3 @@ export const extractHashFromIssue = (issue: {
 
 export const createTempFilePath = (prefix: string): string =>
   path.join(os.tmpdir(), prefix);
-
-export const formatError = (error: unknown) => {
-  if (!(error instanceof Error)) {
-    return '';
-  }
-
-  return error.message;
-};

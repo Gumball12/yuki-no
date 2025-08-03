@@ -3,7 +3,6 @@ import {
   chunk,
   excludeFrom,
   extractHashFromIssue,
-  formatError,
   isNotEmpty,
   mergeArray,
   unique,
