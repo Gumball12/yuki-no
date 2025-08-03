@@ -198,9 +198,6 @@ See [yuki-no-plugin-test](https://github.com/Gumball12/yuki-no-plugin-test) for 
 
 ### Passing Inputs to Plugins
 
-> [!CAUTION]
-> Environment variable names passed as plugin inputs must always have the `YUKI_NO_` prefix.
-
 Plugins can receive custom values using environment variables instead [`with`](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith). This approach avoids IDE warnings about undefined inputs and follows GitHub Actions best practices. Use the `env` block to pass custom values to your plugins:
 
 ```yaml
@@ -218,7 +215,7 @@ Plugins can receive custom values using environment variables instead [`with`](h
     track-from: abc123
 ```
 
-Only environment variables with the `YUKI_NO` prefix are passed to plugins to prevent access to unauthorized environment variables. Therefore, you must include the `YUKI_NO_` prefix in your environment variable names.
+We recommend prefixing your environment variables with `YUKI_NO_` to avoid conflicts with other variables.
 
 ### Publishing
 
