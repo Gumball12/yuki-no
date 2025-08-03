@@ -120,6 +120,8 @@ const getYukiNoReleaseTrackingLabels = async (
       'getYukiNoReleaseTrackingLabels :: use @yuki-no/plugin-release-tracking',
     );
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     return getReleaseTrackingLabels(github);
   } catch (error) {
     log(
