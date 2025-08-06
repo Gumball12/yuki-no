@@ -55,7 +55,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore: bump ${{ steps.package.outputs.path }} to v${{ steps.package.outputs.version }}"
-          git push origin HEAD:main
+          git push origin HEAD:next
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
