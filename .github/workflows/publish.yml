@@ -29,7 +29,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
-          ref: main
+          ref: next
 
       - run: corepack enable
 
