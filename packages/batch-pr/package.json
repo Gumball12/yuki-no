@@ -1,6 +1,6 @@
 {
   "name": "@yuki-no/plugin-batch-pr",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Batch PR plugin for yuki-no - Collects opened Yuki-no translation issues and creates a single pull request",
   "repository": {
     "type": "git",
