@@ -1,6 +1,7 @@
-import type { FileChange, FileNameFilter } from './types';
+import type { FileChange } from './types';
 import { applyFileChanges } from './utils/applyFileChanges';
 import { createCommit } from './utils/createCommit';
+import { createFileNameFilter } from './utils/createFileNameFilter';
 import { createPrBody } from './utils/createPrBody';
 import { extractFileChanges } from './utils/extractFileChanges';
 import { getTrackedIssues } from './utils/getTrackedIssues';
@@ -8,12 +9,10 @@ import { setupBatchPr } from './utils/setupBatchPr';
 
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
-import type { Config } from '@yuki-no/plugin-sdk/types/config';
 import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
 import { getInput, getMultilineInput } from '@yuki-no/plugin-sdk/utils/input';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
-import picomatch from 'picomatch';
 
 const BRANCH_NAME = '__yuki-no-batch-pr';
 
@@ -56,7 +55,11 @@ const batchPrPlugin: YukiNoPlugin = {
       `batchPr :: Processing ${issuesToProcess.length} issues (${trackedIssues.length} tracked + ${shouldTrackIssues.length} new)`,
     );
 
-    const fileChanges: FileChange[] = [];
+    const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
+    if (rootDir) {
+      log('I', `batchPr :: Using root directory filter: ${rootDir}`);
+    }
+
     const batchPrExcludePatterns = getMultilineInput(
       'YUKI_NO_BATCH_PR_EXCLUDE',
     );
@@ -64,12 +67,7 @@ const batchPrPlugin: YukiNoPlugin = {
       ...config,
       exclude: [...config.exclude, ...batchPrExcludePatterns],
     };
-    const fileNameFilter = createFileNameFilter(extendedConfig);
-    const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
-
-    if (rootDir) {
-      log('I', `batchPr :: Using root directory filter: ${rootDir}`);
-    }
+    const fileNameFilter = createFileNameFilter(extendedConfig, rootDir);
 
     if (batchPrExcludePatterns.length > 0) {
       log(
@@ -84,7 +82,10 @@ const batchPrPlugin: YukiNoPlugin = {
       withClone: true,
     });
 
+    const fileChanges: FileChange[] = [];
+
     log('I', 'batchPr :: Extracting file changes from commits');
+
     for (const { hash } of issuesToProcess) {
       const changes = extractFileChanges(
         headGit,
@@ -93,6 +94,7 @@ const batchPrPlugin: YukiNoPlugin = {
         rootDir,
       );
       fileChanges.push(...changes);
+
       log(
         'I',
         `batchPr :: Extracted ${changes.length} file changes from commit ${hash.substring(0, 8)}`,
@@ -144,22 +146,3 @@ const batchPrPlugin: YukiNoPlugin = {
 };
 
 export default batchPrPlugin;
-
-const createFileNameFilter = (
-  config: Pick<Config, 'include' | 'exclude'>,
-): FileNameFilter => {
-  const isIncluded = picomatch(config.include.length ? config.include : ['**']);
-  const isExcluded = picomatch(config.exclude);
-
-  return (fileName: string): boolean => {
-    if (!fileName.length) {
-      return false;
-    }
-
-    if (config.include.length === 0 && config.exclude.length === 0) {
-      return true;
-    }
-
-    return !isExcluded(fileName) && isIncluded(fileName);
-  };
-};

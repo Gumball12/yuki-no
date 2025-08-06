@@ -10,11 +10,23 @@ export const resolveFileNameWithRootDir = (
     return '';
   }
 
-  const normalizedRootDir = rootDir.endsWith('/') ? rootDir : `${rootDir}/`;
+  const normalizedRootDir = normalizeRootDir(rootDir);
 
   if (!fileName.startsWith(normalizedRootDir)) {
     return fileName;
   }
 
   return fileName.substring(normalizedRootDir.length);
+};
+
+export const normalizeRootDir = (rootDir?: string): string => {
+  if (!rootDir) {
+    return '';
+  }
+
+  if (rootDir.endsWith('/')) {
+    return rootDir as `${string}/`;
+  }
+
+  return `${rootDir}/`;
 };
