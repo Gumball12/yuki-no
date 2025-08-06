@@ -9,7 +9,7 @@ import { log } from '@yuki-no/plugin-sdk/utils/log';
 export const extractFileChanges = (
   headGit: Git,
   hash: string,
-  filterNameFilter: FileNameFilter,
+  fileNameFilter: FileNameFilter,
   rootDir?: string,
 ): FileChange[] => {
   log('I', `extractFileChanges :: Starting extraction for hash: ${hash}`);
@@ -17,7 +17,7 @@ export const extractFileChanges = (
   const fileStatusString = headGit.exec(
     `show --name-status --format="" ${hash}`,
   );
-  const fileStatuses = parseFileStatuses(fileStatusString, filterNameFilter);
+  const fileStatuses = parseFileStatuses(fileStatusString, fileNameFilter);
 
   log('I', `extractFileChanges :: Found ${fileStatuses.length} file statuses`);
 
