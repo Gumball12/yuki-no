@@ -25,10 +25,19 @@ if ! command -v pnpm &> /dev/null; then
     echo "✅ pnpm installed successfully"
 fi
 
+# Fix workspace package symlink issues when used as plugins
+# - Workspace packages get symlinked, but their dist directories don't exist
+#   because local packages aren't built, causing runtime failures
+# - node-linker=hoisted: Creates flat node_modules, eliminates .pnpm virtual store
+# - symlink=false: Prevents workspace package symlinks (overrides special workspace handling)
+# - package-import-method=hardlink: Forces hardlinks from global store (consistent across filesystems)
+echo "node-linker=hoisted" > .npmrc
+echo "symlink=false" >> .npmrc
+echo "package-import-method=hardlink" >> .npmrc
+
 # Install base dependencies
 echo "📦 Installing base dependencies..."
 pnpm install
-
 
 # Install plugins with exact version requirement
 if [ ! -z "${PLUGINS:-}" ]; then
