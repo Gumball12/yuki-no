@@ -1,7 +1,6 @@
 import { FILE_HEADER_PREFIX } from '../constants';
 import type { FileChange, FileStatus, LineChange } from '../types';
 
-import { extractBlobHash } from './extractBlobHash';
 import { isBinaryFile } from './isBinaryFile';
 import { resolveFileNameWithRootDir } from './resolveFileNameWithRootDir';
 
@@ -342,4 +341,29 @@ const extractBinaryChangeSafely = (headGit: Git, blobHash: string): Buffer => {
       fs.unlinkSync(randomTempPath);
     }
   }
+};
+
+// format: 100644 blob (blobHash) (fileName)
+const LS_TREE_REGEX = /^(\d+) blob ([a-f0-9]+)\t(.+)$/;
+
+const extractBlobHash = (git: Git, hash: string, fileName: string): string => {
+  const lsTreeString = git.exec(`ls-tree -r ${hash}`);
+  const lines = splitByNewline(lsTreeString);
+
+  for (const line of lines) {
+    const match = line.match(LS_TREE_REGEX);
+
+    if (!match) {
+      continue;
+    }
+
+    const [, , blobHash, parsedFileName] = match;
+    if (parsedFileName === fileName) {
+      return blobHash;
+    }
+  }
+
+  throw new Error(
+    `Failed to extract blob hash for ${fileName} (head-repo: ${hash})`,
+  );
 };
