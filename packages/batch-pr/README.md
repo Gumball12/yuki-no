@@ -45,12 +45,13 @@ This will ensure that when applying changes from `docs/README.md` in your head r
 
 ### `YUKI_NO_BATCH_PR_EXCLUDE`
 
-The `YUKI_NO_BATCH_PR_EXCLUDE` option allows you to specify file patterns that should be excluded from batch PR processing. This is useful when you want to exclude certain files like build artifacts, temporary files, or sensitive files from being included in the batch PR.
+The `YUKI_NO_BATCH_PR_EXCLUDE` option allows you to specify **`head-repo` file patterns** that should be excluded from batch PR processing. This is useful when you want to exclude certain files like build artifacts, temporary files, or sensitive files from being included in the batch PR.
 
 The option supports glob patterns and can accept multiple patterns, each on a separate line:
 
 ```yaml
 env:
+  # Specify `head-repo` file patterns
   YUKI_NO_BATCH_PR_EXCLUDE: |
     *.log
     temp/**
