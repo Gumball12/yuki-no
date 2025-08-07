@@ -78,6 +78,16 @@ permissions:
   pull-requests: write
 ```
 
+**Additionally, you need to enable "Allow GitHub Actions to create and approve pull requests"** in your repository settings:
+
+![Set workflow permissions](./docs/workflow-permissions.png)
+
+1. Go to **Settings** → **Actions** → **General**
+2. Under **Workflow permissions**, check **"Allow GitHub Actions to create and approve pull requests"**
+3. Click "Save"
+
+These permissions are required because the plugin needs to create pull requests.
+
 ## Configuration
 
 This plugin uses yuki-no's built-in `include` and `exclude` options to determine which files to track.
