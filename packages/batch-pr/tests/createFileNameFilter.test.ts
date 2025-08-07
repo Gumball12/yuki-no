@@ -319,6 +319,30 @@ describe('createFileNameFilter', () => {
       // When & Then
       expect(filter('src/')).toBe(true);
     });
+
+    test('Real world tests', () => {
+      // Given
+      const config: Pick<Config, 'include' | 'exclude'> = {
+        include: ['docs/**'],
+        exclude: ['guide/migration*.md', '**/package.json'],
+      };
+      mockNormalizeRootDir.mockReturnValue('docs');
+
+      // When
+      const filter = createFileNameFilter(config);
+
+      // Then - multiple calls should work consistently
+      expect(filter('docs/a.md')).toBeTruthy();
+      expect(filter('docs/ssr-using-modulerunner.md')).toBeTruthy();
+      expect(
+        filter('playground/ssr/src/forked-deadlock/README.md'),
+      ).toBeFalsy();
+      expect(filter('guide/migration.md')).toBeFalsy();
+      expect(filter('/guide/migration.md')).toBeFalsy();
+      expect(filter('guide/migration2.md')).toBeFalsy();
+      expect(filter('package.json')).toBeFalsy();
+      expect(filter('docs/package.json')).toBeFalsy();
+    });
   });
 
   describe('performance considerations', () => {
@@ -339,25 +363,6 @@ describe('createFileNameFilter', () => {
       expect(filter('src/file3.ts')).toBe(true);
       expect(filter('src/file1.test.ts')).toBe(false);
       expect(filter('src/file2.test.ts')).toBe(false);
-    });
-
-    test('>>> test', () => {
-      // Given
-      const config: Pick<Config, 'include' | 'exclude'> = {
-        include: ['docs/**'],
-        exclude: ['guide/migration*.md', 'package.json'],
-      };
-      mockNormalizeRootDir.mockReturnValue('docs');
-
-      // When
-      const filter = createFileNameFilter(config);
-
-      // Then - multiple calls should work consistently
-      expect(filter('docs/a.md')).toBeTruthy();
-      expect(filter('docs/ssr-using-modulerunner.md')).toBeTruthy();
-      expect(
-        filter('playground/ssr/src/forked-deadlock/README.md'),
-      ).toBeFalsy();
     });
   });
 });
