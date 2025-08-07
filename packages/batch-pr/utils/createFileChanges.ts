@@ -21,7 +21,7 @@ export const createFileChanges = (
 
   log(
     'I',
-    `createFileChanges :: Processing ${fileStatus.status} for ${headFileName}`,
+    `createFileChanges :: Processing ${fileStatus.status} for ${headFileName}(head) ${upstreamFileName}(upstream)`,
   );
 
   if (!shouldLineChangeProcessing(fileStatus)) {
@@ -100,11 +100,25 @@ const createComplexFileChange = (
 ): FileChange => {
   const { status, headFileName } = fileStatus;
 
+  const diffString = headGit.exec(`show -U0 --format= ${hash}`);
+  const filesDiffString = parseDiffStringByFileName(diffString);
+  const fileDiffString = filesDiffString.find(
+    ({ fileName }) => fileName === headFileName,
+  )?.diffString;
+
+  if (!fileDiffString) {
+    throw new Error(
+      `Failed to extract fileName from ${hash} for ${headFileName}`,
+    );
+  }
+
+  log('I', `createComplexFileChange :: Extracting changes for ${headFileName}`);
+
   if (status === 'A' || status === 'M') {
     return {
       type: 'update',
       upstreamFileName,
-      changes: createLineChanges(headGit, hash, headFileName),
+      changes: createLineChanges(fileDiffString),
     };
   }
 
@@ -119,23 +133,32 @@ const createComplexFileChange = (
       upstreamFileName,
       nextUpstreamFileName,
       similarity: fileStatus.similarity,
-      changes: createLineChanges(headGit, hash, headFileName),
+      changes: createLineChanges(fileDiffString),
     };
   }
 
   throw new Error(`Failed to create FileChange for ${upstreamFileName}`);
 };
 
-const createLineChanges = (
-  headGit: Git,
-  hash: string,
-  fileName: string,
-): LineChange[] => {
-  log('I', `createLineChanges :: Extracting changes for ${fileName}`);
+const parseDiffStringByFileName = (
+  diffString: string,
+): { diffString: string; fileName: string }[] =>
+  diffString
+    .split('diff --git')
+    .slice(1)
+    .map(str => {
+      const fileDiffString = `diff --git${str}`;
+      const fileNameMatch = fileDiffString.match(/diff --git a\/(.+) b\/(.+)/);
 
-  const blobHash = extractBlobHash(headGit, hash, fileName);
-  const diffString = headGit.exec(`show -U0 --format= ${hash} ${blobHash}`);
-  const diffLines = splitByNewline(diffString, false);
+      if (!fileNameMatch) {
+        throw new Error(`Failed to extract fileName`);
+      }
+
+      return { diffString: fileDiffString, fileName: fileNameMatch[1] };
+    });
+
+const createLineChanges = (fileDiffString: string): LineChange[] => {
+  const diffLines = splitByNewline(fileDiffString, false);
 
   log('I', `createLineChanges :: Processing ${diffLines.length} diff lines`);
 

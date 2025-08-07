@@ -73,8 +73,10 @@ describe('extractFileChanges', () => {
       // Given
       mockGitExec
         .mockReturnValueOnce('M\tfile.ts\nM\tfile.js') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\tfile.ts') // ls-tree
-        .mockReturnValueOnce('@@ -1,1 +1,1 @@\n-old\n+new'); // show diff
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/file.ts b/file.ts\nindex abc123..def456 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,1 +1,1 @@\n-old\n+new',
+        );
       const tsOnlyFilter: FileNameFilter = fileName => fileName.endsWith('.ts');
 
       // When
@@ -88,167 +90,150 @@ describe('extractFileChanges', () => {
   });
 
   describe('file status processing', () => {
-    describe('Modified files (M)', () => {
-      test('should create update type for modified file', () => {
-        // Given
-        mockGitExec
-          .mockReturnValueOnce('M\tfile.ts') // show --name-status
-          .mockReturnValueOnce('100644 blob def456\tfile.ts') // ls-tree
-          .mockReturnValueOnce('@@ -1,1 +1,1 @@\n-old line\n+new line'); // show diff
+    test('should handle Modified files (M)', () => {
+      // Given
+      mockGitExec
+        .mockReturnValueOnce('M\tfile.ts') // show --name-status
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/file.ts b/file.ts\nindex abc123..def456 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
+        );
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'update',
-          upstreamFileName: 'file.ts',
-          changes: [
-            { type: 'delete-line', lineNumber: 1 },
-            { type: 'insert-line', lineNumber: 1, content: 'new line' },
-          ],
-        });
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'update',
+        upstreamFileName: 'file.ts',
+        changes: [
+          { type: 'delete-line', lineNumber: 1 },
+          { type: 'insert-line', lineNumber: 1, content: 'new line' },
+        ],
       });
     });
 
-    describe('Added files (A)', () => {
-      test('should create update type for added file', () => {
-        // Given
-        mockGitExec
-          .mockReturnValueOnce('A\tnewfile.ts') // show --name-status
-          .mockReturnValueOnce('100644 blob def456\tnewfile.ts') // ls-tree
-          .mockReturnValueOnce('@@ -0,0 +1,1 @@\n+new content'); // show diff
+    test('should handle Added files (A)', () => {
+      // Given
+      mockGitExec
+        .mockReturnValueOnce('A\tnewfile.ts') // show --name-status
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/newfile.ts b/newfile.ts\nnew file mode 100644\nindex 0000000..def456\n--- /dev/null\n+++ b/newfile.ts\n@@ -0,0 +1,1 @@\n+new content',
+        );
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'update',
-          upstreamFileName: 'newfile.ts',
-          changes: [
-            { type: 'insert-line', lineNumber: 1, content: 'new content' },
-          ],
-        });
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'update',
+        upstreamFileName: 'newfile.ts',
+        changes: [
+          { type: 'insert-line', lineNumber: 1, content: 'new content' },
+        ],
       });
     });
 
-    describe('Deleted files (D)', () => {
-      test('should create delete type for deleted file', () => {
-        // Given
-        mockGitExec.mockReturnValueOnce('D\tfile.ts');
+    test('should handle Deleted files (D)', () => {
+      // Given
+      mockGitExec.mockReturnValueOnce('D\tfile.ts');
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'delete',
-          upstreamFileName: 'file.ts',
-        });
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'delete',
+        upstreamFileName: 'file.ts',
       });
     });
 
-    describe('Renamed files (R)', () => {
-      test('should create rename type for renamed file with similarity < 100', () => {
-        // Given
-        mockGitExec
-          .mockReturnValueOnce('R85\told.ts\tnew.ts') // show --name-status
-          .mockReturnValueOnce('100644 blob def456\told.ts') // ls-tree
-          .mockReturnValueOnce('@@ -1,1 +1,1 @@\n-old line\n+new line'); // show diff
+    test('should handle Renamed files (R) with changes', () => {
+      // Given
+      mockGitExec
+        .mockReturnValueOnce('R85\told.ts\tnew.ts') // show --name-status
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/old.ts b/new.ts\nsimilarity index 85%\nrename from old.ts\nrename to new.ts\nindex abc123..def456 100644\n--- a/old.ts\n+++ b/new.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
+        );
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'rename',
-          upstreamFileName: 'old.ts',
-          nextUpstreamFileName: 'new.ts',
-          similarity: 85,
-          changes: [
-            { type: 'delete-line', lineNumber: 1 },
-            { type: 'insert-line', lineNumber: 1, content: 'new line' },
-          ],
-        });
-      });
-
-      test('should create rename type without line changes for similarity = 100', () => {
-        // Given
-        mockGitExec.mockReturnValueOnce('R100\told.ts\tnew.ts');
-
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
-
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'rename',
-          upstreamFileName: 'old.ts',
-          nextUpstreamFileName: 'new.ts',
-          similarity: 100,
-          changes: [],
-        });
-      });
-
-      test('should apply filter to nextHeadFileName for renamed files', () => {
-        // Given
-        mockGitExec.mockReturnValueOnce('R100\told.js\tnew.ts');
-        const tsOnlyFilter: FileNameFilter = fileName =>
-          fileName.endsWith('.ts');
-
-        // When
-        const result = extractFileChanges(mockGit, testHash, tsOnlyFilter);
-
-        // Then
-        expect(result).toHaveLength(1); // Should include because new.ts matches filter
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'rename',
+        upstreamFileName: 'old.ts',
+        nextUpstreamFileName: 'new.ts',
+        similarity: 85,
+        changes: [
+          { type: 'delete-line', lineNumber: 1 },
+          { type: 'insert-line', lineNumber: 1, content: 'new line' },
+        ],
       });
     });
 
-    describe('Copied files (C)', () => {
-      test('should create copy type for copied file', () => {
-        // Given
-        mockGitExec
-          .mockReturnValueOnce('C75\tsource.ts\tcopy.ts') // show --name-status
-          .mockReturnValueOnce('100644 blob def456\tsource.ts') // ls-tree
-          .mockReturnValueOnce('@@ -1,1 +1,1 @@\n-old line\n+new line'); // show diff
+    test('should handle Renamed files (R) without changes', () => {
+      // Given
+      mockGitExec.mockReturnValueOnce('R100\told.ts\tnew.ts');
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'copy',
-          upstreamFileName: 'source.ts',
-          nextUpstreamFileName: 'copy.ts',
-          similarity: 75,
-          changes: [
-            { type: 'delete-line', lineNumber: 1 },
-            { type: 'insert-line', lineNumber: 1, content: 'new line' },
-          ],
-        });
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'rename',
+        upstreamFileName: 'old.ts',
+        nextUpstreamFileName: 'new.ts',
+        similarity: 100,
+        changes: [],
       });
     });
 
-    describe('Type changed files (T)', () => {
-      test('should create type change for type changed file', () => {
-        // Given
-        mockGitExec.mockReturnValueOnce('T\tfile.sh');
+    test('should handle Copied files (C)', () => {
+      // Given
+      mockGitExec
+        .mockReturnValueOnce('C75\tsource.ts\tcopy.ts') // show --name-status
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/source.ts b/copy.ts\nsimilarity index 75%\ncopy from source.ts\ncopy to copy.ts\nindex abc123..def456 100644\n--- a/source.ts\n+++ b/copy.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
+        );
 
-        // When
-        const result = extractFileChanges(mockGit, testHash, defaultFilter);
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
-        // Then
-        expect(result).toHaveLength(1);
-        expect(result[0]).toEqual({
-          type: 'type',
-          upstreamFileName: 'file.sh',
-        });
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'copy',
+        upstreamFileName: 'source.ts',
+        nextUpstreamFileName: 'copy.ts',
+        similarity: 75,
+        changes: [
+          { type: 'delete-line', lineNumber: 1 },
+          { type: 'insert-line', lineNumber: 1, content: 'new line' },
+        ],
+      });
+    });
+
+    test('should handle Type changed files (T)', () => {
+      // Given
+      mockGitExec.mockReturnValueOnce('T\tfile.sh');
+
+      // When
+      const result = extractFileChanges(mockGit, testHash, defaultFilter);
+
+      // Then
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        type: 'type',
+        upstreamFileName: 'file.sh',
       });
     });
   });
@@ -258,9 +243,13 @@ describe('extractFileChanges', () => {
       // Given
       mockGitExec
         .mockReturnValueOnce('M\tfile.ts') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\tfile.ts') // ls-tree
         .mockReturnValueOnce(
+          // show -U0 --format=
           [
+            'diff --git a/file.ts b/file.ts',
+            'index abc123..def456 100644',
+            '--- a/file.ts',
+            '+++ b/file.ts',
             '@@ -1,1 +1,1 @@',
             '-first old line',
             '+first new line',
@@ -268,7 +257,7 @@ describe('extractFileChanges', () => {
             '-second old line',
             '+second new line',
           ].join('\n'),
-        ); // show diff
+        );
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
@@ -285,44 +274,14 @@ describe('extractFileChanges', () => {
       }
     });
 
-    test('should ignore context lines and file headers', () => {
-      // Given
-      mockGitExec
-        .mockReturnValueOnce('M\tfile.ts') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\tfile.ts') // ls-tree
-        .mockReturnValueOnce(
-          [
-            'diff --git a/file.ts b/file.ts',
-            'index abc123..def456 100644',
-            '--- a/file.ts',
-            '+++ b/file.ts',
-            '@@ -1,3 +1,3 @@',
-            ' context line',
-            '-old line',
-            '+new line',
-            ' another context line',
-          ].join('\n'),
-        ); // show diff
-
-      // When
-      const result = extractFileChanges(mockGit, testHash, defaultFilter);
-
-      // Then
-      expect(result[0].type).toBe('update');
-      if (result[0].type === 'update') {
-        expect(result[0].changes).toEqual([
-          { type: 'delete-line', lineNumber: 2 },
-          { type: 'insert-line', lineNumber: 2, content: 'new line' },
-        ]);
-      }
-    });
-
     test('should handle empty lines correctly', () => {
       // Given
       mockGitExec
         .mockReturnValueOnce('M\tfile.ts') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\tfile.ts') // ls-tree
-        .mockReturnValueOnce(['@@ -1,2 +1,2 @@', '-', '+'].join('\n')); // show diff with empty lines
+        .mockReturnValueOnce(
+          // show -U0 --format=
+          'diff --git a/file.ts b/file.ts\nindex abc123..def456 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,2 +1,2 @@\n-\n+',
+        );
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
@@ -351,7 +310,7 @@ describe('extractFileChanges', () => {
       mockPath.extname.mockReturnValue('.png');
       mockGitExec
         .mockReturnValueOnce('M\timage.png') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\timage.png') // ls-tree
+        .mockReturnValueOnce('100644 blob def456\timage.png') // ls-tree for binary
         .mockReturnValueOnce(''); // show blob
 
       // When
@@ -487,30 +446,6 @@ describe('extractFileChanges', () => {
   });
 
   describe('edge cases', () => {
-    test('should throw error for invalid status line', () => {
-      // Given
-      mockGitExec.mockReturnValueOnce('INVALID\tfile.ts');
-
-      // When & Then
-      expect(() => {
-        extractFileChanges(mockGit, testHash, defaultFilter);
-      }).toThrow('Unable to parse status line: INVALID\tfile.ts');
-    });
-
-    test('should throw error when blob hash not found', () => {
-      // Given
-      mockGitExec
-        .mockReturnValueOnce('M\tfile.ts') // show --name-status
-        .mockReturnValueOnce('100644 blob def456\tother.ts'); // ls-tree (different file)
-
-      // When & Then
-      expect(() => {
-        extractFileChanges(mockGit, testHash, defaultFilter);
-      }).toThrow(
-        `Failed to extract blob hash for file.ts (head-repo: ${testHash})`,
-      );
-    });
-
     test('should handle special characters in file names', () => {
       // Given
       mockGitExec.mockReturnValueOnce('D\tfile with spaces.ts');
@@ -537,16 +472,31 @@ describe('extractFileChanges', () => {
       });
     });
 
-    test('should throw error for unsupported status in createSimpleFileChange', () => {
-      // This test might fail if the implementation doesn't handle unknown statuses properly
-      // Given - we need to somehow trigger an unknown status through createSimpleFileChange
-      // This is hard to test directly due to the parsing logic, so we'll test the parsing error instead
-      mockGitExec.mockReturnValueOnce('X\tfile.ts');
+    test('should throw error when file not found in diff output', () => {
+      // Given - file status indicates a modification but diff doesn't contain the file
+      mockGitExec
+        .mockReturnValueOnce('M\tfile.ts') // show --name-status
+        .mockReturnValueOnce('diff --git a/other.ts b/other.ts\n...'); // show -U0 --format= (different file)
 
       // When & Then
       expect(() => {
         extractFileChanges(mockGit, testHash, defaultFilter);
-      }).toThrow('Unable to parse status line: X\tfile.ts');
+      }).toThrow(`Failed to extract fileName from ${testHash} for file.ts`);
+    });
+
+    test('should throw error for blob hash not found in binary files', () => {
+      // Given
+      mockPath.extname.mockReturnValue('.png');
+      mockGitExec
+        .mockReturnValueOnce('M\timage.png') // show --name-status
+        .mockReturnValueOnce('100644 blob def456\tother.png'); // ls-tree (different file)
+
+      // When & Then
+      expect(() => {
+        extractFileChanges(mockGit, testHash, defaultFilter);
+      }).toThrow(
+        'Failed to extract blob hash for image.png (head-repo: abc123)',
+      );
     });
   });
 
@@ -562,10 +512,25 @@ describe('extractFileChanges', () => {
             'R100\told.ts\tnew.ts',
           ].join('\n'),
         ) // show --name-status
-        .mockReturnValueOnce('100644 blob abc123\tmodified.ts') // ls-tree for modified
-        .mockReturnValueOnce('@@ -1,1 +1,1 @@\n-old\n+new') // diff for modified
-        .mockReturnValueOnce('100644 blob def456\tadded.ts') // ls-tree for added
-        .mockReturnValueOnce('@@ -0,0 +1,1 @@\n+content'); // diff for added
+        .mockReturnValue(
+          // show -U0 --format=
+          [
+            'diff --git a/modified.ts b/modified.ts',
+            'index abc123..def456 100644',
+            '--- a/modified.ts',
+            '+++ b/modified.ts',
+            '@@ -1,1 +1,1 @@',
+            '-old',
+            '+new',
+            'diff --git a/added.ts b/added.ts',
+            'new file mode 100644',
+            'index 0000000..def456',
+            '--- /dev/null',
+            '+++ b/added.ts',
+            '@@ -0,0 +1,1 @@',
+            '+content',
+          ].join('\n'),
+        );
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
