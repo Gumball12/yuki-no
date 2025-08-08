@@ -86,8 +86,11 @@ const createCommitFromLog = ([line, ...fileNames]: string[]):
 };
 
 const useIsIncludedCommit = (config: Pick<Config, 'include' | 'exclude'>) => {
-  const isIncluded = picomatch(config.include.length ? config.include : ['**']);
-  const isExcluded = picomatch(config.exclude);
+  const isIncluded = picomatch(
+    config.include.length ? config.include : ['**'],
+    { dot: true },
+  );
+  const isExcluded = picomatch(config.exclude, { dot: true });
 
   return (commit?: Commit): commit is Commit => {
     if (!commit) {
