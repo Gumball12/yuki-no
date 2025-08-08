@@ -1,5 +1,3 @@
-export type FileNameFilter = (fileName: string) => boolean;
-
 type FileChangeBase = {
   upstreamFileName: string;
 };

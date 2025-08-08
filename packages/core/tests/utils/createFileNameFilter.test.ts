@@ -1,23 +1,12 @@
-import { createFileNameFilter } from '../utils/createFileNameFilter';
+import {
+  createFileNameFilter,
+  normalizeRootDir,
+} from '../../utils/createFileNameFilter';
 
 import type { Config } from '@yuki-no/plugin-sdk/types/config';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
-
-// Mock only the dependencies we want to isolate
-vi.mock('../utils/resolveFileNameWithRootDir');
-
-const { normalizeRootDir } = await import(
-  '../utils/resolveFileNameWithRootDir'
-);
-
-const mockNormalizeRootDir = vi.mocked(normalizeRootDir);
+import { describe, expect, test } from 'vitest';
 
 describe('createFileNameFilter', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockNormalizeRootDir.mockReturnValue('src/');
-  });
-
   describe('basic functionality', () => {
     test('should create a filter function', () => {
       // Given
@@ -39,7 +28,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -55,42 +43,12 @@ describe('createFileNameFilter', () => {
         include: [],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
       expect(filter('any/file.ts')).toBe(true);
       expect(filter('any/file.js')).toBe(true);
       expect(filter('any/file.json')).toBe(true);
-    });
-
-    test('should call normalizeRootDir with provided rootDir', () => {
-      // Given
-      const config: Pick<Config, 'include' | 'exclude'> = {
-        include: ['**/*.ts'],
-        exclude: [],
-      };
-      const rootDir = 'src';
-
-      // When
-      createFileNameFilter(config, rootDir);
-
-      // Then
-      expect(mockNormalizeRootDir).toHaveBeenCalledWith('src');
-    });
-
-    test('should call normalizeRootDir with empty string when rootDir not provided', () => {
-      // Given
-      const config: Pick<Config, 'include' | 'exclude'> = {
-        include: ['**/*.ts'],
-        exclude: [],
-      };
-
-      // When
-      createFileNameFilter(config);
-
-      // Then
-      expect(mockNormalizeRootDir).toHaveBeenCalledWith('');
     });
   });
 
@@ -116,7 +74,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When
@@ -132,7 +89,6 @@ describe('createFileNameFilter', () => {
         include: [],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When
@@ -148,7 +104,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: ['**/*.test.ts'],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When & Then
@@ -163,7 +118,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When & Then
@@ -178,7 +132,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: ['**/*.test.ts'],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When & Then
@@ -195,7 +148,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts', '**/*.js', 'special/*.json'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -212,7 +164,6 @@ describe('createFileNameFilter', () => {
         include: ['**'],
         exclude: ['**/*.test.ts', '**/node_modules/**', '**/.git/**'],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -229,7 +180,6 @@ describe('createFileNameFilter', () => {
         include: ['src/**/*.ts'],
         exclude: ['**/*.d.ts'],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -245,7 +195,6 @@ describe('createFileNameFilter', () => {
         include: ['src/**/*.{ts,js}'],
         exclude: ['**/test/**', '**/*.spec.*'],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -262,7 +211,6 @@ describe('createFileNameFilter', () => {
         include: ['src/index.ts', 'lib/**/*.js'],
         exclude: ['**/*.min.js'],
       };
-      mockNormalizeRootDir.mockReturnValue('');
       const filter = createFileNameFilter(config);
 
       // When & Then
@@ -284,12 +232,11 @@ describe('createFileNameFilter', () => {
       const specialRootDir = 'src-with-dashes/sub_dir';
 
       // When
-      createFileNameFilter(config, specialRootDir);
+      const filter = createFileNameFilter(config, specialRootDir);
 
       // Then
-      expect(mockNormalizeRootDir).toHaveBeenCalledWith(
-        'src-with-dashes/sub_dir',
-      );
+      expect(filter('src-with-dashes/sub_dir/file.ts')).toBe(true);
+      expect(filter('other/file.ts')).toBe(false);
     });
 
     test('should work with different rootDir normalization results', () => {
@@ -298,7 +245,6 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('deeply/nested/path/');
       const filter = createFileNameFilter(config, 'deeply/nested/path');
 
       // When & Then
@@ -313,7 +259,6 @@ describe('createFileNameFilter', () => {
         include: ['**'],
         exclude: [],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
       const filter = createFileNameFilter(config, 'src');
 
       // When & Then
@@ -326,10 +271,9 @@ describe('createFileNameFilter', () => {
         include: ['docs/**'],
         exclude: ['guide/migration*.md', '**/package.json'],
       };
-      mockNormalizeRootDir.mockReturnValue('docs');
 
       // When
-      const filter = createFileNameFilter(config);
+      const filter = createFileNameFilter(config, 'docs');
 
       // Then - multiple calls should work consistently
       expect(filter('docs/a.md')).toBeTruthy();
@@ -342,6 +286,7 @@ describe('createFileNameFilter', () => {
       expect(filter('guide/migration2.md')).toBeFalsy();
       expect(filter('package.json')).toBeFalsy();
       expect(filter('docs/package.json')).toBeFalsy();
+      expect(filter('docs/.a/b.md')).toBeTruthy();
     });
   });
 
@@ -352,10 +297,9 @@ describe('createFileNameFilter', () => {
         include: ['**/*.ts'],
         exclude: ['**/*.test.ts'],
       };
-      mockNormalizeRootDir.mockReturnValue('src/');
 
       // When
-      const filter = createFileNameFilter(config);
+      const filter = createFileNameFilter(config, 'src');
 
       // Then - multiple calls should work consistently
       expect(filter('src/file1.ts')).toBe(true);
@@ -363,6 +307,178 @@ describe('createFileNameFilter', () => {
       expect(filter('src/file3.ts')).toBe(true);
       expect(filter('src/file1.test.ts')).toBe(false);
       expect(filter('src/file2.test.ts')).toBe(false);
+    });
+  });
+});
+
+describe('normalizeRootDir', () => {
+  describe('basic functionality', () => {
+    test('should add trailing slash to rootDir without one', () => {
+      // Given
+      const rootDir = 'src';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('src/');
+    });
+
+    test('should keep trailing slash when already present', () => {
+      // Given
+      const rootDir = 'src/';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('src/');
+    });
+
+    test('should return default empty string when no rootDir provided', () => {
+      // Given & When
+      const result = normalizeRootDir();
+
+      // Then
+      expect(result).toBe('');
+    });
+
+    test('should handle undefined rootDir', () => {
+      // Given
+      const rootDir = undefined;
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('');
+    });
+  });
+
+  describe('edge cases', () => {
+    test('should handle empty string', () => {
+      // Given
+      const rootDir = '';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('');
+    });
+
+    test('should handle root directory', () => {
+      // Given
+      const rootDir = '/';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('/');
+    });
+
+    test('should handle single character directory', () => {
+      // Given
+      const rootDir = 'a';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('a/');
+    });
+
+    test('should handle deeply nested paths', () => {
+      // Given
+      const rootDir = 'very/deep/nested/folder/structure';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('very/deep/nested/folder/structure/');
+    });
+
+    test('should handle paths with special characters', () => {
+      // Given
+      const rootDir = 'src-main/components_new';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('src-main/components_new/');
+    });
+
+    test('should handle paths with dots', () => {
+      // Given
+      const rootDir = 'src/v1.0/components';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('src/v1.0/components/');
+    });
+
+    test('should handle relative paths', () => {
+      // Given
+      const rootDir = './src/components';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('./src/components/');
+    });
+
+    test('should handle paths with multiple slashes', () => {
+      // Given
+      const rootDir = 'src//components';
+
+      // When
+      const result = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result).toBe('src//components/');
+    });
+  });
+
+  describe('performance and consistency', () => {
+    test('should be consistent across multiple calls', () => {
+      // Given
+      const rootDir = 'src/components';
+
+      // When
+      const result1 = normalizeRootDir(rootDir);
+      const result2 = normalizeRootDir(rootDir);
+      const result3 = normalizeRootDir(rootDir);
+
+      // Then
+      expect(result1).toBe(result2);
+      expect(result2).toBe(result3);
+      expect(result1).toBe('src/components/');
+    });
+
+    test('should handle various input formats consistently', () => {
+      // Given
+      const testCases = [
+        { input: 'src', expected: 'src/' },
+        { input: 'src/', expected: 'src/' },
+        { input: '', expected: '' },
+        { input: undefined, expected: '' },
+        { input: 'a', expected: 'a/' },
+        { input: 'a/', expected: 'a/' },
+      ];
+
+      testCases.forEach(({ input, expected }) => {
+        // When
+        const result = normalizeRootDir(input);
+
+        // Then
+        expect(result).toBe(expected);
+      });
     });
   });
 });

@@ -49,12 +49,8 @@
   "peerDependencies": {
     "@yuki-no/plugin-sdk": "^1.0.0"
   },
-  "dependencies": {
-    "picomatch": "^4.0.3"
-  },
   "devDependencies": {
     "@octokit/rest": "^21.1.1",
-    "@types/picomatch": "^3.0.2",
     "@yuki-no/plugin-sdk": "workspace:*"
   }
 }

@@ -1,9 +1,9 @@
-import { type FileNameFilter } from '../types';
 import { extractFileChanges } from '../utils/extractFileChanges';
 
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
 // Import mocked dependencies
 import { createTempFilePath } from '@yuki-no/plugin-sdk/utils/common';
+import type { FileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import fs from 'node:fs';
 import path from 'node:path';
 import { beforeEach, describe, expect, test, vi } from 'vitest';

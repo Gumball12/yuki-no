@@ -1,7 +1,6 @@
 import type { FileChange } from './types';
 import { applyFileChanges } from './utils/applyFileChanges';
 import { createCommit } from './utils/createCommit';
-import { createFileNameFilter } from './utils/createFileNameFilter';
 import { createPrBody } from './utils/createPrBody';
 import { extractFileChanges } from './utils/extractFileChanges';
 import { getTrackedIssues } from './utils/getTrackedIssues';
@@ -11,6 +10,7 @@ import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
+import { createFileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import { getInput, getMultilineInput } from '@yuki-no/plugin-sdk/utils/input';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 

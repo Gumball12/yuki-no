@@ -1,9 +1,10 @@
-import type { FileChange, FileNameFilter } from '../types';
+import type { FileChange } from '../types';
 
 import { createFileChanges } from './createFileChanges';
 import { parseFileStatuses } from './parseFileStatuses';
 
 import type { Git } from '@yuki-no/plugin-sdk/infra/git';
+import type { FileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 export const extractFileChanges = (

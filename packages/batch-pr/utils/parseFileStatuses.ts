@@ -1,6 +1,7 @@
 import { FILE_STATUS_REGEX } from '../constants';
-import type { FileNameFilter, FileStatus } from '../types';
+import type { FileStatus } from '../types';
 
+import type { FileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import { splitByNewline } from '@yuki-no/plugin-sdk/utils/input';
 import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 

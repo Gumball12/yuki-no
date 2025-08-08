@@ -2,10 +2,9 @@ import type { Git } from '../infra/git';
 import type { Config } from '../types/config';
 import type { Commit } from '../types/git';
 import { isNotEmpty } from '../utils/common';
+import { createFileNameFilter } from '../utils/createFileNameFilter';
 import { splitByNewline } from '../utils/input';
 import { log } from '../utils/log';
-
-import picomatch from 'picomatch';
 
 export const COMMIT_SEP = ':COMMIT_START_SEP:';
 export const COMMIT_DATA_SEPARATOR = ':COMMIT_DATA_SEP:';
@@ -39,12 +38,14 @@ export const getCommits = (
     throw new Error(`Invalid trackFrom commit hash: ${config.trackFrom}`);
   }
 
+  const fileNameFilter = createFileNameFilter(config);
   const commits = result
     .split(COMMIT_SEP)
     .filter(isNotEmpty)
     .map(commitString => splitByNewline(commitString))
     .map(createCommitFromLog)
-    .filter(useIsIncludedCommit(config));
+    .filter(commit => commit?.fileNames.some(fileNameFilter))
+    .filter(isNotEmpty);
 
   log('I', `getCommits :: Total ${commits.length} commits extracted`);
 
@@ -76,25 +77,6 @@ const createCommitFromLog = ([line, ...fileNames]: string[]):
     isoDate,
     hash,
     fileNames,
-  };
-};
-
-const useIsIncludedCommit = (config: Pick<Config, 'include' | 'exclude'>) => {
-  const isIncluded = picomatch(config.include.length ? config.include : ['**']);
-  const isExcluded = picomatch(config.exclude);
-
-  return (commit?: Commit): commit is Commit => {
-    if (!commit) {
-      return false;
-    }
-
-    if (config.include.length === 0 && config.exclude.length === 0) {
-      return true;
-    }
-
-    return commit.fileNames.some(
-      fileName => !isExcluded(fileName) && isIncluded(fileName),
-    );
   };
 };
 

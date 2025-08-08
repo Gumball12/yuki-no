@@ -1,3 +1,5 @@
+import { normalizeRootDir } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
+
 export const resolveFileNameWithRootDir = (
   fileName: string,
   rootDir?: string,
@@ -17,16 +19,4 @@ export const resolveFileNameWithRootDir = (
   }
 
   return fileName.substring(normalizedRootDir.length);
-};
-
-export const normalizeRootDir = (rootDir?: string): string => {
-  if (!rootDir) {
-    return '';
-  }
-
-  if (rootDir.endsWith('/')) {
-    return rootDir as `${string}/`;
-  }
-
-  return `${rootDir}/`;
 };
