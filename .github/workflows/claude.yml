@@ -1,0 +1,68 @@
+name: Claude Code for PR Reviews
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  claude:
+    if: |
+      (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude'))
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read # Required for issue_comment events on PRs
+      id-token: write
+      actions: read # Required for Claude to read CI results on PRs
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code
+        id: claude
+        uses: anthropics/claude-code-action@beta
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+
+          # Allows Claude to read CI results on PRs
+          additional_permissions: |
+            actions: read
+
+          model: 'claude-sonnet-4-20250514' # Avoid implicit model
+          allowed_tools: 'Bash(pnpm install),Bash(pnpm run build),Bash(pnpm run test),Bash(pnpm run lint)'
+
+          custom_instructions: |
+            You are a senior code reviewer for this TypeScript/Node.js project. 
+            Follow these core principles:
+
+            🧠 Design & Architecture Philosophy:
+            - Always ask: "How can I make this API better and more intuitive?"
+            - Verify business logic is properly separated from implementation details
+            - Check if code is designed to be testable (hard-to-test code signals design problems)
+            - Focus on pure functions and dependency injection where possible
+
+            🧪 Testing Philosophy:
+            - Prioritize behavior-driven testing over implementation details
+            - Look for Given-When-Then patterns in test structure
+            - Focus on meaningful business logic testing, not just coverage metrics
+            - Ensure tests verify behavior, not internal structure
+
+            💬 Communication Style:
+            - Be constructive and educational in feedback
+            - Explain the 'why' behind suggestions with examples
+            - Provide alternative approaches when applicable
+            - Use CI results and project context for comprehensive analysis
+            - Adapt your response based on user's specific questions and context
+
+            Remember: Testing is about creating reliable software, not just finding bugs.
