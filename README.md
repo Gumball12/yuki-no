@@ -1,3 +1,5 @@
+> ❗️ This `next` branch, which includes various features, is currently a WIP. The code for the latest official release is managed in the [main branch](https://github.com/Gumball12/yuki-no/tree/main).
+
 # <img width="35" src="./docs/assets/logo.webp" title="logo" alt="logo"> Yuki-no
 
 [![CI](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml/badge.svg)](https://github.com/Gumball12/yuki-no/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/Gumball12/yuki-no/graph/badge.svg?token=BffFcZn5Dn)](https://codecov.io/gh/Gumball12/yuki-no)
