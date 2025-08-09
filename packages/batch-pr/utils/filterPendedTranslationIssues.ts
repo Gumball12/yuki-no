@@ -4,7 +4,7 @@ import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 
 export const filterPendedTranslationIssues = async (
   github: GitHub,
-  translationIssue: Issue[],
+  translationIssues: Issue[],
 ): Promise<Issue[]> => {
   const pendedTranslationLabels = await getYukiNoReleaseTrackingLabels(github);
   log(
@@ -12,7 +12,7 @@ export const filterPendedTranslationIssues = async (
     `filterPendedTranslationIssues :: Getting release tracking labels [${pendedTranslationLabels.join(', ')}]`,
   );
 
-  return translationIssue.filter(({ labels }) =>
+  return translationIssues.filter(({ labels }) =>
     labels.every(l => !pendedTranslationLabels.includes(l)),
   );
 };
