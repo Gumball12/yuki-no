@@ -4,7 +4,7 @@ import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
-import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
+import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 type GetTrackedIssuesReturns = {
   trackedIssues: Issue[];
@@ -27,16 +27,8 @@ export const getTrackedIssues = async (
     );
   }
 
-  const pendedTranslationLabels = await getYukiNoReleaseTrackingLabels(github);
-  log(
-    'I',
-    `getTrackedIssues :: Getting release tracking labels [${pendedTranslationLabels.join(', ')}]`,
-  );
-
   log('I', `getTrackedIssues :: Filtering translation issues`);
-  const translationIssues = (await getOpenedIssues(github)).filter(
-    ({ labels }) => labels.every(l => !pendedTranslationLabels.includes(l)),
-  );
+  const translationIssues = await getOpenedIssues(github);
   const translationIssueNumbers = translationIssues.map(({ number }) => number);
   log(
     'I',
@@ -103,32 +95,4 @@ const extractTrackedISsueNumbers = (
   }
 
   return numbers;
-};
-
-const getYukiNoReleaseTrackingLabels = async (
-  github: GitHub,
-): Promise<string[]> => {
-  try {
-    const { getReleaseTrackingLabels } = await import(
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      '@yuki-no/plugin-release-tracking/getReleaseTrackingLabels'
-    );
-
-    log(
-      'I',
-      'getYukiNoReleaseTrackingLabels :: use @yuki-no/plugin-release-tracking',
-    );
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return getReleaseTrackingLabels(github);
-  } catch (error) {
-    log(
-      'I',
-      `getYukiNoReleaseTrackingLabels :: cannot find @yuki-no/plugin-release-tracking / ${formatError(error)}`,
-    );
-  }
-
-  return [];
 };
