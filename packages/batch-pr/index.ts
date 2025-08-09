@@ -3,6 +3,7 @@ import { applyFileChanges } from './utils/applyFileChanges';
 import { createCommit } from './utils/createCommit';
 import { createPrBody } from './utils/createPrBody';
 import { extractFileChanges } from './utils/extractFileChanges';
+import { filterPendedTranslationIssues } from './utils/filterPendedTranslationIssues';
 import { getTrackedIssues } from './utils/getTrackedIssues';
 import { setupBatchPr } from './utils/setupBatchPr';
 
@@ -44,15 +45,20 @@ const batchPrPlugin: YukiNoPlugin = {
       upstreamGitHub,
       prNumber,
     );
+    log('I', `batchPr :: ${trackedIssues.length} already processed`);
 
+    const allTranslationIssues = [
+      ...shouldTrackIssues,
+      ...(createdIssues ?? []),
+    ];
     const issuesToProcess = uniqueWith(
-      [...shouldTrackIssues, ...(createdIssues ?? [])],
+      await filterPendedTranslationIssues(upstreamGitHub, allTranslationIssues),
       ({ number }) => number,
     );
 
     log(
       'I',
-      `batchPr :: Processing ${issuesToProcess.length} issues (${trackedIssues.length} tracked + ${shouldTrackIssues.length} new)`,
+      `batchPr :: Processing ${issuesToProcess.length} issues (${shouldTrackIssues.length} tracked + ${createdIssues.length} new - ${allTranslationIssues.length - issuesToProcess.length} filtered)`,
     );
 
     const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
@@ -120,13 +126,12 @@ const batchPrPlugin: YukiNoPlugin = {
     log('I', `batchPr :: Pushing changes to branch ${BRANCH_NAME}`);
     upstreamGit.exec(`push -f origin ${BRANCH_NAME}`);
 
-    const allIssues = [...trackedIssues, ...issuesToProcess];
     log(
       'I',
-      `batchPr :: Updating PR body with ${allIssues.length} linked issues`,
+      `batchPr :: Updating PR body with ${issuesToProcess.length} linked issues`,
     );
     const nextPrBody = createPrBody(
-      allIssues.map(({ number }) => ({
+      issuesToProcess.map(({ number }) => ({
         number,
         type: 'Resolved',
       })),
