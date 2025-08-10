@@ -3,11 +3,14 @@ import { getOpenedIssues } from '../../utils-infra/getOpenedIssues';
 
 import { beforeEach, expect, it, vi } from 'vitest';
 
-const mockListForRepo = vi.fn();
+const mockPaginate = vi.fn();
 
 vi.mock('../../infra/github', () => ({
   GitHub: vi.fn().mockImplementation(() => ({
-    api: { issues: { listForRepo: mockListForRepo } },
+    api: {
+      paginate: mockPaginate,
+      issues: { listForRepo: vi.fn() },
+    },
     ownerAndRepo: { owner: 'test-owner', repo: 'test-repo' },
     configuredLabels: ['label1', 'label2'],
   })),
@@ -30,9 +33,7 @@ beforeEach(() => {
 });
 
 it('Should return an empty array when there are no issues', async () => {
-  mockListForRepo.mockResolvedValue({
-    data: [],
-  });
+  mockPaginate.mockResolvedValue([]);
 
   const result = await getOpenedIssues(mockGitHub);
 
@@ -40,8 +41,7 @@ it('Should return an empty array when there are no issues', async () => {
 });
 
 it('Issues with only different labels from the configuration or without body should be filtered out', async () => {
-  mockListForRepo.mockResolvedValue({
-    data: [
+  mockPaginate.mockResolvedValue([
       {
         number: 1,
         body: 'body',
@@ -54,8 +54,7 @@ it('Issues with only different labels from the configuration or without body sho
         labels: ['label1', 'label2'],
         created_at: '2023-01-01T12:00:00Z',
       },
-    ],
-  });
+    ]);
 
   const result = await getOpenedIssues(mockGitHub);
 
@@ -65,8 +64,7 @@ it('Issues with only different labels from the configuration or without body sho
 it('Should return only issues that have all configured labels', async () => {
   const EXPECTED_HASH = 'abcd123';
 
-  mockListForRepo.mockResolvedValue({
-    data: [
+  mockPaginate.mockResolvedValue([
       {
         number: 1,
         body: `https://github.com/org/name/commit/${EXPECTED_HASH}`,
@@ -78,8 +76,7 @@ it('Should return only issues that have all configured labels', async () => {
           'extra-label',
         ],
       },
-    ],
-  });
+    ]);
 
   const result = await getOpenedIssues(mockGitHub);
 
@@ -95,8 +92,7 @@ it('Should return only issues that have all configured labels', async () => {
 it('Issues without a hash should be filtered out', async () => {
   const EXPECTED_HASH = 'abcd123';
 
-  mockListForRepo.mockResolvedValue({
-    data: [
+  mockPaginate.mockResolvedValue([
       {
         number: 1,
         body: `https://github.com/org/repo/commit/${EXPECTED_HASH}`,
@@ -109,8 +105,7 @@ it('Issues without a hash should be filtered out', async () => {
         created_at: '2023-01-01T12:00:00Z',
         labels: [{ name: 'label1' }, { name: 'label2' }],
       },
-    ],
-  });
+    ]);
 
   const result = await getOpenedIssues(mockGitHub);
 

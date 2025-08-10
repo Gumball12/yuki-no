@@ -7,48 +7,28 @@ import { log } from '../utils/log';
 export const getOpenedIssues = async (github: GitHub): Promise<Issue[]> => {
   log('I', 'getOpenedIssues :: Starting search for open issues');
 
-  const issues: Issue[] = [];
+  const allIssues = await github.api.paginate(github.api.issues.listForRepo, {
+    ...github.ownerAndRepo,
+    state: 'open',
+    per_page: 100,
+  });
 
-  let page = 1;
-  let totalIssuesChecked = 0;
+  const totalIssuesChecked = allIssues.length;
 
-  while (true) {
-    const { data } = await github.api.issues.listForRepo({
-      ...github.ownerAndRepo,
-      state: 'open',
-      per_page: 100,
-      page,
-    });
+  const openedIssuesWithoutHash = allIssues.map<Omit<Issue, 'hash'>>(item => ({
+    number: item.number,
+    body: item.body ?? '',
+    isoDate: item.created_at,
+    labels: item.labels
+      .map(convGithubIssueLabelToString)
+      .filter(isNotEmpty)
+      .sort(),
+  }));
 
-    if (data.length === 0) {
-      break;
-    }
-
-    totalIssuesChecked += data.length;
-
-    const openedIssuesWithoutHash = data.map<Omit<Issue, 'hash'>>(item => ({
-      number: item.number,
-      body: item.body ?? '',
-      isoDate: item.created_at,
-      labels: item.labels
-        .map(convGithubIssueLabelToString)
-        .filter(isNotEmpty)
-        .sort(),
-    }));
-
-    const openedYukiNoIssues = openedIssuesWithoutHash
-      .filter(issue => isYukiNoIssue(github.configuredLabels, issue))
-      .map(issue => ({ ...issue, hash: extractHashFromIssue(issue) }))
-      .filter(hasHash);
-
-    issues.push(...openedYukiNoIssues);
-
-    page++;
-
-    if (data.length < 100) {
-      break;
-    }
-  }
+  const issues = openedIssuesWithoutHash
+    .filter(issue => isYukiNoIssue(github.configuredLabels, issue))
+    .map(issue => ({ ...issue, hash: extractHashFromIssue(issue) }))
+    .filter(hasHash);
 
   log(
     'I',
