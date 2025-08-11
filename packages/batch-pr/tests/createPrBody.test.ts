@@ -23,7 +23,7 @@ describe('createPrBody', () => {
       // Should have empty resolved issues section
       const resolvedSection = result
         .split('### Resolved Issues')[1]
-        .split('---')[0];
+        .split('### ⚠️ Files with Line Mismatches')[0];
       expect(resolvedSection.trim()).toBe('');
     });
   });
@@ -261,6 +261,48 @@ describe('createPrBody', () => {
         expect(singleResult).toContain(element);
         expect(multipleResult).toContain(element);
       });
+    });
+  });
+
+  describe('mismatched files section', () => {
+    test('should show success message when no files are mismatched', () => {
+      // Given
+      const issueStatus: Array<{ number: number; type: BatchIssueType }> = [];
+      const mismatchedFiles: string[] = [];
+
+      // When
+      const result = createPrBody(issueStatus, mismatchedFiles);
+
+      // Then
+      expect(result).toContain('### ⚠️ Files with Line Mismatches');
+      expect(result).toContain('All files were applied successfully.');
+    });
+
+    test('should list a single mismatched file', () => {
+      // Given
+      const issueStatus: Array<{ number: number; type: BatchIssueType }> = [];
+      const mismatchedFiles: string[] = ['src/file1.ts'];
+
+      // When
+      const result = createPrBody(issueStatus, mismatchedFiles);
+
+      // Then
+      expect(result).toContain('### ⚠️ Files with Line Mismatches');
+      expect(result).toContain('- `src/file1.ts`');
+    });
+
+    test('should list multiple mismatched files', () => {
+      // Given
+      const issueStatus: Array<{ number: number; type: BatchIssueType }> = [];
+      const mismatchedFiles: string[] = ['src/file1.ts', 'docs/guide.md'];
+
+      // When
+      const result = createPrBody(issueStatus, mismatchedFiles);
+
+      // Then
+      expect(result).toContain('### ⚠️ Files with Line Mismatches');
+      expect(result).toContain('- `src/file1.ts`');
+      expect(result).toContain('- `docs/guide.md`');
     });
   });
 });

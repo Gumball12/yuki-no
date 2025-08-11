@@ -83,6 +83,7 @@ describe('applyFileChanges', () => {
               { type: 'delete-line', lineNumber: 2 },
               { type: 'insert-line', lineNumber: 3, content: 'new line 3' },
             ],
+            totalLineCount: 4,
           },
         ];
 
@@ -116,6 +117,7 @@ describe('applyFileChanges', () => {
               { type: 'insert-line', lineNumber: 2, content: 'new line 2' }, // Should be applied first (lower line number)
               { type: 'insert-line', lineNumber: 5, content: 'new line 5' }, // Should be applied second
             ],
+            totalLineCount: 5,
           },
         ];
 
@@ -161,6 +163,7 @@ describe('applyFileChanges', () => {
             changes: [
               { type: 'insert-line', lineNumber: 1, content: 'first line' },
             ],
+            totalLineCount: 0,
           },
         ];
 
@@ -185,6 +188,7 @@ describe('applyFileChanges', () => {
             changes: [
               { type: 'insert-line', lineNumber: 1, content: 'new content' },
             ],
+            totalLineCount: 0,
           },
         ];
 
@@ -279,6 +283,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'new-name.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 3,
           },
         ];
 
@@ -293,7 +298,6 @@ describe('applyFileChanges', () => {
           '/test/repo/old-name.ts',
           '/test/repo/new-name.ts',
         );
-        expect(mockFs.readFileSync).not.toHaveBeenCalled(); // No additional changes
       });
 
       test('should rename file and apply additional changes', () => {
@@ -308,6 +312,7 @@ describe('applyFileChanges', () => {
             changes: [
               { type: 'insert-line', lineNumber: 1, content: 'new line' },
             ],
+            totalLineCount: 1,
           },
         ];
 
@@ -343,6 +348,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'nested/new-name.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 3,
           },
         ];
 
@@ -372,6 +378,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'new-name.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 0,
           },
         ];
 
@@ -397,6 +404,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'copy.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 3,
           },
         ];
 
@@ -409,7 +417,6 @@ describe('applyFileChanges', () => {
           '/test/repo/source.ts',
           '/test/repo/copy.ts',
         );
-        expect(mockFs.readFileSync).not.toHaveBeenCalled(); // No additional changes
       });
 
       test('should copy file and apply additional changes', () => {
@@ -424,6 +431,7 @@ describe('applyFileChanges', () => {
             changes: [
               { type: 'insert-line', lineNumber: 2, content: 'modified line' },
             ],
+            totalLineCount: 1,
           },
         ];
 
@@ -459,6 +467,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'nested/copy.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 3,
           },
         ];
 
@@ -488,6 +497,7 @@ describe('applyFileChanges', () => {
             nextUpstreamFileName: 'copy.ts',
             similarity: 100,
             changes: [],
+            totalLineCount: 0,
           },
         ];
 
@@ -542,6 +552,7 @@ describe('applyFileChanges', () => {
             { type: 'insert-line', lineNumber: 1, content: 'inserted at 1' },
             { type: 'delete-line', lineNumber: 1 },
           ],
+            totalLineCount: 5,
         },
       ];
 
@@ -568,6 +579,7 @@ describe('applyFileChanges', () => {
             { type: 'delete-line', lineNumber: 1 },
             { type: 'insert-line', lineNumber: 1, content: 'replacement line' },
           ],
+            totalLineCount: 1,
         },
       ];
 
@@ -593,6 +605,7 @@ describe('applyFileChanges', () => {
             { type: 'delete-line', lineNumber: 5 }, // Beyond file bounds
             { type: 'insert-line', lineNumber: 3, content: 'new line' },
           ],
+            totalLineCount: 2,
         },
       ];
 
@@ -615,6 +628,7 @@ describe('applyFileChanges', () => {
           changes: [
             { type: 'insert-line', lineNumber: 1, content: 'content1' },
           ],
+            totalLineCount: 3,
         },
         {
           type: 'delete',
@@ -626,6 +640,7 @@ describe('applyFileChanges', () => {
           nextUpstreamFileName: 'file3-renamed.ts',
           similarity: 100,
           changes: [],
+            totalLineCount: 3,
         },
       ];
 
@@ -676,6 +691,7 @@ describe('applyFileChanges', () => {
           type: 'update',
           upstreamFileName: 'empty-changes.ts',
           changes: [],
+            totalLineCount: 3,
         },
       ];
 
@@ -703,6 +719,7 @@ describe('applyFileChanges', () => {
           type: 'update',
           upstreamFileName: 'preserve.ts',
           changes: [],
+            totalLineCount: 3,
         },
       ];
 
@@ -729,6 +746,7 @@ describe('applyFileChanges', () => {
           changes: [
             { type: 'delete-line', lineNumber: 1 }, // Should delete first line (index 0)
           ],
+          totalLineCount: 3,
         },
       ];
 
@@ -758,6 +776,7 @@ describe('applyFileChanges', () => {
               content: 'inserted at beginning',
             },
           ],
+          totalLineCount: 1,
         },
       ];
 
@@ -768,6 +787,74 @@ describe('applyFileChanges', () => {
       // Note: If lineNumber 0 is not handled correctly, this test might fail
       // The implementation should handle this edge case properly
       expect(mockFs.writeFileSync).toHaveBeenCalled();
+    });
+  });
+
+  describe('line count mismatch', () => {
+    test('should skip update and return mismatched file when line counts differ', () => {
+      // Given
+      mockFs.readFileSync.mockReturnValue('line1\nline2\nline3\nline4'); // 4 lines
+      const fileChanges: FileChange[] = [
+        {
+          type: 'update',
+          upstreamFileName: 'mismatched.ts',
+          changes: [
+            { type: 'insert-line', lineNumber: 1, content: 'new line' },
+          ],
+          totalLineCount: 3, // Expected 3 lines
+        },
+      ];
+
+      // When
+      const mismatchedFiles = applyFileChanges(mockGit, fileChanges);
+
+      // Then
+      expect(mismatchedFiles).toEqual(['mismatched.ts']);
+      expect(mockFs.writeFileSync).not.toHaveBeenCalled();
+    });
+
+    test('should skip rename and return mismatched file when line counts differ', () => {
+      // Given
+      mockFs.readFileSync.mockReturnValue('line1\nline2'); // 2 lines
+      const fileChanges: FileChange[] = [
+        {
+          type: 'rename',
+          upstreamFileName: 'old-mismatched.ts',
+          nextUpstreamFileName: 'new-mismatched.ts',
+          similarity: 90,
+          changes: [],
+          totalLineCount: 3, // Expected 3 lines
+        },
+      ];
+
+      // When
+      const mismatchedFiles = applyFileChanges(mockGit, fileChanges);
+
+      // Then
+      expect(mismatchedFiles).toEqual(['old-mismatched.ts']);
+      expect(mockFs.renameSync).not.toHaveBeenCalled();
+    });
+
+    test('should not check line count for binary files', () => {
+      // Given
+      const bufferContent = Buffer.from('binary data');
+      const fileChanges: FileChange[] = [
+        {
+          type: 'update',
+          upstreamFileName: 'binary.png',
+          changes: bufferContent,
+        },
+      ];
+
+      // When
+      const mismatchedFiles = applyFileChanges(mockGit, fileChanges);
+
+      // Then
+      expect(mismatchedFiles).toEqual([]);
+      expect(mockFs.writeFileSync).toHaveBeenCalledWith(
+        '/test/repo/binary.png',
+        bufferContent,
+      );
     });
   });
 });

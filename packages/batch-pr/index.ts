@@ -116,7 +116,12 @@ const batchPrPlugin: YukiNoPlugin = {
       'I',
       `batchPr :: Applying ${fileChanges.length} file changes to upstream repository`,
     );
-    await applyFileChanges(upstreamGit, fileChanges);
+    const mismatchedFiles = await applyFileChanges(upstreamGit, fileChanges);
+
+    if (mismatchedFiles.length === fileChanges.length) {
+      log('W', 'batchPr :: All file changes have line mismatches, skipping commit');
+      return;
+    }
 
     log('I', 'batchPr :: Creating commit with applied changes');
     createCommit(upstreamGit, {
@@ -135,6 +140,7 @@ const batchPrPlugin: YukiNoPlugin = {
         number,
         type: 'Resolved',
       })),
+      mismatchedFiles,
     );
 
     await upstreamGitHub.api.pulls.update({

@@ -2,20 +2,31 @@ type FileChangeBase = {
   upstreamFileName: string;
 };
 
+type TextFileChange =
+  | {
+      type: 'update';
+      changes: LineChange[];
+      totalLineCount: number;
+    }
+  | {
+      type: 'rename' | 'copy';
+      nextUpstreamFileName: string;
+      similarity: number;
+      changes: LineChange[];
+      totalLineCount: number;
+    };
+
+type BinaryFileChange = {
+  type: 'update';
+  changes: Buffer;
+};
+
 export type FileChange = FileChangeBase &
   (
-    | {
-        type: 'update';
-        changes: LineChange[] | Buffer;
-      }
+    | TextFileChange
+    | BinaryFileChange
     | {
         type: 'delete';
-      }
-    | {
-        type: 'rename' | 'copy';
-        nextUpstreamFileName: string;
-        similarity: number;
-        changes: LineChange[];
       }
     | {
         type: 'type';

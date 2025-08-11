@@ -8,7 +8,7 @@ import path from 'node:path';
 export const applyFileChanges = (
   upstreamGit: Git,
   fileChanges: FileChange[],
-): void => {
+): string[] => {
   log(
     'I',
     `applyFileChanges :: Starting to apply ${fileChanges.length} file changes`,
@@ -16,10 +16,11 @@ export const applyFileChanges = (
 
   if (fileChanges.length === 0) {
     log('I', 'applyFileChanges :: No file changes to apply, returning');
-    return;
+    return [];
   }
 
   const repoDirName = upstreamGit.dirName;
+  const mismatchedFiles: string[] = [];
 
   for (const fileChange of fileChanges) {
     const absoluteFileName = path.join(
@@ -33,9 +34,10 @@ export const applyFileChanges = (
     );
 
     try {
+      let isMismatched = false;
       switch (fileChange.type) {
         case 'update':
-          handleUpdateFile(absoluteFileName, fileChange);
+          isMismatched = handleUpdateFile(absoluteFileName, fileChange);
           break;
 
         case 'delete':
@@ -44,16 +46,20 @@ export const applyFileChanges = (
 
         case 'rename':
         case 'copy':
-          handleMoveFile(absoluteFileName, repoDirName, fileChange);
+          isMismatched = handleMoveFile(absoluteFileName, repoDirName, fileChange);
           break;
 
         case 'type':
           // noop (ignore)
           log(
             'I',
-            `applyFileChanges :: Ignoring type change for ${fileChange.upstreamFileName}`,
+            `applyFilechanges :: Ignoring type change for ${fileChange.upstreamFileName}`,
           );
           break;
+      }
+
+      if (isMismatched) {
+        mismatchedFiles.push(fileChange.upstreamFileName);
       }
     } catch (error) {
       log(
@@ -68,6 +74,8 @@ export const applyFileChanges = (
     'S',
     `applyFileChanges :: Successfully applied all ${fileChanges.length} file changes`,
   );
+
+  return mismatchedFiles;
 };
 
 const deleteFileSync = (absoluteFileName: string): void => {
@@ -93,9 +101,21 @@ const deleteFileSync = (absoluteFileName: string): void => {
 
 const handleUpdateFile = (
   absoluteFileName: string,
-  { changes }: Pick<Extract<FileChange, { type: 'update' }>, 'changes'>,
-): void => {
+  fileChange: Extract<FileChange, { type: 'update' }>,
+): boolean => {
+  const { changes } = fileChange;
   log('I', `handleUpdateFile :: Updating file ${absoluteFileName}`);
+
+  if ('totalLineCount' in fileChange) {
+    const currentLines = readFileSync(absoluteFileName);
+    if (currentLines.length !== fileChange.totalLineCount) {
+      log(
+        'W',
+        `handleUpdateFile :: Line count mismatch for ${absoluteFileName}. Expected ${fileChange.totalLineCount}, but got ${currentLines.length}. Skipping.`,
+      );
+      return true;
+    }
+  }
 
   if (Buffer.isBuffer(changes)) {
     log(
@@ -103,7 +123,7 @@ const handleUpdateFile = (
       `handleUpdateFile :: Writing binary content (${changes.length} bytes)`,
     );
     writeFileSync(absoluteFileName, changes);
-    return;
+    return false;
   }
 
   log('I', `handleUpdateFile :: Processing ${changes.length} line changes`);
@@ -131,6 +151,7 @@ const handleUpdateFile = (
   const nextContent = lines.join('\n');
   writeFileSync(absoluteFileName, nextContent);
   log('S', `handleUpdateFile :: Successfully updated ${absoluteFileName}`);
+  return false;
 };
 
 const readFileSync = (fileName: string): string[] => {
@@ -191,18 +212,25 @@ const writeFileSync = (
 const handleMoveFile = (
   absoluteFileName: string,
   repoDirName: string,
-  {
-    type,
-    nextUpstreamFileName,
-    changes,
-  }: Extract<FileChange, { type: 'rename' | 'copy' }>,
-): void => {
+  fileChange: Extract<FileChange, { type: 'rename' | 'copy' }>,
+): boolean => {
+  const { type, nextUpstreamFileName, changes, totalLineCount } = fileChange;
+
+  const currentLines = readFileSync(absoluteFileName);
+  if (currentLines.length !== totalLineCount) {
+    log(
+      'W',
+      `handleMoveFile :: Line count mismatch for ${absoluteFileName}. Expected ${totalLineCount}, but got ${currentLines.length}. Skipping.`,
+    );
+    return true;
+  }
+
   if (!fs.existsSync(absoluteFileName)) {
     log(
       'I',
       `handleMoveFile :: Source file ${absoluteFileName} does not exist, skipping ${type}`,
     );
-    return;
+    return false;
   }
 
   const absoluteNextFileName = path.join(repoDirName, nextUpstreamFileName);
@@ -231,7 +259,11 @@ const handleMoveFile = (
         'I',
         `handleMoveFile :: Applying ${changes.length} additional changes to moved file`,
       );
-      handleUpdateFile(absoluteNextFileName, { changes });
+      return handleUpdateFile(absoluteNextFileName, {
+        type: 'update',
+        changes,
+        totalLineCount,
+      });
     }
   } catch (error) {
     log(
@@ -240,6 +272,8 @@ const handleMoveFile = (
     );
     throw error;
   }
+
+  return false;
 };
 
 const createDirIfNotExists = (dir: string): void => {

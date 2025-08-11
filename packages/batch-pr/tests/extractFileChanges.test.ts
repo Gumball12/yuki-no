@@ -97,7 +97,8 @@ describe('extractFileChanges', () => {
         .mockReturnValueOnce(
           // show -U0 --format=
           'diff --git a/file.ts b/file.ts\nindex abc123..def456 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
-        );
+        )
+        .mockReturnValueOnce('old line');
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
@@ -111,6 +112,7 @@ describe('extractFileChanges', () => {
           { type: 'delete-line', lineNumber: 1 },
           { type: 'insert-line', lineNumber: 1, content: 'new line' },
         ],
+        totalLineCount: 1,
       });
     });
 
@@ -134,6 +136,7 @@ describe('extractFileChanges', () => {
         changes: [
           { type: 'insert-line', lineNumber: 1, content: 'new content' },
         ],
+        totalLineCount: 0,
       });
     });
 
@@ -159,7 +162,8 @@ describe('extractFileChanges', () => {
         .mockReturnValueOnce(
           // show -U0 --format=
           'diff --git a/old.ts b/new.ts\nsimilarity index 85%\nrename from old.ts\nrename to new.ts\nindex abc123..def456 100644\n--- a/old.ts\n+++ b/new.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
-        );
+        )
+        .mockReturnValueOnce('old line');
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
@@ -175,6 +179,7 @@ describe('extractFileChanges', () => {
           { type: 'delete-line', lineNumber: 1 },
           { type: 'insert-line', lineNumber: 1, content: 'new line' },
         ],
+        totalLineCount: 1,
       });
     });
 
@@ -203,7 +208,8 @@ describe('extractFileChanges', () => {
         .mockReturnValueOnce(
           // show -U0 --format=
           'diff --git a/source.ts b/copy.ts\nsimilarity index 75%\ncopy from source.ts\ncopy to copy.ts\nindex abc123..def456 100644\n--- a/source.ts\n+++ b/copy.ts\n@@ -1,1 +1,1 @@\n-old line\n+new line',
-        );
+        )
+        .mockReturnValueOnce('old line');
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
@@ -219,6 +225,7 @@ describe('extractFileChanges', () => {
           { type: 'delete-line', lineNumber: 1 },
           { type: 'insert-line', lineNumber: 1, content: 'new line' },
         ],
+        totalLineCount: 1,
       });
     });
 
@@ -257,6 +264,9 @@ describe('extractFileChanges', () => {
             '-second old line',
             '+second new line',
           ].join('\n'),
+        )
+        .mockReturnValueOnce(
+          '1\n2\n3\n4\n5\n6\n7\n8\n9\n10',
         );
 
       // When
@@ -264,13 +274,14 @@ describe('extractFileChanges', () => {
 
       // Then
       expect(result[0].type).toBe('update');
-      if (result[0].type === 'update') {
+      if (result[0].type === 'update' && 'totalLineCount' in result[0]) {
         expect(result[0].changes).toEqual([
           { type: 'delete-line', lineNumber: 1 },
           { type: 'insert-line', lineNumber: 1, content: 'first new line' },
           { type: 'delete-line', lineNumber: 10 },
           { type: 'insert-line', lineNumber: 10, content: 'second new line' },
         ]);
+        expect(result[0].totalLineCount).toBe(10);
       }
     });
 
@@ -281,18 +292,20 @@ describe('extractFileChanges', () => {
         .mockReturnValueOnce(
           // show -U0 --format=
           'diff --git a/file.ts b/file.ts\nindex abc123..def456 100644\n--- a/file.ts\n+++ b/file.ts\n@@ -1,2 +1,2 @@\n-\n+',
-        );
+        )
+        .mockReturnValueOnce('\n');
 
       // When
       const result = extractFileChanges(mockGit, testHash, defaultFilter);
 
       // Then
       expect(result[0].type).toBe('update');
-      if (result[0].type === 'update') {
+      if (result[0].type === 'update' && 'totalLineCount' in result[0]) {
         expect(result[0].changes).toEqual([
           { type: 'delete-line', lineNumber: 1 },
           { type: 'insert-line', lineNumber: 1, content: '' },
         ]);
+        expect(result[0].totalLineCount).toBe(2);
       }
     });
   });

@@ -114,11 +114,14 @@ const createComplexFileChange = (
 
   log('I', `createComplexFileChange :: Extracting changes for ${headFileName}`);
 
+  const totalLineCount = getTotalLineCount(headGit, hash, fileStatus);
+
   if (status === 'A' || status === 'M') {
     return {
       type: 'update',
       upstreamFileName,
       changes: createLineChanges(fileDiffString),
+      totalLineCount,
     };
   }
 
@@ -134,10 +137,26 @@ const createComplexFileChange = (
       nextUpstreamFileName,
       similarity: fileStatus.similarity,
       changes: createLineChanges(fileDiffString),
+      totalLineCount,
     };
   }
 
   throw new Error(`Failed to create FileChange for ${upstreamFileName}`);
+};
+
+const getTotalLineCount = (
+  headGit: Git,
+  hash: string,
+  fileStatus: FileStatus,
+): number => {
+  if (fileStatus.status === 'A') {
+    return 0;
+  }
+
+  const originalContent = headGit.exec(
+    `show ${hash}~:${fileStatus.headFileName}`,
+  );
+  return originalContent.split('\n').length;
 };
 
 const parseDiffStringByFileName = (
