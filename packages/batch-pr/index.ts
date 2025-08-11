@@ -20,7 +20,7 @@ const BRANCH_NAME = '__yuki-no-batch-pr';
 const batchPrPlugin: YukiNoPlugin = {
   name: 'batch-pr',
 
-  async onFinally({ createdIssues, config }) {
+  async onFinally({ config }) {
     log('I', '=== Batch PR plugin started ===');
 
     const upstreamGitHub = new GitHub({
@@ -47,18 +47,14 @@ const batchPrPlugin: YukiNoPlugin = {
     );
     log('I', `batchPr :: ${trackedIssues.length} already processed`);
 
-    const allTranslationIssues = [
-      ...shouldTrackIssues,
-      ...(createdIssues ?? []),
-    ];
     const issuesToProcess = uniqueWith(
-      await filterPendedTranslationIssues(upstreamGitHub, allTranslationIssues),
+      await filterPendedTranslationIssues(upstreamGitHub, shouldTrackIssues),
       ({ number }) => number,
     );
 
     log(
       'I',
-      `batchPr :: Processing ${issuesToProcess.length} issues (${shouldTrackIssues.length} tracked + ${createdIssues.length} new - ${allTranslationIssues.length - issuesToProcess.length} filtered)`,
+      `batchPr :: Processing ${issuesToProcess.length} issues (${trackedIssues.length} tracked + ${shouldTrackIssues.length} new - ${shouldTrackIssues.length - issuesToProcess.length} filtered)`,
     );
 
     const rootDir = getInput('YUKI_NO_BATCH_PR_ROOT_DIR');
