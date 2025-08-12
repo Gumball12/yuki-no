@@ -20,11 +20,7 @@ export const getLatestSuccessfulRunISODate = async (
     .findLast(run => run.name === WORKFLOW_NAME);
 
   if (!latestSuccessfulRun) {
-    log(
-      'I',
-      'getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found',
-    );
-    return;
+    throw new Error('Cannot find last successful GitHub Action');
   }
 
   const latestSuccessfulRunDate = latestSuccessfulRun.created_at;
