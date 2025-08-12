@@ -27,7 +27,7 @@ export const getTrackedIssues = async (
     );
   }
 
-  const trackedIssueNumbers = extractTrackedISsueNumbers(prBody, 'Resolved');
+  const trackedIssueNumbers = extractTrackedIssueNumbers(prBody, 'Resolved');
   log(
     'I',
     `getTrackedIssues :: Found ${trackedIssueNumbers.length} tracked issue numbers in PR body`,
@@ -70,7 +70,7 @@ const getPrDetails = async (
   return data;
 };
 
-const extractTrackedISsueNumbers = (
+const extractTrackedIssueNumbers = (
   prBody: string,
   type: BatchIssueType,
 ): number[] => {
