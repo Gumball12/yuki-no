@@ -2,6 +2,7 @@ import type { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 
+// NOTE: Filter out issues that are pending @yuki-no/plugin-release-tracking status
 export const filterPendedTranslationIssues = async (
   github: GitHub,
   translationIssues: Issue[],
