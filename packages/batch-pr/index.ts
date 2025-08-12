@@ -43,7 +43,7 @@ const batchPrPlugin: YukiNoPlugin = {
 
     if (!notPendedTranslationIssues.length) {
       log(
-        'W',
+        'I',
         'batchPr :: No pending translation issues found, skipping batch PR process',
       );
       return;
