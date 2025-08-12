@@ -4,14 +4,6 @@ import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Mock dependencies
-vi.mock('@yuki-no/plugin-sdk/utils-infra/getOpenedIssues');
-
-const { getOpenedIssues } = await import(
-  '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues'
-);
-const mockGetOpenedIssues = vi.mocked(getOpenedIssues);
-
 describe('getTrackedIssues', () => {
   let mockGitHub: GitHub;
 
@@ -68,13 +60,12 @@ describe('getTrackedIssues', () => {
         Some other content.
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(2);
@@ -117,13 +108,12 @@ describe('getTrackedIssues', () => {
         Resolved #30
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(3);
@@ -155,13 +145,12 @@ describe('getTrackedIssues', () => {
         Resolved #999
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(1);
@@ -197,13 +186,12 @@ describe('getTrackedIssues', () => {
         Just some improvements.
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(0);
@@ -226,13 +214,14 @@ describe('getTrackedIssues', () => {
         },
       ];
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: null },
       });
 
       // When & Then
-      await expect(getTrackedIssues(mockGitHub, prNumber)).rejects.toThrow(
+      await expect(
+        getTrackedIssues(mockGitHub, prNumber, mockIssues),
+      ).rejects.toThrow(
         'PR #111 body is empty or missing. Cannot extract tracked issue numbers.',
       );
     });
@@ -250,13 +239,14 @@ describe('getTrackedIssues', () => {
         },
       ];
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: '' },
       });
 
       // When & Then
-      await expect(getTrackedIssues(mockGitHub, prNumber)).rejects.toThrow(
+      await expect(
+        getTrackedIssues(mockGitHub, prNumber, mockIssues),
+      ).rejects.toThrow(
         'PR #222 body is empty or missing. Cannot extract tracked issue numbers.',
       );
     });
@@ -274,13 +264,14 @@ describe('getTrackedIssues', () => {
         },
       ];
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: undefined },
       });
 
       // When & Then
-      await expect(getTrackedIssues(mockGitHub, prNumber)).rejects.toThrow(
+      await expect(
+        getTrackedIssues(mockGitHub, prNumber, mockIssues),
+      ).rejects.toThrow(
         'PR #333 body is empty or missing. Cannot extract tracked issue numbers.',
       );
     });
@@ -296,13 +287,12 @@ describe('getTrackedIssues', () => {
         Resolved #2
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(0);
@@ -317,16 +307,14 @@ describe('getTrackedIssues', () => {
       const mockIssues: Issue[] = [];
       const prBody = 'Some PR body';
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      await getTrackedIssues(mockGitHub, prNumber);
+      await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
-      expect(mockGetOpenedIssues).toHaveBeenCalledWith(mockGitHub);
       expect(mockGitHub.api.pulls.get).toHaveBeenCalledWith({
         owner: 'test-owner',
         repo: 'test-repo',
@@ -371,13 +359,12 @@ describe('getTrackedIssues', () => {
         This should not match: Resolved 888 (no #)
       `;
 
-      mockGetOpenedIssues.mockResolvedValue(mockIssues);
       (mockGitHub.api.pulls.get as any).mockResolvedValue({
         data: { body: prBody },
       });
 
       // When
-      const result = await getTrackedIssues(mockGitHub, prNumber);
+      const result = await getTrackedIssues(mockGitHub, prNumber, mockIssues);
 
       // Then
       expect(result.trackedIssues).toHaveLength(3);

@@ -10,6 +10,7 @@ import { setupBatchPr } from './utils/setupBatchPr';
 import { Git } from '@yuki-no/plugin-sdk/infra/git';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { YukiNoPlugin } from '@yuki-no/plugin-sdk/types/plugin';
+import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
 import { uniqueWith } from '@yuki-no/plugin-sdk/utils/common';
 import { createFileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import { getInput, getMultilineInput } from '@yuki-no/plugin-sdk/utils/input';
@@ -33,6 +34,21 @@ const batchPrPlugin: YukiNoPlugin = {
       withClone: true,
     });
 
+    const translationIssues = await getOpenedIssues(upstreamGitHub);
+    // NOTE: Filter out issues that are pending @yuki-no/plugin-release-tracking status
+    const notPendedTranslationIssues = await filterPendedTranslationIssues(
+      upstreamGitHub,
+      translationIssues,
+    );
+
+    if (!notPendedTranslationIssues.length) {
+      log(
+        'W',
+        'batchPr :: No pending translation issues found, skipping batch PR process',
+      );
+      return;
+    }
+
     log('I', 'batchPr :: Setting up batch PR branch and pull request');
     const { prNumber } = await setupBatchPr(
       upstreamGitHub,
@@ -44,6 +60,7 @@ const batchPrPlugin: YukiNoPlugin = {
     const { trackedIssues, shouldTrackIssues } = await getTrackedIssues(
       upstreamGitHub,
       prNumber,
+      notPendedTranslationIssues,
     );
     log('I', `batchPr :: ${trackedIssues.length} already processed`);
 

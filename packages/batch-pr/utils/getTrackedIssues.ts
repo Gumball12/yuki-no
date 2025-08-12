@@ -3,7 +3,6 @@ import type { BatchIssueType } from './createPrBody';
 import type { RestEndpointMethodTypes } from '@octokit/rest';
 import { GitHub } from '@yuki-no/plugin-sdk/infra/github';
 import type { Issue } from '@yuki-no/plugin-sdk/types/github';
-import { getOpenedIssues } from '@yuki-no/plugin-sdk/utils-infra/getOpenedIssues';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 
 type GetTrackedIssuesReturns = {
@@ -14,6 +13,7 @@ type GetTrackedIssuesReturns = {
 export const getTrackedIssues = async (
   github: GitHub,
   prNumber: number,
+  notPendedTranslationIssues: Issue[],
 ): Promise<GetTrackedIssuesReturns> => {
   log('I', `getTrackedIssues :: Processing PR #${prNumber}`);
 
@@ -27,27 +27,15 @@ export const getTrackedIssues = async (
     );
   }
 
-  log('I', `getTrackedIssues :: Filtering translation issues`);
-  const translationIssues = await getOpenedIssues(github);
-  const translationIssueNumbers = translationIssues.map(({ number }) => number);
-  log(
-    'I',
-    `getTrackedIssues :: Found ${translationIssues.length} translation issues`,
-  );
-
   const trackedIssueNumbers = extractTrackedISsueNumbers(prBody, 'Resolved');
   log(
     'I',
     `getTrackedIssues :: Found ${trackedIssueNumbers.length} tracked issue numbers in PR body`,
   );
 
-  const openedTrackedIssueNumbers = trackedIssueNumbers.filter(number =>
-    translationIssueNumbers.includes(number),
-  );
-
-  const results = translationIssues.reduce<GetTrackedIssuesReturns>(
+  const results = notPendedTranslationIssues.reduce<GetTrackedIssuesReturns>(
     ({ trackedIssues, shouldTrackIssues }, translationIssue) => {
-      if (openedTrackedIssueNumbers.includes(translationIssue.number)) {
+      if (trackedIssueNumbers.includes(translationIssue.number)) {
         trackedIssues.push(translationIssue);
       } else {
         shouldTrackIssues.push(translationIssue);
