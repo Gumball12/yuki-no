@@ -20,11 +20,9 @@ export const getLatestSuccessfulRunISODate = async (
     .findLast(run => run.name === name);
 
   if (!latestSuccessfulRun) {
-    log(
-      'I',
-      'getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found',
+    throw new Error(
+      'Cannot find last successful Yuki-no GitHub Action run time',
     );
-    return;
   }
 
   const latestSuccessfulRunDate = latestSuccessfulRun.created_at;

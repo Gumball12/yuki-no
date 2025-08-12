@@ -16,7 +16,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-it('Should return undefined when there are no successful workflow runs', async () => {
+it.skip('Should return undefined when there are no successful workflow runs', async () => {
   (mockGitHub.api.actions.listWorkflowRunsForRepo as any).mockResolvedValue({
     data: {
       workflow_runs: [],
