@@ -102,16 +102,15 @@ const batchPrPlugin: YukiNoPlugin = {
     });
 
     const fileChanges: FileChange[] = [];
+    const excludedFiles = new Set<string>();
 
     log('I', 'batchPr :: Extracting file changes from commits');
 
     for (const { hash } of issuesToProcess) {
-      const changes = extractFileChanges(
-        headGit,
-        hash,
-        fileNameFilter,
+      const changes = extractFileChanges(headGit, hash, fileNameFilter, {
+        onExcluded: p => excludedFiles.add(p),
         rootDir,
-      );
+      });
       fileChanges.push(...changes);
 
       log(
@@ -148,6 +147,7 @@ const batchPrPlugin: YukiNoPlugin = {
         number,
         type: 'Resolved',
       })),
+      { excludedFiles: Array.from(excludedFiles) },
     );
 
     await upstreamGitHub.api.pulls.update({

@@ -7,18 +7,27 @@ import type { Git } from '@yuki-no/plugin-sdk/infra/git';
 import type { FileNameFilter } from '@yuki-no/plugin-sdk/utils/createFileNameFilter';
 import { log } from '@yuki-no/plugin-sdk/utils/log';
 
+type ExtractOpts = {
+  onExcluded?: (path: string) => void;
+  rootDir?: string;
+};
+
 export const extractFileChanges = (
   headGit: Git,
   hash: string,
   fileNameFilter: FileNameFilter,
-  rootDir?: string,
+  { onExcluded, rootDir } = {} as ExtractOpts,
 ): FileChange[] => {
   log('I', `extractFileChanges :: Starting extraction for hash: ${hash}`);
 
   const fileStatusString = headGit.exec(
     `show --name-status --format="" ${hash}`,
   );
-  const fileStatuses = parseFileStatuses(fileStatusString, fileNameFilter);
+  const fileStatuses = parseFileStatuses(
+    fileStatusString,
+    fileNameFilter,
+    onExcluded,
+  );
 
   log('I', `extractFileChanges :: Found ${fileStatuses.length} file statuses`);
 

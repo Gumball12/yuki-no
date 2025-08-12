@@ -8,6 +8,7 @@ import { formatError, log } from '@yuki-no/plugin-sdk/utils/log';
 export const parseFileStatuses = (
   statusString: string,
   fileNameFilter: FileNameFilter,
+  onExcluded?: (path: string) => void,
 ): FileStatus[] => {
   const statusLines = splitByNewline(statusString);
   log(
@@ -21,14 +22,20 @@ export const parseFileStatuses = (
   for (const statusLine of statusLines) {
     const fileStatus = parseFileStatus(statusLine);
     let shouldInclude = fileNameFilter(fileStatus.headFileName);
+    const isRenameOrCopy =
+      fileStatus.status === 'R' || fileStatus.status === 'C';
 
-    if (fileStatus.status === 'R' || fileStatus.status === 'C') {
+    if (isRenameOrCopy) {
       shouldInclude = fileNameFilter(fileStatus.nextHeadFileName);
     }
 
     if (shouldInclude) {
       statuses.push(fileStatus);
     } else {
+      const excludedPath = isRenameOrCopy
+        ? fileStatus.nextHeadFileName
+        : fileStatus.headFileName;
+      onExcluded?.(excludedPath);
       excludedCount++;
     }
   }

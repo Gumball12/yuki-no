@@ -366,12 +366,9 @@ describe('extractFileChanges', () => {
       mockGitExec.mockReturnValueOnce('D\tsrc/file.ts');
 
       // When
-      const result = extractFileChanges(
-        mockGit,
-        testHash,
-        defaultFilter,
-        'src',
-      );
+      const result = extractFileChanges(mockGit, testHash, defaultFilter, {
+        rootDir: 'src',
+      });
 
       // Then
       expect(result[0].upstreamFileName).toBe('file.ts');
@@ -382,12 +379,9 @@ describe('extractFileChanges', () => {
       mockGitExec.mockReturnValueOnce('D\tsrc/file.ts');
 
       // When
-      const result = extractFileChanges(
-        mockGit,
-        testHash,
-        defaultFilter,
-        'src/',
-      );
+      const result = extractFileChanges(mockGit, testHash, defaultFilter, {
+        rootDir: 'src/',
+      });
 
       // Then
       expect(result[0].upstreamFileName).toBe('file.ts');
@@ -398,12 +392,9 @@ describe('extractFileChanges', () => {
       mockGitExec.mockReturnValueOnce('D\tsrc');
 
       // When
-      const result = extractFileChanges(
-        mockGit,
-        testHash,
-        defaultFilter,
-        'src',
-      );
+      const result = extractFileChanges(mockGit, testHash, defaultFilter, {
+        rootDir: 'src',
+      });
 
       // Then
       expect(result[0].upstreamFileName).toBe('');
@@ -414,12 +405,9 @@ describe('extractFileChanges', () => {
       mockGitExec.mockReturnValueOnce('D\tother/file.ts');
 
       // When
-      const result = extractFileChanges(
-        mockGit,
-        testHash,
-        defaultFilter,
-        'src',
-      );
+      const result = extractFileChanges(mockGit, testHash, defaultFilter, {
+        rootDir: 'src',
+      });
 
       // Then
       expect(result[0].upstreamFileName).toBe('other/file.ts');
@@ -430,12 +418,9 @@ describe('extractFileChanges', () => {
       mockGitExec.mockReturnValueOnce('R100\tsrc/old.ts\tsrc/new.ts');
 
       // When
-      const result = extractFileChanges(
-        mockGit,
-        testHash,
-        defaultFilter,
-        'src',
-      );
+      const result = extractFileChanges(mockGit, testHash, defaultFilter, {
+        rootDir: 'src',
+      });
 
       // Then
       expect(result[0]).toMatchObject({
