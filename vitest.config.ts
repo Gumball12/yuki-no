@@ -14,8 +14,13 @@ export default defineConfig({
         'packages/*/dist/**/*.ts',
         'vitest.config.ts',
 
+        // types
+        'packages/core/types/**/*.ts',
+        'packages/batch-pr/types.ts',
+
         // orchestration
-        'packages/**/index.ts',
+        'packages/batch-pr/index.ts',
+        'packages/release-tracking/index.ts',
       ],
     },
   },
