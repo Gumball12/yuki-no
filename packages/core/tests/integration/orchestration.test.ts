@@ -1,3 +1,8 @@
+import {
+  COMMIT_DATA_SEPARATOR,
+  COMMIT_SEP,
+} from '../../utils-infra/getCommits';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 describe('Core Orchestration Integration', () => {
@@ -58,8 +63,8 @@ describe('Core Orchestration Integration', () => {
         constructor(_: any) {}
         clone() {}
         exec(_cmd: string) {
-          const sep = ':COMMIT_START_SEP:';
-          const data = ':COMMIT_DATA_SEP:';
+          const sep = COMMIT_SEP;
+          const data = COMMIT_DATA_SEPARATOR;
           const c1 = `${sep}1111111${data}feat: one${data}2024-01-01T00:00:00Z\nsrc/a.ts`;
           const c2 = `${sep}2222222${data}fix: two${data}2024-01-02T00:00:00Z\nsrc/keep.ts\nREADME.md`;
           return [c1, c2].join('');

@@ -14,6 +14,15 @@ describe('Plugin loader - version context on failure', () => {
 
     const { loadPlugins } = await import('../../plugin/index.ts');
     await expect(loadPlugins(['non-existent-plugin@1.2.3'])).rejects.toThrow(
+      /Failed to load plugin "/,
+    );
+    await expect(loadPlugins(['non-existent-plugin@1.2.3'])).rejects.toThrow(
+      /Resolved ID: non-existent-plugin/,
+    );
+    await expect(loadPlugins(['non-existent-plugin@1.2.3'])).rejects.toThrow(
+      /Original plugin specification: non-existent-plugin@1\.2\.3/,
+    );
+    await expect(loadPlugins(['non-existent-plugin@1.2.3'])).rejects.toThrow(
       /Version specification: 1\.2\.3/,
     );
   });
