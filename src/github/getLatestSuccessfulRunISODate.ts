@@ -34,6 +34,10 @@ export const getLatestSuccessfulRunISODate = async (
   }
 
   if (!latestSuccessfulRun) {
+    log(
+      'W',
+      `getLatestSuccessfulRunISODate :: API inconsistency detected: totalCount=${totalRunCount}, but no successful run found`,
+    );
     throw new Error(
       'GitHub API data inconsistency detected. This might indicate API instability.',
     );
@@ -60,6 +64,11 @@ const getLatestSuccessfulRun = async (
     status: 'success',
     per_page: 100,
   });
+
+  log(
+    'I',
+    `getLatestSuccessfulRunISODate :: Found ${data.total_count} total / ${data.workflow_runs.length} successful runs`,
+  );
 
   const latestSuccessfulRun = data.workflow_runs
     .sort((a, b) => a.created_at.localeCompare(b.created_at))

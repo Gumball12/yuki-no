@@ -1,4 +1,4 @@
-import { isNotEmpty } from '../utils';
+import { isNotEmpty, log } from '../utils';
 
 import type { GitHub } from './core';
 import { extractHashFromIssue } from './utils';
@@ -17,17 +17,29 @@ export const getTranslationIssues = async (
   github: GitHub,
   state: RestEndpointMethodTypes['issues']['listForRepo']['parameters']['state'] = undefined,
 ): Promise<Issue[]> => {
+  log(
+    'I',
+    `getTranslationIssues :: Starting to fetch translation issues with state: ${state || 'all'}`,
+  );
+
   const issues: Issue[] = [];
 
   let page = 1;
 
   while (true) {
+    log('I', `getTranslationIssues :: Fetching page ${page}`);
+
     const { data } = await github.api.issues.listForRepo({
       ...github.ownerAndRepo,
       state,
       per_page: 100,
       page,
     });
+
+    log(
+      'I',
+      `getTranslationIssues :: Page ${page} returned ${data.length} issues`,
+    );
 
     if (data.length === 0) {
       break;
@@ -48,6 +60,11 @@ export const getTranslationIssues = async (
       .map(issue => ({ ...issue, hash: extractHashFromIssue(issue) }))
       .filter(hasHash);
 
+    log(
+      'I',
+      `getTranslationIssues :: Found ${openedYukiNoIssues.length} Yuki-no issues on page ${page}`,
+    );
+
     issues.push(...openedYukiNoIssues);
 
     page++;
@@ -58,6 +75,12 @@ export const getTranslationIssues = async (
   }
 
   issues.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
+
+  log(
+    'I',
+    `getTranslationIssues :: Completed: Total ${issues.length} translation issues found`,
+  );
+
   return issues;
 };
 
