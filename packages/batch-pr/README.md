@@ -60,6 +60,8 @@ env:
     **/*.tmp
 ```
 
+Files matched by `YUKI_NO_BATCH_PR_EXCLUDE` are intentionally NOT applied by the plugin. They will be listed in the batch PR body under "Excluded Files (manual changes required)", so you can quickly see what to update manually.
+
 Note that this behaves slightly differently from Yuki-no's `exclude` option. The `exclude` option is used when creating issues from `head-repo` changes. For more details, please refer to the [Yuki-no Configuration](../../README.md#configuration) section.
 
 ## Permissions
