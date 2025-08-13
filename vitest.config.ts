@@ -17,10 +17,6 @@ export default defineConfig({
         // types
         'packages/core/types/**/*.ts',
         'packages/batch-pr/types.ts',
-
-        // orchestration
-        'packages/batch-pr/index.ts',
-        // 'packages/release-tracking/index.ts',
       ],
     },
   },
