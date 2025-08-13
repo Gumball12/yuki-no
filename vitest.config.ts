@@ -20,7 +20,7 @@ export default defineConfig({
 
         // orchestration
         'packages/batch-pr/index.ts',
-        'packages/release-tracking/index.ts',
+        // 'packages/release-tracking/index.ts',
       ],
     },
   },
