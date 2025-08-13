@@ -35,6 +35,7 @@ export const parseFileStatuses = (
       const excludedPath = isRenameOrCopy
         ? fileStatus.nextHeadFileName
         : fileStatus.headFileName;
+      log('I', `parseFileStatuses :: Excluded: ${excludedPath}`);
       onExcluded?.(excludedPath);
       excludedCount++;
     }
