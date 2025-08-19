@@ -45,6 +45,23 @@ describe('GitHub API Integration Tests', () => {
     });
 
     it('Should create and list issue comments with the expected structure', async () => {
+      const { data: existingComments } = await octokit.issues.listComments({
+        ...TEST_REPO,
+        issue_number: TEST_ISSUE_NUM,
+        per_page: 100,
+      });
+
+      for (const comment of existingComments) {
+        try {
+          await octokit.issues.deleteComment({
+            ...TEST_REPO,
+            comment_id: comment.id,
+          });
+        } catch {
+          // noop
+        }
+      }
+
       const commentBody = 'Test Comment';
       const { data: createdComment } = await octokit.issues.createComment({
         ...TEST_REPO,
