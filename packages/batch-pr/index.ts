@@ -143,7 +143,7 @@ const batchPrPlugin: YukiNoPlugin = {
       `batchPr :: Updating PR body with ${issuesToProcess.length} linked issues`,
     );
     const nextPrBody = createPrBody(
-      issuesToProcess.map(({ number }) => ({
+      [...issuesToProcess, ...trackedIssues].map(({ number }) => ({
         number,
         type: 'Resolved',
       })),

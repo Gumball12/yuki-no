@@ -66,23 +66,6 @@ describe('batch-pr plugin integration', () => {
       ]),
     }));
 
-    vi.mock('@yuki-no/plugin-sdk/utils/createFileNameFilter', () => ({
-      createFileNameFilter: vi.fn(
-        (_cfg: any, _root?: string) => (file: string) =>
-          !file.endsWith('.spec.ts') &&
-          !file.endsWith('.test.ts') &&
-          file.startsWith('docs/'),
-      ),
-    }));
-
-    vi.mock('@yuki-no/plugin-sdk/utils/input', async importOriginal => {
-      const orig =
-        await importOriginal<
-          typeof import('@yuki-no/plugin-sdk/utils/input')
-        >();
-      return { ...orig };
-    });
-
     // batch-pr utils mocks/spies
     vi.mock('../../utils/filterPendedTranslationIssues', () => ({
       filterPendedTranslationIssues: vi.fn(async (_gh: any, issues: any[]) =>
@@ -141,13 +124,6 @@ describe('batch-pr plugin integration', () => {
     vi.mock('../../utils/createCommit', () => ({
       createCommit: vi.fn((_git: any, _opts: any) => {}),
     }));
-
-    vi.mock('../../utils/createPrBody', () => ({
-      createPrBody: vi.fn(
-        (items: any[], meta: any) =>
-          `Body ${items.length} ${JSON.stringify(meta.excludedFiles)}`,
-      ),
-    }));
   });
 
   afterEach(() => {
@@ -161,6 +137,7 @@ describe('batch-pr plugin integration', () => {
     const config = {
       labels: ['sync'],
       exclude: [],
+      include: [],
       headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
       upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
     } as any;
@@ -177,7 +154,37 @@ describe('batch-pr plugin integration', () => {
       repo: 'upstream',
       pull_number: 123,
     });
-    expect(arg.body).toContain('Body 1');
+
+    expect(arg.body).toContain('Resolved #222');
+    expect(arg.body).toContain('Resolved #111');
+  });
+
+  it('should include both trackedIssues and issuesToProcess in PR body', async () => {
+    const plugin = (await import('../../index')).default;
+
+    const config = {
+      labels: ['sync'],
+      exclude: [],
+      include: [],
+      headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
+      upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
+    } as any;
+
+    await plugin.onFinally?.({ config } as any);
+
+    const { pullsUpdate } = (globalThis as any).__mockBP_GH as {
+      pullsUpdate: ReturnType<typeof vi.fn>;
+    };
+    expect(pullsUpdate).toHaveBeenCalled();
+    const arg = pullsUpdate.mock.calls[0][0];
+    expect(arg).toMatchObject({
+      owner: 'acme',
+      repo: 'upstream',
+      pull_number: 123,
+    });
+
+    expect(arg.body).toContain('Resolved #222');
+    expect(arg.body).toContain('Resolved #111');
   });
 
   it('Skip when no pending translation issues', async () => {
@@ -190,6 +197,7 @@ describe('batch-pr plugin integration', () => {
     const config = {
       labels: ['sync'],
       exclude: [],
+      include: [],
       headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
       upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
     } as any;
@@ -214,6 +222,7 @@ describe('batch-pr plugin integration', () => {
     const config = {
       labels: ['sync'],
       exclude: [],
+      include: [],
       headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
       upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
     } as any;
@@ -223,6 +232,113 @@ describe('batch-pr plugin integration', () => {
     const { pullsUpdate } = (globalThis as any).__mockBP_GH as {
       pullsUpdate: ReturnType<typeof vi.fn>;
     };
+    expect(pullsUpdate).not.toHaveBeenCalled();
+  });
+
+  it('should handle only trackedIssues scenario', async () => {
+    const { getTrackedIssues } = await import('../../utils/getTrackedIssues');
+    (getTrackedIssues as any).mockResolvedValueOnce({
+      trackedIssues: [{ number: 111, hash: 'aaaaaaaa' }],
+      shouldTrackIssues: [],
+    });
+
+    const plugin = (await import('../../index')).default;
+    const config = {
+      labels: ['sync'],
+      exclude: [],
+      include: [],
+      headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
+      upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
+    } as any;
+
+    await plugin.onFinally?.({ config } as any);
+
+    const { pullsUpdate } = (globalThis as any).__mockBP_GH as {
+      pullsUpdate: ReturnType<typeof vi.fn>;
+    };
+
+    expect(pullsUpdate).not.toHaveBeenCalled();
+  });
+
+  it('should handle only new issues scenario', async () => {
+    const { getTrackedIssues } = await import('../../utils/getTrackedIssues');
+    (getTrackedIssues as any).mockResolvedValueOnce({
+      trackedIssues: [],
+      shouldTrackIssues: [{ number: 222, hash: 'bbbbbbbb' }],
+    });
+
+    const { extractFileChanges } = await import(
+      '../../utils/extractFileChanges'
+    );
+    (extractFileChanges as any).mockImplementation(
+      (
+        _git: any,
+        hash: string,
+        filter: (f: string) => boolean,
+        opts: { onExcluded: (p: string) => void },
+      ) => {
+        if (hash === 'bbbbbbbb') {
+          const files = [`docs/${hash}/keep.md`];
+          const out = [] as import('../../types').FileChange[];
+          for (const f of files) {
+            if (!filter(f)) {
+              opts.onExcluded(f);
+              continue;
+            }
+            out.push({
+              type: 'update',
+              upstreamFileName: f,
+              changes: [{ type: 'insert-line', lineNumber: 1, content: 'x' }],
+            });
+          }
+          return out;
+        }
+        return [];
+      },
+    );
+
+    const plugin = (await import('../../index')).default;
+    const config = {
+      labels: ['sync'],
+      exclude: [],
+      include: [],
+      headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
+      upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
+    } as any;
+
+    await plugin.onFinally?.({ config } as any);
+
+    const { pullsUpdate } = (globalThis as any).__mockBP_GH as {
+      pullsUpdate: ReturnType<typeof vi.fn>;
+    };
+
+    expect(pullsUpdate).toHaveBeenCalled();
+    const arg = pullsUpdate.mock.calls[0][0];
+    expect(arg.body).toContain('Resolved #222');
+  });
+
+  it('should handle empty issues scenario', async () => {
+    const { getTrackedIssues } = await import('../../utils/getTrackedIssues');
+    (getTrackedIssues as any).mockResolvedValueOnce({
+      trackedIssues: [],
+      shouldTrackIssues: [],
+    });
+
+    const plugin = (await import('../../index')).default;
+    const config = {
+      labels: ['sync'],
+      exclude: [],
+      include: [],
+      headRepoSpec: { owner: 'acme', name: 'head', branch: 'main' },
+      upstreamRepoSpec: { owner: 'acme', name: 'upstream', branch: 'main' },
+    } as any;
+
+    await plugin.onFinally?.({ config } as any);
+
+    const { pullsUpdate } = (globalThis as any).__mockBP_GH as {
+      pullsUpdate: ReturnType<typeof vi.fn>;
+    };
+
     expect(pullsUpdate).not.toHaveBeenCalled();
   });
 });
