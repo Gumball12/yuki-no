@@ -15,11 +15,11 @@ export type Issue = {
 
 export const getTranslationIssues = async (
   github: GitHub,
-  state: RestEndpointMethodTypes['issues']['listForRepo']['parameters']['state'] = undefined,
+  state: RestEndpointMethodTypes['issues']['listForRepo']['parameters']['state'] = 'all',
 ): Promise<Issue[]> => {
   log(
     'I',
-    `getTranslationIssues :: Starting to fetch translation issues with state: ${state || 'all'}`,
+    `getTranslationIssues :: Starting to fetch translation issues with state: ${state}`,
   );
 
   const issues: Issue[] = [];
