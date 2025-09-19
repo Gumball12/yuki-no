@@ -1,4 +1,3 @@
-import { name } from '../../package.json';
 import { log } from '../utils';
 
 import type { GitHub } from './core';
@@ -6,19 +5,23 @@ import { getTranslationIssues } from './getTranslationIssues';
 
 import type { RestEndpointMethodTypes } from '@octokit/rest';
 
+// Use a constant workflow name to avoid ambiguity.
+// This should match the name defined in the workflow YAML that uses Yuki-no.
+const WORKFLOW_NAME = 'yuki-no';
+
 export const getLatestSuccessfulRunISODate = async (
   github: GitHub,
+  hintFirstRun: boolean,
 ): Promise<string | undefined> => {
   log(
     'I',
     'getLatestSuccessfulRunISODate :: Extracting last successful GitHub Actions run time',
   );
 
-  const { workflowRun: latestSuccessfulRun, totalCount: totalRunCount } =
+  const { run: latestSuccessfulRun, successfulCount } =
     await getLatestSuccessfulRun(github);
-
   const maybeFirstExecution =
-    totalRunCount === 0 && latestSuccessfulRun === undefined;
+    hintFirstRun && successfulCount === 0 && latestSuccessfulRun === undefined;
 
   if (maybeFirstExecution) {
     const allIssues = await getTranslationIssues(github, 'all');
@@ -27,7 +30,7 @@ export const getLatestSuccessfulRunISODate = async (
     if (isFirstExecution) {
       log(
         'I',
-        'getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found',
+        'getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found (first execution confirmed)',
       );
       return;
     }
@@ -36,7 +39,7 @@ export const getLatestSuccessfulRunISODate = async (
   if (!latestSuccessfulRun) {
     log(
       'W',
-      `getLatestSuccessfulRunISODate :: API inconsistency detected: totalCount=${totalRunCount}, but no successful run found`,
+      `getLatestSuccessfulRunISODate :: API inconsistency detected: totalCount=${successfulCount}, but no successful run found`,
     );
     throw new Error(
       'GitHub API data inconsistency detected. This might indicate API instability.',
@@ -58,21 +61,25 @@ type WorkflowRun =
 
 const getLatestSuccessfulRun = async (
   github: GitHub,
-): Promise<{ workflowRun: WorkflowRun | undefined; totalCount: number }> => {
-  const { data } = await github.api.actions.listWorkflowRunsForRepo({
+): Promise<{ run: WorkflowRun | undefined; successfulCount: number }> => {
+  const { data } = await github.api.rest.actions.listWorkflowRunsForRepo({
     ...github.ownerAndRepo,
-    status: 'success',
+    status: 'completed',
     per_page: 100,
   });
 
   log(
     'I',
-    `getLatestSuccessfulRunISODate :: Found ${data.total_count} total / ${data.workflow_runs.length} successful runs`,
+    `getLatestSuccessfulRunISODate :: Found ${data.total_count} completed / ${data.workflow_runs.length} runs on first page`,
   );
 
-  const latestSuccessfulRun = data.workflow_runs
-    .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .findLast(run => run.name === name);
+  const yukiNoRun = data.workflow_runs.filter(
+    ({ name }) => name === WORKFLOW_NAME,
+  );
+  const successfulRun = yukiNoRun.filter(
+    ({ conclusion }) => conclusion === 'success',
+  );
+  const [latestSuccessfulRun] = successfulRun;
 
-  return { workflowRun: latestSuccessfulRun, totalCount: data.total_count };
+  return { run: latestSuccessfulRun, successfulCount: successfulRun.length };
 };

@@ -49,6 +49,7 @@ describe('Basic configuration creation', () => {
       releaseTracking: false,
       releaseTrackingLabels: [yukiNoDefaults.releaseTrackingLabel],
       verbose: false,
+      maybeFirstRun: false,
     });
   });
 
@@ -76,6 +77,7 @@ describe('Custom envs processing', () => {
       RELEASE_TRACKING: 'true',
       RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
       VERBOSE: 'true',
+      MAYBE_FIRST_RUN: 'true',
     };
 
     process.env = { ...process.env, ...LOCAL_TEST_ENV };
@@ -103,6 +105,7 @@ describe('Custom envs processing', () => {
       releaseTracking: true,
       releaseTrackingLabels: ['pending-release', 'released'],
       verbose: true,
+      maybeFirstRun: true,
     });
   });
 });

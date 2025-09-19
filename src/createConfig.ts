@@ -16,6 +16,7 @@ type RawConfig = Readonly<{
   releaseTracking?: string;
   releaseTrackingLabels?: string;
   verbose?: string;
+  maybeFirstRun?: string;
 }>;
 
 export type Config = Readonly<{
@@ -31,6 +32,7 @@ export type Config = Readonly<{
   releaseTracking: boolean;
   releaseTrackingLabels: string[];
   verbose: boolean;
+  maybeFirstRun: boolean;
 }>;
 
 export type RepoSpec = {
@@ -79,6 +81,7 @@ export const createConfig = (): Config => {
   );
 
   const verbose = rawConfig.verbose?.toLowerCase() === 'true';
+  const maybeFirstRun = rawConfig.maybeFirstRun?.toLowerCase() === 'true';
 
   return {
     accessToken,
@@ -93,6 +96,7 @@ export const createConfig = (): Config => {
     releaseTracking,
     releaseTrackingLabels,
     verbose,
+    maybeFirstRun,
   };
 };
 
@@ -115,6 +119,7 @@ const createRawConfig = (): RawConfig => {
     releaseTracking: process.env.RELEASE_TRACKING,
     releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
     verbose: process.env.VERBOSE,
+    maybeFirstRun: process.env.MAYBE_FIRST_RUN,
   };
 };
 

@@ -53,7 +53,10 @@ const syncCommits = async (
 ): Promise<Issue[]> => {
   log('I', '=== Synchronization started ===');
 
-  const latestSuccessfulRun = await getLatestSuccessfulRunISODate(github);
+  const latestSuccessfulRun = await getLatestSuccessfulRunISODate(
+    github,
+    config.maybeFirstRun,
+  );
   const commits = getCommits(config, git, latestSuccessfulRun);
   const notCreatedCommits = await lookupCommitsInIssues(github, commits);
 

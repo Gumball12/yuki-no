@@ -64,6 +64,19 @@ runs:
       run: ${{ github.action_path }}/scripts/checkout.sh
       shell: bash
 
+    - name: Check if first run
+      shell: bash
+      run: |
+        if [ "$RUN_NUMBER" = "1" ]; then
+          echo "MAYBE_FIRST_RUN=true" >> $GITHUB_ENV
+          echo "This is the first run"
+        else
+          echo "MAYBE_FIRST_RUN=false" >> $GITHUB_ENV
+          echo "This is not the first run"
+        fi
+      env:
+        RUN_NUMBER: ${{ github.run_number }}
+
     - name: Run Yuki-no
       env:
         ACCESS_TOKEN: ${{ inputs.access-token }}
@@ -79,6 +92,7 @@ runs:
         RELEASE_TRACKING: ${{ inputs.release-tracking }}
         RELEASE_TRACKING_LABELS: ${{ inputs.release-tracking-labels }}
         VERBOSE: ${{ inputs.verbose }}
+        MAYBE_FIRST_RUN: ${{ env.MAYBE_FIRST_RUN }}
       run: |
         cd yuki-no
         yarn install
