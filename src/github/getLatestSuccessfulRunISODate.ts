@@ -73,13 +73,14 @@ const getLatestSuccessfulRun = async (
     `getLatestSuccessfulRunISODate :: Found ${data.total_count} completed / ${data.workflow_runs.length} runs on first page`,
   );
 
-  const yukiNoRun = data.workflow_runs.filter(
-    ({ name }) => name === WORKFLOW_NAME,
+  const successfulYukiNoRun = data.workflow_runs.filter(
+    ({ conclusion, name }) =>
+      conclusion === 'success' && name === WORKFLOW_NAME,
   );
-  const successfulRun = yukiNoRun.filter(
-    ({ conclusion }) => conclusion === 'success',
-  );
-  const [latestSuccessfulRun] = successfulRun;
+  const [latestSuccessfulRun] = successfulYukiNoRun;
 
-  return { run: latestSuccessfulRun, successfulCount: successfulRun.length };
+  return {
+    run: latestSuccessfulRun,
+    successfulCount: successfulYukiNoRun.length,
+  };
 };
