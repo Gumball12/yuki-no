@@ -21,9 +21,10 @@ export const getCommits = (
   git: Git,
   latestSuccessfulRun?: string,
 ): Commit[] => {
+  const branchRef = `origin/${config.headRepoSpec.branch}`;
   const command = [
     'log',
-    'origin/main',
+    branchRef,
     config.trackFrom ? `${config.trackFrom}..` : undefined,
     latestSuccessfulRun ? `--since="${latestSuccessfulRun}"` : undefined,
     '--name-only',

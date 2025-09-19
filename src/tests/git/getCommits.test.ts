@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe('getCommits - git log command creation', () => {
-  it('Should execute the correct git log command', () => {
+  it('Should execute the correct git log command (uses main by default)', () => {
     mockGit.exec.mockReturnValue(
       [
         `${COMMIT_SEP}hash1${COMMIT_DATA_SEPARATOR}title1${COMMIT_DATA_SEPARATOR}2023-01-01T10:00:00Z`,
@@ -81,6 +81,24 @@ describe('getCommits - git log command creation', () => {
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       expect.stringMatching(`--since="${latestRun}"`),
+    );
+  });
+  it('Should execute git log against the configured branch (feature)', () => {
+    mockGit.exec.mockReturnValue(
+      [
+        `${COMMIT_SEP}hash1${COMMIT_DATA_SEPARATOR}title1${COMMIT_DATA_SEPARATOR}2023-01-01T10:00:00Z`,
+      ].join('\n'),
+    );
+
+    const cfg = {
+      ...MOCK_CONFIG,
+      headRepoSpec: { ...MOCK_CONFIG.headRepoSpec, branch: 'feature' },
+    } as any;
+
+    getCommits(cfg, mockGit);
+
+    expect(mockGit.exec).toHaveBeenCalledWith(
+      expect.stringMatching(/^log origin\/feature/),
     );
   });
 });
