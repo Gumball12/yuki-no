@@ -24,6 +24,7 @@ describe('E2E: Sync Creates Issues', () => {
   it(`should create ${NUM_COMMITS} issues from ${NUM_COMMITS} commits`, async () => {
     await withBranch(s, async ({ baseSha, branch }) => {
       const shas = await makeCommits(s, branch, NUM_COMMITS);
+      const startTime = new Date();
 
       const result = await runAction({
         HEAD_REPO_BRANCH: branch,
@@ -34,7 +35,6 @@ describe('E2E: Sync Creates Issues', () => {
 
       await sleep(WAIT_FOR_ISSUES_MS);
 
-      const startTime = new Date();
       const issues = await getCreatedIssues(
         s.octokit,
         s.upstreamRepo,
