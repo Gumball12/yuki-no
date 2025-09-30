@@ -34,12 +34,17 @@ jobs:
       - if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Set environment variables (release only)
-        if: github.event_name == 'release' && github.event.action == 'published'
-        run: echo "MOCKED_REQUEST_TEST=${{ secrets.MOCKED_REQUEST_TEST }}" >> $GITHUB_ENV
-
       - name: Run lint and tests
         run: yarn lint && yarn test
+        env:
+          E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
+          HEAD_REPO: ${{ vars.HEAD_REPO }}
+          UPSTREAM_REPO: ${{ vars.UPSTREAM_REPO }}
+          MOCKED_REQUEST_TEST: >-
+            ${{ github.event_name == 'release'
+              && github.event.action == 'published'
+              && secrets.MOCKED_REQUEST_TEST
+              || '' }}
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4

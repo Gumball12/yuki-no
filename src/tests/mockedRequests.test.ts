@@ -11,7 +11,7 @@ const isCI = process.env.CI === 'true';
 const currRepo = process.env.GITHUB_REPOSITORY || '';
 const ALLOWED_REPO = `${TEST_REPO.owner}/${TEST_REPO.repo}`;
 const auth = process.env.MOCKED_REQUEST_TEST;
-const shouldRunTests = isCI && currRepo === ALLOWED_REPO && auth !== undefined;
+const shouldRunTests = isCI && currRepo === ALLOWED_REPO && auth?.length;
 
 describe('GitHub API Integration Tests', () => {
   if (!shouldRunTests) {
