@@ -84,9 +84,13 @@ git checkout -b feat/your-feature
 2. Run tests and the application:
 
 ```bash
-yarn test # unit tests
-yarn start:dev # run script
+yarn test      # run all tests (unit & e2e)
+yarn test:unit # run unit tests
+yarn test:e2e  # run e2e tests
+yarn start:dev # run script w/ local .env file
 ```
+
+If you are running e2e tests(`yarn test:e2e`), [E2E test setup](#e2e-testing) is required.
 
 3. Format your code:
 
@@ -171,7 +175,7 @@ The project uses [Vitest](https://vitest.dev/) for testing. Tests are in the `sr
 To run tests with coverage:
 
 ```bash
-yarn test
+yarn test:unit # run unit tests
 ```
 
 ### About Mocking

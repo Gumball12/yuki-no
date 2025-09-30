@@ -11,7 +11,8 @@
     "start:dev": "tsx --env-file=.env src/index.ts",
     "type-check": "tsc --noEmit",
     "lint": "yarn type-check && prettier --check --write --parser typescript \"{src,test}/**/*.ts\"",
-    "test": "yarn lint && vitest --coverage --run",
+    "test": "yarn test:unit && yarn test:e2e",
+    "test:unit": "vitest --coverage --run",
     "test:e2e": "vitest --config vitest.e2e.config.ts --run"
   },
   "dependencies": {
