@@ -7,7 +7,7 @@ export interface E2EEnvironment {
 
 export const validateEnvironment = (): E2EEnvironment => {
   const envVars = {
-    ACCESS_TOKEN: process.env.ACCESS_TOKEN,
+    E2E_ACCESS_TOKEN: process.env.E2E_ACCESS_TOKEN,
     HEAD_REPO: process.env.HEAD_REPO,
     UPSTREAM_REPO: process.env.UPSTREAM_REPO,
   };
@@ -26,7 +26,7 @@ export const validateEnvironment = (): E2EEnvironment => {
   }
 
   return {
-    accessToken: envVars.ACCESS_TOKEN!,
+    accessToken: envVars.E2E_ACCESS_TOKEN!,
     headRepoUrl: envVars.HEAD_REPO!,
     upstreamRepoUrl: envVars.UPSTREAM_REPO!,
     labels: process.env.LABELS,
