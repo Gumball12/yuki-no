@@ -10,7 +10,8 @@ const TEST_ISSUE_NUM = 1;
 const isCI = process.env.CI === 'true';
 const currRepo = process.env.GITHUB_REPOSITORY || '';
 const ALLOWED_REPO = `${TEST_REPO.owner}/${TEST_REPO.repo}`;
-const shouldRunTests = isCI && currRepo === ALLOWED_REPO;
+const auth = process.env.MOCKED_REQUEST_TEST;
+const shouldRunTests = isCI && currRepo === ALLOWED_REPO && auth !== undefined;
 
 describe('GitHub API Integration Tests', () => {
   if (!shouldRunTests) {
@@ -20,9 +21,7 @@ describe('GitHub API Integration Tests', () => {
     return;
   }
 
-  const octokit = new Octokit({
-    auth: process.env.MOCKED_REQUEST_TEST,
-  });
+  const octokit = new Octokit({ auth });
 
   describe('Issues API', () => {
     it('Should list repository issues with the expected structure', async () => {
