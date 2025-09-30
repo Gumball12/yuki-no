@@ -202,3 +202,72 @@ If you need help:
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## E2E Testing
+
+E2E tests verify the entire workflow by running the action against real GitHub repositories. Unlike unit tests, these tests use actual GitHub API calls without mocking.
+
+### Test Structure
+
+```
+src/e2e/
+├── helpers/
+│   ├── env.ts        # Environment variable validation
+│   ├── fixture.ts    # Test setup and cleanup utilities
+│   ├── github.ts     # GitHub API helpers (Octokit wrapper)
+│   └── spawn.ts      # Action execution helper
+└── scenarios/
+    └── *.e2e.test.ts # Test scenarios
+```
+
+Key components:
+
+- **helpers/env.ts**: Validates required environment variables (`ACCESS_TOKEN`, `HEAD_REPO`, `UPSTREAM_REPO`)
+- **helpers/fixture.ts**: Provides `setup()`, `cleanup()`, `withBranch()`, and `makeCommits()` functions
+- **helpers/github.ts**: GitHub API operations (create/delete branches, issues, tags)
+- **helpers/spawn.ts**: Executes the action with custom environment variables
+- **scenarios/**: Individual test cases that simulate real-world usage
+
+### Prerequisites
+
+E2E tests require two GitHub repositories:
+
+1. **HEAD_REPO**: Source repository to track changes from
+2. **UPSTREAM_REPO**: Target repository where issues will be created
+
+Update your `.env` file:
+
+```env
+ACCESS_TOKEN=your_pat_with_repo_access
+HEAD_REPO=https://github.com/your-username/test-head-repo.git
+UPSTREAM_REPO=https://github.com/your-username/test-upstream-repo.git
+```
+
+> [!WARNING]
+>
+> **Important Notes**
+>
+> - E2E tests use **real GitHub API calls** and create actual branches/issues
+> - Tests automatically clean up created resources, but failures may leave artifacts
+> - Be mindful of GitHub API rate limits (typically 5,000 requests/hour)
+> - Use separate test repositories to avoid conflicts with production data
+
+### Running E2E Tests
+
+```bash
+yarn test:e2e
+```
+
+**Test configuration** (`vitest.e2e.config.ts`):
+
+- Runs sequentially (single thread) to prevent conflicts
+- 3-minute timeout per test
+- No coverage reporting
+- Automatically loads `.env` file
+
+**Expected behavior:**
+
+- Creates temporary branches with `e2e/<uuid>` prefix
+- Creates test commits in the head repository
+- Executes the action and verifies issue creation
+- Cleans up branches and closes created issues
