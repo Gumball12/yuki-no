@@ -226,7 +226,7 @@ src/e2e/
 
 Key components:
 
-- **helpers/env.ts**: Validates required environment variables (`E2E_ACCESS_TOKEN`, `HEAD_REPO`, `UPSTREAM_REPO`)
+- **helpers/env.ts**: Validates required environment variables (`E2E_ACCESS_TOKEN`, `E2E_HEAD_REPO`, `E2E_UPSTREAM_REPO`)
 - **helpers/fixture.ts**: Provides `setup()`, `cleanup()`, `withBranch()`, and `makeCommits()` functions
 - **helpers/github.ts**: GitHub API operations (create/delete branches, issues, tags)
 - **helpers/spawn.ts**: Executes the action with custom environment variables
@@ -236,15 +236,15 @@ Key components:
 
 E2E tests require two GitHub repositories:
 
-1. **HEAD_REPO**: Source repository to track changes from
-2. **UPSTREAM_REPO**: Target repository where issues will be created
+1. **E2E_HEAD_REPO**: Source repository to track changes from
+2. **E2E_UPSTREAM_REPO**: Target repository where issues will be created
 
 Update your `.env` file:
 
 ```env
 E2E_ACCESS_TOKEN=your_pat_with_repo_access
-HEAD_REPO=https://github.com/your-username/test-head-repo.git
-UPSTREAM_REPO=https://github.com/your-username/test-upstream-repo.git
+E2E_HEAD_REPO=https://github.com/your-username/test-head-repo.git
+E2E_UPSTREAM_REPO=https://github.com/your-username/test-upstream-repo.git
 ```
 
 > [!WARNING]

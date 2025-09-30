@@ -8,8 +8,8 @@ export interface E2EEnvironment {
 export const validateEnvironment = (): E2EEnvironment => {
   const envVars = {
     E2E_ACCESS_TOKEN: process.env.E2E_ACCESS_TOKEN,
-    HEAD_REPO: process.env.HEAD_REPO,
-    UPSTREAM_REPO: process.env.UPSTREAM_REPO,
+    E2E_HEAD_REPO: process.env.E2E_HEAD_REPO,
+    E2E_UPSTREAM_REPO: process.env.E2E_UPSTREAM_REPO,
   };
 
   const missing: string[] = [];
@@ -27,8 +27,8 @@ export const validateEnvironment = (): E2EEnvironment => {
 
   return {
     accessToken: envVars.E2E_ACCESS_TOKEN!,
-    headRepoUrl: envVars.HEAD_REPO!,
-    upstreamRepoUrl: envVars.UPSTREAM_REPO!,
+    headRepoUrl: envVars.E2E_HEAD_REPO!,
+    upstreamRepoUrl: envVars.E2E_UPSTREAM_REPO!,
     labels: process.env.LABELS,
   };
 };
