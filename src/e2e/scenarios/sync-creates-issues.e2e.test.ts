@@ -27,7 +27,10 @@ describe('E2E: Sync Creates Issues', () => {
       const startTime = new Date();
 
       const result = await runAction({
+        ACCESS_TOKEN: s.env.accessToken,
+        HEAD_REPO: s.env.headRepoUrl,
         HEAD_REPO_BRANCH: branch,
+        UPSTREAM_REPO: s.env.upstreamRepoUrl,
         TRACK_FROM: baseSha,
         MAYBE_FIRST_RUN: 'true',
       });

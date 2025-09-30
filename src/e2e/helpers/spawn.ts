@@ -9,7 +9,7 @@ export const runAction = async (
   envOverrides: Record<string, string> = {},
   options: RunActionOptions = {},
 ): Promise<{ exitCode: number; stdout: string; stderr: string }> => {
-  const { command = 'yarn', args = ['start:dev'] } = options;
+  const { command = 'yarn', args = ['start'] } = options;
   const env = { ...process.env, ...envOverrides };
 
   return new Promise((resolve, reject) => {
