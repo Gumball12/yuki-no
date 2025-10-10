@@ -5,6 +5,7 @@ import {
   createTestBranch,
   createTestCommit,
   deleteBranch,
+  deleteTag,
   parseRepoUrl,
   type TestRepo,
 } from './github';
@@ -19,6 +20,7 @@ export interface Setup {
   cleanup: {
     branches: { owner: string; repo: string; name: string }[];
     issues: { owner: string; repo: string; number: number }[];
+    tags: { owner: string; repo: string; name: string }[];
   };
 }
 
@@ -33,7 +35,7 @@ export const setup = async (): Promise<Setup> => {
     octokit,
     headRepo,
     upstreamRepo,
-    cleanup: { branches: [], issues: [] },
+    cleanup: { branches: [], issues: [], tags: [] },
   };
 };
 
@@ -47,6 +49,18 @@ export const cleanup = async (s: Setup) => {
       );
     } catch (e) {
       console.error(`[cleanup] Failed to close issue #${it.number}:`, e);
+    }
+  }
+
+  for (const tag of s.cleanup.tags) {
+    try {
+      await deleteTag(
+        s.octokit,
+        { owner: tag.owner, repo: tag.repo },
+        tag.name,
+      );
+    } catch (e) {
+      console.error(`[cleanup] Failed to delete tag ${tag.name}:`, e);
     }
   }
 
@@ -86,17 +100,20 @@ export const makeCommits = async (
   s: Setup,
   branch: string,
   count: number,
+  startIndex: number = 1,
 ): Promise<string[]> => {
   const shas: string[] = [];
 
-  for (let i = 1; i <= count; i++) {
+  for (let i = 0; i < count; i++) {
+    const fileIndex = startIndex + i;
+    const uuid = randomUUID().split('-')[0]; // Add uniqueness
     const sha = await createTestCommit(
       s.octokit,
       s.headRepo,
       branch,
-      `docs/e2e-test-${i}.md`,
-      `# E2E Test File ${i}\n\nThis is a test file for e2e testing.`,
-      `test: Add e2e test file ${i}`,
+      `docs/e2e-test-${fileIndex}-${uuid}.md`,
+      `# E2E Test File ${fileIndex}\n\nThis is a test file for e2e testing.`,
+      `test: Add e2e test file ${fileIndex}`,
     );
 
     if (!sha) {
@@ -104,7 +121,7 @@ export const makeCommits = async (
     }
 
     shas.push(sha);
-    console.log(`[E2E] Created commit ${i}/${count}: ${sha}`);
+    console.log(`[E2E] Created commit ${i + 1}/${count}: ${sha}`);
   }
 
   return shas;

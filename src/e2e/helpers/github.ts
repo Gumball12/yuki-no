@@ -1,6 +1,7 @@
 import { retry } from '@octokit/plugin-retry';
 import { throttling } from '@octokit/plugin-throttling';
 import { Octokit } from '@octokit/rest';
+import { randomUUID } from 'crypto';
 
 const OctokitWithPlugins = Octokit.plugin(retry, throttling);
 
@@ -8,7 +9,7 @@ export const createOctokit = (token: string) =>
   new OctokitWithPlugins({
     auth: token,
     throttle: {
-      onRateLimit: (retryAfter: number, options: any) => {
+      onRateLimit: (retryAfter, options) => {
         console.warn(
           `Request quota exhausted for request ${options.method} ${options.url}`,
         );
@@ -18,7 +19,7 @@ export const createOctokit = (token: string) =>
           return true;
         }
       },
-      onSecondaryRateLimit: (_, options: any) => {
+      onSecondaryRateLimit: (_, options) => {
         console.warn(
           `Secondary rate limit detected for request ${options.method} ${options.url}`,
         );
@@ -181,4 +182,9 @@ export const deleteTag = async (
   } catch (error) {
     console.error(`Failed to delete tag ${tagName}:`, error);
   }
+};
+
+export const generateE2EPrereleaseTag = (version: string = '1.0.0'): string => {
+  const uuid = randomUUID().split('-')[0];
+  return `${version}-e2e-${uuid}-beta`;
 };

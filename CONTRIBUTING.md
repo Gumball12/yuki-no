@@ -27,7 +27,7 @@ Thank you for your interest in contributing to Yuki-no! This guide will help you
 1. [Create a new Fine-grained PAT](https://github.com/settings/personal-access-tokens/new)
 2. Repository access settings:
    - Select "Only select repositories"
-   - Choose your upstream repository
+   - Choose your **head(for e2e) and upstream** repositories
 3. Repository Permissions:
    - Contents: Read and write
    - Issues: Read and write (needed for release tracking)
@@ -230,6 +230,7 @@ Key components:
 - **helpers/fixture.ts**: Provides `setup()`, `cleanup()`, `withBranch()`, and `makeCommits()` functions
 - **helpers/github.ts**: GitHub API operations (create/delete branches, issues, tags)
 - **helpers/spawn.ts**: Executes the action with custom environment variables
+- **helpers/utils.ts**: Test utilities
 - **scenarios/**: Individual test cases that simulate real-world usage
 
 ### Prerequisites
@@ -253,6 +254,7 @@ E2E_UPSTREAM_REPO=https://github.com/your-username/test-upstream-repo.git
 >
 > - E2E tests use **real GitHub API calls** and create actual branches/issues
 > - Tests automatically clean up created resources, but failures may leave artifacts
+> - If needed, manually remove e2e/\* branches, created tags, and close test issues
 > - Be mindful of GitHub API rate limits (typically 5,000 requests/hour)
 > - Use separate test repositories to avoid conflicts with production data
 

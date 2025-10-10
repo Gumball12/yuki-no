@@ -18,6 +18,21 @@ export const getLatestSuccessfulRunISODate = async (
     'getLatestSuccessfulRunISODate :: Extracting last successful GitHub Actions run time',
   );
 
+  // E2E-only hook: allow tests to inject a mock last successful run time.
+  // Why do we mock only here (and not other API calls)?
+  // - Our E2E environment cannot create real GitHub Actions workflow run records.
+  // - This function needs the latest successful run time to compute a '--since' boundary for git log.
+  // - By allowing an environment-provided timestamp, we keep all other API calls REAL (commits, issues, etc.),
+  //   stubbing only the unavailable infrastructure piece while preserving end-to-end behavior.
+  const mockedLatest = process.env.E2E_MOCK_LATEST_SUCCESS_AT;
+  if (mockedLatest && mockedLatest.length > 0) {
+    log(
+      'I',
+      `getLatestSuccessfulRunISODate :: Using E2E_MOCK_LATEST_SUCCESS_AT=${mockedLatest}`,
+    );
+    return mockedLatest;
+  }
+
   const { run: latestSuccessfulRun, successfulCount } =
     await getLatestSuccessfulRun(github);
   const maybeFirstExecution =
