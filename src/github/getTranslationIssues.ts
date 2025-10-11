@@ -24,56 +24,30 @@ export const getTranslationIssues = async (
 
   const issues: Issue[] = [];
 
-  let page = 1;
+  const all = await github.api.paginate(github.api.issues.listForRepo, {
+    ...github.ownerAndRepo,
+    state,
+    per_page: 100,
+  });
 
-  while (true) {
-    log('I', `getTranslationIssues :: Fetching page ${page}`);
+  log('I', `getTranslationIssues :: Total issues fetched: ${all.length}`);
 
-    const { data } = await github.api.issues.listForRepo({
-      ...github.ownerAndRepo,
-      state,
-      per_page: 100,
-      page,
-    });
+  const openedIssuesWithoutHash = all.map<Omit<Issue, 'hash'>>(item => ({
+    number: item.number,
+    body: item.body ?? '',
+    isoDate: item.created_at,
+    labels: item.labels
+      .map(convGithubIssueLabelToString)
+      .filter(isNotEmpty)
+      .sort(),
+  }));
 
-    log(
-      'I',
-      `getTranslationIssues :: Page ${page} returned ${data.length} issues`,
-    );
+  const openedYukiNoIssues = openedIssuesWithoutHash
+    .filter(issue => isYukiNoIssue(github.configuredLabels, issue))
+    .map(issue => ({ ...issue, hash: extractHashFromIssue(issue) }))
+    .filter(hasHash);
 
-    if (data.length === 0) {
-      break;
-    }
-
-    const openedIssuesWithoutHash = data.map<Omit<Issue, 'hash'>>(item => ({
-      number: item.number,
-      body: item.body ?? '',
-      isoDate: item.created_at,
-      labels: item.labels
-        .map(convGithubIssueLabelToString)
-        .filter(isNotEmpty)
-        .sort(),
-    }));
-
-    const openedYukiNoIssues = openedIssuesWithoutHash
-      .filter(issue => isYukiNoIssue(github.configuredLabels, issue))
-      .map(issue => ({ ...issue, hash: extractHashFromIssue(issue) }))
-      .filter(hasHash);
-
-    log(
-      'I',
-      `getTranslationIssues :: Found ${openedYukiNoIssues.length} Yuki-no issues on page ${page}`,
-    );
-
-    issues.push(...openedYukiNoIssues);
-
-    page++;
-
-    if (data.length < 100) {
-      break;
-    }
-  }
-
+  issues.push(...openedYukiNoIssues);
   issues.sort((a, b) => (a.isoDate > b.isoDate ? 1 : -1));
 
   log(
