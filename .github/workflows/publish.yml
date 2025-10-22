@@ -40,6 +40,8 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
+      - run: npm i -g npm@latest
+
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r build
       - run: pnpm lint
@@ -61,7 +63,4 @@ jobs:
 
       - name: Publish package
         working-directory: ${{ steps.package.outputs.path }}
-        run: |
-          npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish
