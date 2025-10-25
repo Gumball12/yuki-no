@@ -108,6 +108,14 @@ describe('Custom envs processing', () => {
       maybeFirstRun: true,
     });
   });
+
+  it('RELEASE_TRACKING_LABELS empty string should produce an empty array (no default pending)', () => {
+    process.env.RELEASE_TRACKING_LABELS = '';
+
+    const cfg = createConfig();
+
+    expect(cfg.releaseTrackingLabels).toEqual([]);
+  });
 });
 
 describe('Error handling', () => {

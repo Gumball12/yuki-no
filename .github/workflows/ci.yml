@@ -37,13 +37,13 @@ jobs:
       - name: Run lint and unit tests
         run: yarn lint && yarn test:unit
 
-      - name: Run e2e tests
+      - name: Run integration tests
+        run: yarn test:integration
+
+      - name: Run mocked request tests
         if: github.event_name == 'push' || github.event_name == 'release'
-        run: yarn test:e2e
+        run: yarn test:unit
         env:
-          E2E_ACCESS_TOKEN: ${{ secrets.E2E_ACCESS_TOKEN }}
-          E2E_HEAD_REPO: ${{ vars.E2E_HEAD_REPO }}
-          E2E_UPSTREAM_REPO: ${{ vars.E2E_UPSTREAM_REPO }}
           MOCKED_REQUEST_TEST: ${{ secrets.MOCKED_REQUEST_TEST }}
 
       - name: Upload coverage reports to Codecov

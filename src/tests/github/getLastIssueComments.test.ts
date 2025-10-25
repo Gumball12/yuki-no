@@ -97,7 +97,7 @@ it('Should ignore comments with undefined body', async () => {
   expect(result).toBe(COMMENT);
 });
 
-it('', async () => {
+it('should strip instructional prelude and return only release-tracking lines', async () => {
   const RELEASE_AVAILABLE_CONTENT = `> This comment and the \`pending\` label appear because release-tracking is enabled.
 > To disable, remove the \`release-tracking\` option or set it to \`false\`.
 

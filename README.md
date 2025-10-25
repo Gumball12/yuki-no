@@ -114,8 +114,8 @@ The entire process runs safely without affecting your local environment or git c
 | Option                    | Required | Default                    | Description                                                                                                                     |
 | ------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `access-token`            | Yes      | -                          | GitHub access token.                                                                                                            |
-| `username`                | No       | `github-actions`           | Git username used for GitHub issue operations.                                                                                  |
-| `email`                   | No       | `action@github.com`        | Git username used for GitHub issue operations.                                                                                  |
+| `username`                | No       | `github-actions`           | Git email used for GitHub issue operations.                                                                                  |
+| `email`                   | No       | `action@github.com`        | Git email used for GitHub issue operations.                                                                                  |
 | `upstream-repo`           | No       | Current working repository | URL of your repository.                                                                                                         |
 | `head-repo`               | Yes      | -                          | URL of repository to track                                                                                                      |
 | `track-from`              | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                     |

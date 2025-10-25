@@ -27,7 +27,7 @@ Thank you for your interest in contributing to Yuki-no! This guide will help you
 1. [Create a new Fine-grained PAT](https://github.com/settings/personal-access-tokens/new)
 2. Repository access settings:
    - Select "Only select repositories"
-   - Choose your **head(for e2e) and upstream** repositories
+   - Choose your **head and upstream** repositories
 3. Repository Permissions:
    - Contents: Read and write
    - Issues: Read and write (needed for release tracking)
@@ -84,13 +84,13 @@ git checkout -b feat/your-feature
 2. Run tests and the application:
 
 ```bash
-yarn test      # run all tests (unit & e2e)
+yarn test      # run all tests (unit & integration)
 yarn test:unit # run unit tests
-yarn test:e2e  # run e2e tests
+yarn test:integration  # run integration tests
 yarn start:dev # run script w/ local .env file
 ```
 
-If you are running e2e tests(`yarn test:e2e`), [E2E test setup](#e2e-testing) is required.
+
 
 3. Format your code:
 
@@ -127,7 +127,7 @@ src/
 ├── git/               # Git operations
 ├── github/            # GitHub API interactions
 ├── releaseTracking/   # Release tracking functionality
-└── tests/             # Unit tests
+└── tests/             # Unit and integration tests
 ```
 
 ### Flow
@@ -178,6 +178,14 @@ To run tests with coverage:
 yarn test:unit # run unit tests
 ```
 
+### Integration Tests
+
+Integration tests run offline and mock GitHub API calls using Nock. Tests live in `src/tests/integration` and run with `vitest.integration.config.ts`. No PAT or network access is required.
+
+```bash
+yarn test:integration
+```
+
 ### About Mocking
 
 We generally recommend avoiding excessive mocking in tests. However, for operations with side-effects that aren't directly related to what you're testing, mocking is appropriate:
@@ -207,73 +215,3 @@ If you need help:
 
 By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
-## E2E Testing
-
-E2E tests verify the entire workflow by running the action against real GitHub repositories. Unlike unit tests, these tests use actual GitHub API calls without mocking.
-
-### Test Structure
-
-```
-src/e2e/
-├── helpers/
-│   ├── env.ts        # Environment variable validation
-│   ├── fixture.ts    # Test setup and cleanup utilities
-│   ├── github.ts     # GitHub API helpers (Octokit wrapper)
-│   └── spawn.ts      # Action execution helper
-└── scenarios/
-    └── *.e2e.test.ts # Test scenarios
-```
-
-Key components:
-
-- **helpers/env.ts**: Validates required environment variables (`E2E_ACCESS_TOKEN`, `E2E_HEAD_REPO`, `E2E_UPSTREAM_REPO`)
-- **helpers/fixture.ts**: Provides `setup()`, `cleanup()`, `withBranch()`, and `makeCommits()` functions
-- **helpers/github.ts**: GitHub API operations (create/delete branches, issues, tags)
-- **helpers/spawn.ts**: Executes the action with custom environment variables
-- **helpers/utils.ts**: Test utilities
-- **scenarios/**: Individual test cases that simulate real-world usage
-
-### Prerequisites
-
-E2E tests require two GitHub repositories:
-
-1. **E2E_HEAD_REPO**: Source repository to track changes from
-2. **E2E_UPSTREAM_REPO**: Target repository where issues will be created
-
-Update your `.env` file:
-
-```env
-E2E_ACCESS_TOKEN=your_pat_with_repo_access
-E2E_HEAD_REPO=https://github.com/your-username/test-head-repo.git
-E2E_UPSTREAM_REPO=https://github.com/your-username/test-upstream-repo.git
-```
-
-> [!WARNING]
->
-> **Important Notes**
->
-> - E2E tests use **real GitHub API calls** and create actual branches/issues
-> - Tests automatically clean up created resources, but failures may leave artifacts
-> - If needed, manually remove e2e/\* branches, created tags, and close test issues
-> - Be mindful of GitHub API rate limits (typically 5,000 requests/hour)
-> - Use separate test repositories to avoid conflicts with production data
-
-### Running E2E Tests
-
-```bash
-yarn test:e2e
-```
-
-**Test configuration** (`vitest.e2e.config.ts`):
-
-- Runs sequentially (single thread) to prevent conflicts
-- 3-minute timeout per test
-- No coverage reporting
-- Automatically loads `.env` file
-
-**Expected behavior:**
-
-- Creates temporary branches with `e2e/<uuid>` prefix
-- Creates test commits in the head repository
-- Executes the action and verifies issue creation
-- Cleans up branches and closes created issues

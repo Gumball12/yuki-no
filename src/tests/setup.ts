@@ -1,7 +1,7 @@
 import { vi } from 'vitest';
 
 vi.mock('../utils', async importOriginal => {
-  const actual = (await importOriginal()) as any;
+  const actual = (await importOriginal()) as Record<string, unknown>;
 
   return {
     ...actual,
