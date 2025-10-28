@@ -15,7 +15,7 @@ Yuki-no (雪の, "of snow" in Japanese) is a GitHub Action that tracks changes b
 - Automatically tracks commits from a head repository
 - Creates issues for new changes
 - Filters changes based on file paths (`include` and `exclude` options)
-- Supports custom labels for issues (`label` option)
+- Supports custom labels for issues (`labels` option)
 - Tracks release status with pre-release and release information (`release-tracking` option)
 - Manages release tracking labels for unreleased changes (`release-tracking-labels` option)
 
@@ -25,9 +25,10 @@ Yuki-no is actively used in the <img width="20" src="https://vitejs.dev/logo.svg
 
 1. **Repository Monitoring Process**
    - Clones the `head-repo` in a [OS's temporary directory](https://nodejs.org/docs/latest-v22.x/api/os.html#ostmpdir)
+   - Removes any pre-existing directory with the same name in that temp location before cloning (safe; does not touch your project directory)
    - Uses GitHub Actions Bot credentials by default
 2. **Commit Change Detection and Issue Creation**
-   - Tracks commits newer than the last successful run
+   - Tracks commits newer than the last successful run (workflow name: `yuki-no`); on the very first execution with no existing translation issues, Yuki-no starts from your configured `track-from` boundary without a previous-run since filter
    - Filters changes based on `include`/`exclude` patterns
    - Creates issues for new changes with your specified `labels`
 3. **Version `release-tracking` System** (when enabled)
@@ -111,21 +112,24 @@ The entire process runs safely without affecting your local environment or git c
 
 ### Configuration
 
-| Option                    | Required | Default                    | Description                                                                                                                     |
-| ------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `access-token`            | Yes      | -                          | GitHub access token.                                                                                                            |
-| `username`                | No       | `github-actions`           | Git email used for GitHub issue operations.                                                                                  |
-| `email`                   | No       | `action@github.com`        | Git email used for GitHub issue operations.                                                                                  |
-| `upstream-repo`           | No       | Current working repository | URL of your repository.                                                                                                         |
-| `head-repo`               | Yes      | -                          | URL of repository to track                                                                                                      |
-| `track-from`              | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                     |
-| `head-repo-branch`        | No       | `main`                     | Branch to track in head repo                                                                                                    |
-| `include`                 | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked.                                                  |
-| `exclude`                 | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns.                                                      |
-| `labels`                  | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. |
-| `release-tracking`        | No       | `false`                    | When enabled, Yuki-no will track releases for each commit and add comments about release status.                                |
-| `release-tracking-labels` | No       | `pending`                  | Labels for unreleased changes. Added to issues until changes are released. (newline separated)                                  |
-| `verbose`                 | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
+|| Option                    | Required | Default                    | Description                                                                                                                     |
+|| ------------------------- | -------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+|| `access-token`            | Yes      | -                          | GitHub access token.                                                                                                            |
+|| `username`                | No       | `github-actions`           | Git username used for GitHub issue operations.                |
+|| `email`                   | No       | `action@github.com`        | Git email used for GitHub issue operations.                                                                                  |
+|| `upstream-repo`           | No       | Current working repository | URL of your repository.                                                                                                         |
+|| `head-repo`               | Yes      | -                          | URL of repository to track                                                                                                      |
+|| `track-from`              | Yes      | -                          | Starting commit hash. Tracking starts from the next commit.                                                                     |
+|| `head-repo-branch`        | No       | `main`                     | Branch to track in head repo                                                                                                    |
+|| `include`                 | No       | -                          | Glob patterns for files to track. If not specified, all files will be tracked.                                                  |
+|| `exclude`                 | No       | -                          | Glob patterns for files to exclude. Take precedence over include patterns.                                                      |
+|| `labels`                  | No       | `sync`                     | Labels for issues. You can specify multiple labels separated by newlines. If empty string is provided, no labels will be added. |
+|| `release-tracking`        | No       | `false`                    | When enabled, Yuki-no will track releases for each commit and add comments about release status.                                |
+|| `release-tracking-labels` | No       | `pending`                  | Labels for unreleased changes. Added to issues until changes are released. (newline separated)                                  |
+|| `verbose`                 | No       | `true`                     | When enabled, Yuki-no will show all log messages including info and success messages.                                           |
+Note:
+- `labels` are normalized and sorted internally.
+- Any label listed in `release-tracking-labels` that also appears in `labels` will be excluded for release-tracking purposes (to avoid duplication).
 
 #### File Pattern Examples
 

@@ -122,3 +122,20 @@ it('No successful runs (but completed exist) and not first-run -> throws due to 
     GetLatestModule.getLatestSuccessfulRunISODate(mockGitHub, false),
   ).rejects.toThrow();
 });
+
+it('Uses E2E_MOCK_LATEST_SUCCESS_AT when set and skips API call', async () => {
+  const original = process.env.E2E_MOCK_LATEST_SUCCESS_AT;
+  process.env.E2E_MOCK_LATEST_SUCCESS_AT = '2024-12-31T00:00:00Z';
+
+  const result = await GetLatestModule.getLatestSuccessfulRunISODate(
+    mockGitHub,
+    false,
+  );
+
+  expect(result).toBe('2024-12-31T00:00:00Z');
+  expect(
+    mockGitHub.api.rest.actions.listWorkflowRunsForRepo,
+  ).not.toHaveBeenCalled();
+
+  process.env.E2E_MOCK_LATEST_SUCCESS_AT = original;
+});

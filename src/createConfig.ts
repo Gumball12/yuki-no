@@ -1,23 +1,7 @@
-import { assert, excludeFrom, log, splitByNewline } from './utils';
+import { excludeFrom, log, splitByNewline } from './utils';
+import { parseEnv } from './validation/env';
 
 import path from 'node:path';
-
-type RawConfig = Readonly<{
-  accessToken: string;
-  userName?: string;
-  email?: string;
-  upstreamRepo?: string;
-  headRepo: string;
-  headRepoBranch?: string;
-  trackFrom: string;
-  include?: string;
-  exclude?: string;
-  labels?: string;
-  releaseTracking?: string;
-  releaseTrackingLabels?: string;
-  verbose?: string;
-  maybeFirstRun?: string;
-}>;
 
 export type Config = Readonly<{
   accessToken: string;
@@ -52,36 +36,36 @@ export const defaults = {
 export const createConfig = (): Config => {
   log('I', 'createConfig :: Parsing configuration values');
 
-  const rawConfig = createRawConfig();
+  const env = parseEnv(process.env);
 
-  const accessToken = rawConfig.accessToken;
-  const userName = rawConfig.userName || defaults.userName;
-  const email = rawConfig.email || defaults.email;
+  const accessToken = env.ACCESS_TOKEN;
+  const userName = env.USER_NAME || defaults.userName;
+  const email = env.EMAIL || defaults.email;
 
   const upstreamRepoSpec = createRepoSpec(
-    rawConfig.upstreamRepo || inferUpstreamRepo(),
+    env.UPSTREAM_REPO || inferUpstreamRepo(),
     defaults.branch,
   );
   const headRepoSpec = createRepoSpec(
-    rawConfig.headRepo,
-    rawConfig.headRepoBranch || defaults.branch,
+    env.HEAD_REPO,
+    env.HEAD_REPO_BRANCH || defaults.branch,
   );
-  const trackFrom = rawConfig.trackFrom;
+  const trackFrom = env.TRACK_FROM;
 
-  const include = splitByNewline(rawConfig.include);
-  const exclude = splitByNewline(rawConfig.exclude);
-  const labels = splitByNewline(rawConfig.labels ?? defaults.label).sort();
+  const include = splitByNewline(env.INCLUDE);
+  const exclude = splitByNewline(env.EXCLUDE);
+  const labels = splitByNewline(env.LABELS ?? defaults.label).sort();
 
-  const releaseTracking = rawConfig.releaseTracking?.toLowerCase() === 'true';
+  const releaseTracking = env.RELEASE_TRACKING?.toLowerCase() === 'true';
   const releaseTrackingLabels = excludeFrom(
     splitByNewline(
-      rawConfig.releaseTrackingLabels ?? defaults.releaseTrackingLabel,
+      env.RELEASE_TRACKING_LABELS ?? defaults.releaseTrackingLabel,
     ),
     labels,
   );
 
-  const verbose = rawConfig.verbose?.toLowerCase() === 'true';
-  const maybeFirstRun = rawConfig.maybeFirstRun?.toLowerCase() === 'true';
+  const verbose = env.VERBOSE?.toLowerCase() === 'true';
+  const maybeFirstRun = env.MAYBE_FIRST_RUN?.toLowerCase() === 'true';
 
   return {
     accessToken,
@@ -97,29 +81,6 @@ export const createConfig = (): Config => {
     releaseTrackingLabels,
     verbose,
     maybeFirstRun,
-  };
-};
-
-const createRawConfig = (): RawConfig => {
-  assert(!!process.env.ACCESS_TOKEN, '`accessToken` is required.');
-  assert(!!process.env.HEAD_REPO, '`headRepo` is required.');
-  assert(!!process.env.TRACK_FROM, '`trackFrom` is required.');
-
-  return {
-    accessToken: process.env.ACCESS_TOKEN!,
-    userName: process.env.USER_NAME,
-    email: process.env.EMAIL,
-    upstreamRepo: process.env.UPSTREAM_REPO,
-    headRepo: process.env.HEAD_REPO!,
-    headRepoBranch: process.env.HEAD_REPO_BRANCH,
-    trackFrom: process.env.TRACK_FROM!,
-    include: process.env.INCLUDE,
-    exclude: process.env.EXCLUDE,
-    labels: process.env.LABELS,
-    releaseTracking: process.env.RELEASE_TRACKING,
-    releaseTrackingLabels: process.env.RELEASE_TRACKING_LABELS,
-    verbose: process.env.VERBOSE,
-    maybeFirstRun: process.env.MAYBE_FIRST_RUN,
   };
 };
 
