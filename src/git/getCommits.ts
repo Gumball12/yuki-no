@@ -5,6 +5,7 @@ import type { Git } from './core';
 
 import picomatch from 'picomatch';
 import { getISODate } from 'src/github/utils';
+import { CommitSchema } from 'src/validation/git';
 
 export type Commit = {
   title: string;
@@ -78,12 +79,19 @@ const createCommitFromLog = ([line, ...fileNames]: string[]):
   const [hash, title, date] = parsed;
   const isoDate = getISODate(date);
 
-  return {
+  const candidate = {
     title,
     isoDate,
     hash,
     fileNames,
   };
+
+  const validated = CommitSchema.safeParse(candidate);
+  if (!validated.success) {
+    return;
+  }
+
+  return validated.data;
 };
 
 const useIsIncludedCommit = (config: Pick<Config, 'include' | 'exclude'>) => {

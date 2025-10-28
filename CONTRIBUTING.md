@@ -61,8 +61,10 @@ For more details, see [GitHub documentation](https://docs.github.com/en/authenti
    USER_NAME=your_github_username
    EMAIL=your_github_email
    HEAD_REPO=https://github.com/head_username/head_repo.git
+   HEAD_REPO_BRANCH=main
    UPSTREAM_REPO=https://github.com/your_username/your_repo.git
    TRACK_FROM=head_commit_hash
+   # VERBOSE=true  # optional: show info/success logs locally
 
    # ...
    ```
@@ -90,20 +92,46 @@ yarn test:integration  # run integration tests
 yarn start:dev # run script w/ local .env file
 ```
 
-
-
 3. Format your code:
 
 ```bash
-yarn lint
+yarn lint # type-check + Prettier format (writes changes for **/*.ts)
 ```
 
 4. Commit your changes following [Conventional Commits](https://www.conventionalcommits.org/):
+
+### Code Style Guidelines
+
+- Prefer arrow functions for module-level utilities, callbacks, and most helpers.
+  - Exceptions: class methods (prototype syntax), constructors, generators (function*), and when top-level hoisting is strictly required.
+- Control structures must use block statements with braces on their own lines (if/else, for/for...of/in, while, do...while).
+- Organize files top-down: imports → public types/constants → public API → private/internal helpers (bottom).
+- Use exactly one blank line to separate logical blocks; avoid multiple consecutive blank lines.
+- Type safety: Do not use the TypeScript `any` type; prefer `unknown` with narrowing.
+- Formatting:
+  - Prettier is used with @trivago/prettier-plugin-sort-imports to keep imports ordered.
+  - Run `yarn lint` to type-check and format TypeScript files (writes changes).
+- Logging: Set `VERBOSE=true` to enable info/success log output locally.
+- Tests:
+  - Integration tests use Nock and run offline (no real network calls).
+  - `src/tests/mockedRequests.test.ts` runs only in CI for the upstream repo with `MOCKED_REQUEST_TEST` auth; locally it is skipped.
+- Permissions:
+  - If workflows fail with `403 "Resource not accessible by integration"`, ensure repository "Workflow permissions" are set to "Read and write permissions" (Settings → Actions → General).
 
 ```bash
 git commit -m "feat: add new feature"
 git commit -m "fix: resolve issue #123"
 ```
+
+### Validation (Zod)
+
+- Environment variables are validated by Zod: see `src/validation/env.ts`.
+- Required variables produce clear error messages (e.g., '`accessToken` is required.').
+- Commit objects are validated by Zod: see `src/validation/git.ts`.
+- When adding new inputs/options, update all of:
+  - `action.yml` inputs
+  - `src/validation/env.ts` schema (ENV names in UPPER_SNAKE_CASE)
+  - related tests under `src/tests/validation/*.test.ts`
 
 5. Push your changes and create a pull request!
 
@@ -116,6 +144,11 @@ If you find bugs not covered here, please [open an issue](https://github.com/Gum
 **GitHub API 403 Errors**:
 
 - Check your PAT permissions
+- If running in GitHub Actions, ensure repository Workflow permissions are set to "Read and write permissions" (Settings → Actions → General)
+
+**mockedRequests.test.ts doesn't run locally**:
+
+- This test is designed to run only in CI for the upstream repository and requires `MOCKED_REQUEST_TEST` auth; it is skipped locally by design.
 
 ## Project Structure
 
@@ -124,6 +157,7 @@ src/
 ├── index.ts           # Entry point
 ├── createConfig.ts    # Configuration setup and validation
 ├── utils.ts           # Utility functions
+├── validation/        # Zod schemas (env and git parsing)
 ├── git/               # Git operations
 ├── github/            # GitHub API interactions
 ├── releaseTracking/   # Release tracking functionality

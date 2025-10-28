@@ -13,12 +13,13 @@ Tooling and setup
 - Install dependencies (first time or after updates):
   - corepack enable
   - yarn install
+- Formatting: Prettier with @trivago/prettier-plugin-sort-imports (import ordering)
 
 Common commands
 
 - Type check only:
   - yarn type-check
-- Lint (type-check + format with Prettier on {src,test}/\*_/_.ts):
+- Lint (type-check + Prettier format on all TypeScript files, writes changes):
   - yarn lint
 - Run all tests (unit + integration):
   - yarn test
@@ -37,6 +38,7 @@ Local execution (development)
   - Minimal .env (example placeholders):
     ACCESS_TOKEN=your_pat_here
     HEAD_REPO=https://github.com/head_username/head_repo.git
+    HEAD_REPO_BRANCH=main
     UPSTREAM_REPO=https://github.com/your_username/your_repo.git
     TRACK_FROM=head_commit_hash
   - Start locally with .env: yarn start:dev
@@ -44,6 +46,7 @@ Local execution (development)
 - Important:
   - When running outside GitHub Actions, UPSTREAM_REPO must be set (createConfig.inferUpstreamRepo() throws if GITHUB_REPOSITORY is missing).
   - The action clones the head repo into the OS temp directory and removes any pre-existing directory with the same name in that temp location before cloning (safe; does not touch your project directory).
+  - To see info/success logs locally, set VERBOSE=true (log output is gated by the VERBOSE environment variable).
 
 Code style and structure (for contributors and AI agents)
 
@@ -54,7 +57,7 @@ Prefer arrow functions
 - Exceptions:
   - Class methods: prefer standard method syntax on the prototype.
   - Constructors: must be function/class declarations by nature.
-  - Generators: use function\* when needed.
+  - Generators: use function* when needed.
   - Hoisting needed at top-level: when a function must be called before it is defined, a function declaration may be used intentionally.
 - Examples:
 
@@ -62,7 +65,9 @@ Prefer arrow functions
 // Preferred
 export const parseLines = (text?: string): string[] => {
   const t = text?.trim();
-  if (!t) return [];
+  if (!t) {
+    return [];
+  }
   return t.split('\n').filter(line => line.trim() !== '');
 };
 
@@ -121,7 +126,9 @@ Readability via blank lines
 ```ts
 // Good
 export const doWork = (items: Item[]): Result => {
-  if (items.length === 0) return emptyResult();
+  if (items.length === 0) {
+    return emptyResult();
+  }
 
   const prepared = prepare(items);
 
@@ -175,7 +182,7 @@ if (!items.length) {
 
 Notes on tooling
 
-- Prettier enforces formatting (quotes, trailing commas, import order separation).
+- Prettier enforces formatting (quotes, trailing commas, import order separation), and we use @trivago/prettier-plugin-sort-imports to keep imports ordered.
 - Blank-line usage and arrow-function preference are guidelines, not automatically enforced at the moment.
 - If automated enforcement is desired later, consider adding ESLint with:
   - func-style: ["error", "expression"]
@@ -185,24 +192,24 @@ Notes on tooling
 
 High-level architecture
 
-- Execution flow (src/index.ts):
-  1. createConfig() builds runtime config from env (with defaults for username/email/branch, label presets, release-tracking flags)
-  2. Git wrapper (src/git/core.ts) clones the head repo into OS tmpdir and runs git commands scoped to that clone
-  3. GitHub wrapper (src/github/core.ts) initializes Octokit with retry/throttling
-  4. syncCommits():
-     - getLatestSuccessfulRunISODate() determines a since-boundary from the workflow named "yuki-no" (or first-run logic)
-     - getCommits() executes git log on the head branch, converts to Commit objects, then filters by include/exclude globs (picomatch)
-     - lookupCommitsInIssues() uses the search API to avoid duplicates by commit hash in issue bodies
-     - createIssue() opens issues with configured labels and a commit URL
-  5. Optional releaseTracking():
-     - For open and newly created issues, getRelease() resolves pre-release/release info per commit hash
-     - updateIssueLabelsByRelease() adds/removes release-tracking labels
-     - updateIssueCommentByRelease() writes a status comment (pre-release/release links), including guidance when no releases exist yet
+- Entrypoint (src/index.ts): logs start/end and delegates to app.start().
+- Runtime setup (app.ts):
+  - createRuntime() builds runtime config from env (defaults for username/email/branch, label presets, release-tracking flags), initializes Git and GitHub clients.
+- Synchronization (syncCommitsFlow):
+  - getLatestSuccessfulRunISODate() determines a since-boundary from the workflow named "yuki-no". If maybe-first-run is indicated and there are no existing translation issues, it proceeds without a previous-run since filter.
+  - getCommits() executes git log on the head branch, converts to Commit objects validated by Zod, then filters by include/exclude globs (picomatch). Invalid track-from values cause an error.
+  - lookupCommitsInIssues() uses the search API in chunks (5 commits per query) to avoid duplicates by commit hash present in issue bodies.
+  - createIssue() opens issues with configured labels and a commit URL.
+- Release tracking (releaseTrackingFlow, optional):
+  - For open and newly created issues, getRelease() resolves pre-release/release info per commit hash.
+  - updateIssueLabelsByRelease() adds/removes release-tracking labels.
+  - updateIssueCommentByRelease() writes a status comment (pre-release/release links). If the repository has no releases at all, a short guidance note is included.
 - Key modules:
   - Configuration: src/createConfig.ts (env parsing, defaults, repoSpec inference)
-  - Git access: src/git/\* (clone, git log parsing/separators, release discovery utils)
-  - GitHub access: src/github/\* (Octokit client with retry/throttling, queries and mutations, commit-hash lookup from issue bodies)
-  - Release tracking: src/releaseTracking/\* (comment + label updates based on release info)
+  - Validation: src/validation/env.ts (env schema), src/validation/git.ts (commit schema)
+  - Git access: src/git/* (clone, git log parsing/separators, release discovery utils)
+  - GitHub access: src/github/* (Octokit client with retry/throttling, queries and mutations, commit-hash lookup from issue bodies)
+  - Release tracking: src/releaseTracking/* (comment + label updates based on release info)
   - Utilities: src/utils.ts (typed logging gated by VERBOSE, array helpers, ISO time normalizer)
 - Testing:
   - Unit tests under src/tests cover config, git, GitHub, and release-tracking units (Vitest, v8 coverage)
