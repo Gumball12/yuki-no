@@ -103,7 +103,7 @@ yarn lint # type-check + Prettier format (writes changes for **/*.ts)
 ### Code Style Guidelines
 
 - Prefer arrow functions for module-level utilities, callbacks, and most helpers.
-  - Exceptions: class methods (prototype syntax), constructors, generators (function*), and when top-level hoisting is strictly required.
+  - Exceptions: class methods (prototype syntax), constructors, generators (function\*), and when top-level hoisting is strictly required.
 - Control structures must use block statements with braces on their own lines (if/else, for/for...of/in, while, do...while).
 - Organize files top-down: imports → public types/constants → public API → private/internal helpers (bottom).
 - Use exactly one blank line to separate logical blocks; avoid multiple consecutive blank lines.
@@ -248,4 +248,3 @@ If you need help:
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
-

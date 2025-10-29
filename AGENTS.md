@@ -57,7 +57,7 @@ Prefer arrow functions
 - Exceptions:
   - Class methods: prefer standard method syntax on the prototype.
   - Constructors: must be function/class declarations by nature.
-  - Generators: use function* when needed.
+  - Generators: use function\* when needed.
   - Hoisting needed at top-level: when a function must be called before it is defined, a function declaration may be used intentionally.
 - Examples:
 
@@ -207,9 +207,9 @@ High-level architecture
 - Key modules:
   - Configuration: src/createConfig.ts (env parsing, defaults, repoSpec inference)
   - Validation: src/validation/env.ts (env schema), src/validation/git.ts (commit schema)
-  - Git access: src/git/* (clone, git log parsing/separators, release discovery utils)
-  - GitHub access: src/github/* (Octokit client with retry/throttling, queries and mutations, commit-hash lookup from issue bodies)
-  - Release tracking: src/releaseTracking/* (comment + label updates based on release info)
+  - Git access: src/git/\* (clone, git log parsing/separators, release discovery utils)
+  - GitHub access: src/github/\* (Octokit client with retry/throttling, queries and mutations, commit-hash lookup from issue bodies)
+  - Release tracking: src/releaseTracking/\* (comment + label updates based on release info)
   - Utilities: src/utils.ts (typed logging gated by VERBOSE, array helpers, ISO time normalizer)
 - Testing:
   - Unit tests under src/tests cover config, git, GitHub, and release-tracking units (Vitest, v8 coverage)

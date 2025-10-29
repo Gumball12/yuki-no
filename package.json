@@ -11,7 +11,7 @@
     "start:dev": "tsx --env-file=.env src/index.ts",
     "type-check": "tsc --noEmit",
     "lint": "yarn type-check && yarn lint:prettier",
-    "lint:prettier": "prettier '**/*.ts' --check --write --parser typescript",
+    "lint:prettier": "prettier '**/*.{ts,tsx,md,mdx,yml,yaml,json}' --write && prettier '**/*.{ts,tsx,md,mdx,yml,yaml,json}' --check",
     "test": "yarn test:unit && yarn test:integration",
     "test:unit": "vitest --coverage --run",
     "test:integration": "vitest --config vitest.integration.config.ts --run"
