@@ -14,6 +14,7 @@ const ALLOWED_REPO = `${TEST_REPO.owner}/${TEST_REPO.repo}`;
 const auth = process.env.MOCKED_REQUEST_TEST;
 const shouldRunTests = isCI && currRepo === ALLOWED_REPO && auth;
 
+// TODO: race condition 발생되지 않도록 테스트별로 서로 분리된 이슈 하나 만들어 그 안에서 진행
 describe('GitHub API Integration Tests', () => {
   if (!shouldRunTests) {
     it.skip('Skipping tests - not in CI environment or not in allowed repository', () => {

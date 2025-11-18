@@ -83,7 +83,10 @@ const syncCommits = async (
     await p.onBeforeCompare?.({ ...ctx });
   }
 
-  const latestSuccessfulRun = await getLatestSuccessfulRunISODate(github);
+  const latestSuccessfulRun = await getLatestSuccessfulRunISODate(
+    github,
+    false,
+  );
   const commits = getCommits(config, git, latestSuccessfulRun);
   const notCreatedCommits = await lookupCommitsInIssues(github, commits);
 

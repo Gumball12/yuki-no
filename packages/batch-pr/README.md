@@ -7,6 +7,17 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
 ## Usage
 
 ```yaml
+permissions:
+  # Default yuki-no permissions
+  issues: write
+  actions: read
+
+  # Required for branch creation and push operations
+  contents: write
+
+  # Required for batch PR creation
+  pull-requests: write
+
 - uses: Gumball12/yuki-no@v1
   env:
     # [optional]
@@ -15,7 +26,8 @@ Collects opened Yuki-no translation issues and creates a single pull request to 
     YUKI_NO_BATCH_PR_ROOT_DIR: head-repo-dirname
 
     # [optional]
-    # file patterns that should be excluded from batch PR
+    # file patterns based on `head-repo`
+    # that should be excluded from batch PR
     YUKI_NO_BATCH_PR_EXCLUDE: |
       head-repo-patterns
   with:

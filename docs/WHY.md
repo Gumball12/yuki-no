@@ -1,3 +1,5 @@
+<!-- 업데이트 -->
+
 # Why Yuki-no
 
 Technical docs translation helps more people use technology and grows the open-source community. Many translation projects build their own processes using open-source tools instead of commercial solutions. This choice offers better cost control, scalability, flexibility, and data ownership.
@@ -36,7 +38,7 @@ _Example: Yuki-no automatically creates an issue for new commits in the head rep
 Yuki-no improves on existing solutions with several reliability enhancements:
 
 - Keeps tracking accurate even when Actions fail by using successful run timestamps
-- Uses retry systems for GitHub API failures
+- Built-in retry and rate-limit handling for GitHub API calls
 - Provides detailed logs for better troubleshooting
 
 These improvements ensure no commits are missed, even in challenging situations like Action failures or API rate limits. By tracking only successful Action runs as checkpoints, Yuki-no prevents losing commits during temporary failures. It automatically resumes from the last successful point. This makes it especially reliable for projects with frequent documentation updates.
@@ -65,6 +67,12 @@ Yuki-no addresses these diverse requirements through an extensible [plugin archi
 - **Custom Workflow Integration:** Hook into various stages of the tracking process to match your specific needs
 - **Modular Functionality:** Enable only the features you need, keeping your setup simple or complex as required
 - **Community Contributions:** Develop and share plugins with the community for common use cases
+- **Zero Install in Repo:** Plugins are automatically installed in GitHub Actions; you only list them in the workflow
+
+Built-in/official plugins illustrate how the system scales:
+
+- `@yuki-no/plugin-release-tracking`: Tracks release status per commit and updates labels/comments automatically
+- `@yuki-no/plugin-batch-pr`: Collects open translation issues and creates a single pull request consolidating changes (with exclusion patterns and optional root-dir mapping)
 
 For instance, the built-in `release-tracking` plugin provides automated release status tracking using Issue Comments and Labels for projects where release management is critical. This plugin-based approach allows teams to build exactly the translation management system they need, whether simple or complex, while maintaining compatibility and ease of use.
 
@@ -81,7 +89,7 @@ Yuki-no enhances GitHub Issues-based workflows with organizational features. The
 - Filter and manage translation tasks easily
 - Keep translation issues separate from general issues
 
-These improvements create a more organized and efficient translation process while using GitHub's familiar interface.
+These improvements create a more organized and efficient translation process while using GitHub's familiar interface. When combined with plugins like `release-tracking` and `batch-pr`, teams can coordinate what is ready for release and consolidate approved work into streamlined pull requests.
 
 ### Yuki-no
 
@@ -91,6 +99,7 @@ Yuki-no delivers all three essential features for technical docs translation pro
 - Offers simpler and clearer configuration
 - Provides `include` and `exclude` options based on [Glob patterns](https://github.com/micromatch/picomatch?tab=readme-ov-file#advanced-globbing)
 - Includes a `verbose` option for detailed logging
+- Supports an official plugin ecosystem (release tracking, batch PR)
 
 If you want to start a translation project or add Yuki-no to an existing one, check out the [main guide](../README.md). For users of issue-based translation processes like Ryu-Cho, we have a [migration guide](./MIGRATION.md). For real examples, see the [vite/docs-ko repo](https://github.com/vitejs/docs-ko/blob/main/.github/workflows/sync.yml).
 

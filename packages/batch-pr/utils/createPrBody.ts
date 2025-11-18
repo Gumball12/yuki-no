@@ -11,6 +11,8 @@ type PrBodyOptions = {
   excludedFiles?: string[];
 };
 
+// TODO: YUKI_NO_BATCH_PR_ROOT_DIR 이용해 여기 기준으로 excluded files 필터링 & 명시해야 함
+// 안그럼 필요하지도 않은 애들까지 포함되어서 너무 길어지고 많아진다...
 export const createPrBody = (
   issueStatus: BatchIssueStatus[],
   { excludedFiles } = {} as PrBodyOptions,
