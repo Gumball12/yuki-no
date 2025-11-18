@@ -144,6 +144,8 @@ Safety and approvals
 
 ## 10. Maintaining This Guide
 
+**FOR AI AGENTS**: After completing any task, review this AGENTS.md file and verify if your changes require updates to this documentation. If so, update the relevant sections and commit the changes.
+
 Update when any of the following change:
 
 - Node.js engine requirement or package manager
