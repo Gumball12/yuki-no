@@ -10,7 +10,7 @@
     "lint": "pnpm lint:eslint && pnpm lint:prettier && pnpm type-check",
     "lint:eslint": "eslint .",
     "lint:eslint:fix": "eslint . --fix",
-    "lint:prettier": "prettier --check --write --parser typescript \"**/*.ts\" --ignore-path .gitignore",
+    "lint:prettier": "prettier --check --write '**/*.{ts,tsx,md,mdx,yml,yaml,json}'",
     "start": "pnpm --filter @yuki-no/plugin-sdk start",
     "start:dev": "pnpm --filter @yuki-no/plugin-sdk start:dev"
   },
