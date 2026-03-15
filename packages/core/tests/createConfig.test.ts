@@ -32,6 +32,7 @@ describe('Basic configuration creation', () => {
       accessToken: TEST_ENV.ACCESS_TOKEN,
       userName: yukiNoDefaults.userName,
       email: yukiNoDefaults.email,
+      maybeFirstRun: false,
       upstreamRepoSpec: {
         owner: 'test',
         name: 'current-repo',
@@ -76,6 +77,7 @@ describe('Custom envs processing', () => {
       YUKI_NO_RELEASE_TRACKING_LABELS: 'pending-release\nreleased',
       VERBOSE: 'true',
       PLUGINS: 'yuki-no-plugin-example@1.0.0',
+      MAYBE_FIRST_RUN: 'true',
     };
 
     process.env = { ...process.env, ...LOCAL_TEST_ENV };
@@ -86,6 +88,7 @@ describe('Custom envs processing', () => {
       accessToken: TEST_ENV.ACCESS_TOKEN,
       userName: LOCAL_TEST_ENV.USER_NAME,
       email: LOCAL_TEST_ENV.EMAIL,
+      maybeFirstRun: true,
       upstreamRepoSpec: {
         owner: 'test',
         name: 'upstream-repo',

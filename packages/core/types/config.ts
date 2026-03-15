@@ -2,6 +2,7 @@ export type Config = Readonly<{
   accessToken: string;
   userName: string;
   email: string;
+  maybeFirstRun: boolean;
   upstreamRepoSpec: RepoSpec;
   headRepoSpec: RepoSpec;
   trackFrom: string;

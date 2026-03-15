@@ -42,12 +42,14 @@ export const createConfig = (): Config => {
   const plugins = getMultilineInput('PLUGINS');
 
   const verbose = getBooleanInput('VERBOSE', true);
+  const maybeFirstRun = getBooleanInput('MAYBE_FIRST_RUN');
   process.env.VERBOSE = verbose.toString();
 
   return {
     accessToken: accessToken!,
     userName: userName!,
     email: email!,
+    maybeFirstRun,
     upstreamRepoSpec,
     headRepoSpec,
     trackFrom: trackFrom!,

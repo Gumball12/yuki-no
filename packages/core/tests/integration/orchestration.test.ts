@@ -92,13 +92,25 @@ describe('Core Orchestration Integration', () => {
         api = {
           actions: {
             listWorkflowRunsForRepo: async () => ({
-              data: {
-                workflow_runs: [
-                  { name: 'yuki-no', created_at: '2024-01-01T00:00:00Z' },
-                ],
-              },
+              data:
+                process.env.TEST_NO_PREVIOUS_SUCCESS === 'true'
+                  ? {
+                      total_count: 0,
+                      workflow_runs: [],
+                    }
+                  : {
+                      total_count: 1,
+                      workflow_runs: [
+                        {
+                          conclusion: 'success',
+                          name: 'yuki-no',
+                          created_at: '2024-01-01T00:00:00Z',
+                        },
+                      ],
+                    },
             }),
           },
+          paginate: async () => [],
           search: {
             issuesAndPullRequests: async () => ({
               data: {
@@ -111,6 +123,7 @@ describe('Core Orchestration Integration', () => {
             }),
           },
           issues: {
+            listForRepo: vi.fn(),
             create: vi.fn(
               async ({
                 title,
@@ -153,6 +166,8 @@ describe('Core Orchestration Integration', () => {
     delete process.env.LABELS;
     delete process.env.PLUGINS;
     delete process.env.VERBOSE;
+    delete process.env.MAYBE_FIRST_RUN;
+    delete process.env.TEST_NO_PREVIOUS_SUCCESS;
   });
 
   it('Happy path: creates 1 issue and triggers plugin hooks', async () => {
@@ -188,5 +203,26 @@ describe('Core Orchestration Integration', () => {
     expect(beforeCreate.issueMeta.body).toContain(
       'https://github.com/acme/head/commit/1111111',
     );
+  });
+
+  it('First-run hint path: creates issues when no previous successful run or tracked issues exist', async () => {
+    process.env.MAYBE_FIRST_RUN = 'true';
+    process.env.TEST_NO_PREVIOUS_SUCCESS = 'true';
+
+    // @ts-expect-error for testing
+    await import('mock-plugin');
+    await import('../../index.ts');
+    const { done, events } = (globalThis as any).__mockPlugin as {
+      done: Promise<void>;
+      events: unknown[];
+    };
+    await done;
+
+    const calls = (events as any[]).map(e => (e as any[])[0] as string);
+
+    expect(calls).toContain('onAfterCompare');
+    expect(
+      calls.filter((c: string) => c === 'onAfterCreateIssue'),
+    ).toHaveLength(1);
   });
 });

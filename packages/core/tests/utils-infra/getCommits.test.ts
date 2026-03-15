@@ -25,7 +25,15 @@ beforeEach(() => {
 });
 
 describe('getCommits - git log command creation', () => {
-  it('Should execute the correct git log command', () => {
+  it('Should use the configured head branch in the git log command', () => {
+    const config = {
+      ...MOCK_CONFIG,
+      headRepoSpec: {
+        ...MOCK_CONFIG.headRepoSpec,
+        branch: 'release/next',
+      },
+    };
+
     mockGit.exec.mockReturnValue(
       [
         `${COMMIT_SEP}hash1${COMMIT_DATA_SEPARATOR}title1${COMMIT_DATA_SEPARATOR}2023-01-01T10:00:00Z`,
@@ -34,11 +42,11 @@ describe('getCommits - git log command creation', () => {
       ].join('\n'),
     );
 
-    getCommits(MOCK_CONFIG, mockGit);
+    getCommits(config, mockGit);
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       [
-        'log origin/main',
+        'log origin/release/next',
         'start-commit-hash..',
         '--name-only',
         '--format=":COMMIT_START_SEP:%H:COMMIT_DATA_SEP:%s:COMMIT_DATA_SEP:%aI"',
