@@ -5,6 +5,8 @@ import {
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+const CURRENT_WORKFLOW_PATH = '.github/workflows/current.yml';
+
 describe('Core Orchestration Integration', () => {
   beforeEach(() => {
     vi.resetModules();
@@ -20,6 +22,7 @@ describe('Core Orchestration Integration', () => {
     process.env.LABELS = 'sync';
     process.env.PLUGINS = 'mock-plugin@1.0.0';
     process.env.VERBOSE = 'true';
+    process.env.GITHUB_WORKFLOW_REF = `acme/head/${CURRENT_WORKFLOW_PATH}@refs/heads/main`;
 
     vi.mock('mock-plugin', () => {
       let resolve: (v?: unknown) => void;
@@ -103,7 +106,8 @@ describe('Core Orchestration Integration', () => {
                       workflow_runs: [
                         {
                           conclusion: 'success',
-                          name: 'yuki-no',
+                          name: 'workflow-display-name',
+                          path: CURRENT_WORKFLOW_PATH,
                           created_at: '2024-01-01T00:00:00Z',
                         },
                       ],

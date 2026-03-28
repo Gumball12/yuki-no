@@ -1,9 +1,11 @@
 import { GitHub } from '../../infra/github';
 import { getLatestSuccessfulRunISODate } from '../../utils-infra/getLatestSuccessfulRunISODate';
 
-import { beforeEach, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
-const WORKFLOW_NAME = 'yuki-no';
+const CURRENT_WORKFLOW_PATH = '.github/workflows/current.yml';
+const CURRENT_WORKFLOW_REF = `test-owner/test-repo/${CURRENT_WORKFLOW_PATH}@refs/heads/main`;
+const ORIGINAL_ENV = { ...process.env };
 
 const mockListWorkflowRunsForRepo = vi.fn();
 const mockPaginate = vi.fn();
@@ -35,6 +37,14 @@ const mockGitHub = new GitHub(MOCK_CONFIG);
 
 beforeEach(() => {
   vi.clearAllMocks();
+  process.env = {
+    ...ORIGINAL_ENV,
+    GITHUB_WORKFLOW_REF: CURRENT_WORKFLOW_REF,
+  };
+});
+
+afterEach(() => {
+  process.env = ORIGINAL_ENV;
 });
 
 it('Should return undefined on the first run when no successful workflow or tracked issues exist', async () => {
@@ -54,6 +64,7 @@ it('Should return undefined on the first run when no successful workflow or trac
     repo: 'test-repo',
     status: 'completed',
     per_page: 100,
+    page: 1,
   });
   expect(mockPaginate).toHaveBeenCalledWith(mockListForRepo, {
     owner: 'test-owner',
@@ -63,24 +74,27 @@ it('Should return undefined on the first run when no successful workflow or trac
   });
 });
 
-it('Should return the last execution time when a successful run with the matching workflow name exists', async () => {
+it('Should return the last execution time when a successful run with the matching workflow path exists', async () => {
   const EXPECTED_LAST_CREATED_AT = '2023-01-04T12:00:00Z';
 
   mockListWorkflowRunsForRepo.mockResolvedValue({
     data: {
       workflow_runs: [
         {
-          name: WORKFLOW_NAME,
+          name: 'renamed-workflow',
+          path: CURRENT_WORKFLOW_PATH,
           created_at: EXPECTED_LAST_CREATED_AT,
           conclusion: 'success',
         },
         {
-          name: 'other-action',
+          name: 'yuki-no',
+          path: '.github/workflows/other.yml',
           created_at: '2023-01-03T12:00:00Z',
           conclusion: 'success',
         },
         {
-          name: WORKFLOW_NAME,
+          name: 'renamed-workflow',
+          path: CURRENT_WORKFLOW_PATH,
           created_at: '2023-01-02T12:00:00Z',
           conclusion: 'failure',
         },
@@ -93,6 +107,54 @@ it('Should return the last execution time when a successful run with the matchin
 
   expect(result).toBe(EXPECTED_LAST_CREATED_AT);
   expect(mockPaginate).not.toHaveBeenCalled();
+});
+
+it('Should paginate until a successful run for the current workflow path is found', async () => {
+  const EXPECTED_LAST_CREATED_AT = '2023-01-05T12:00:00Z';
+
+  mockListWorkflowRunsForRepo
+    .mockResolvedValueOnce({
+      data: {
+        total_count: 101,
+        workflow_runs: Array.from({ length: 100 }, (_, index) => ({
+          name: `other-workflow-${index}`,
+          path: '.github/workflows/other.yml',
+          created_at: `2023-01-${String((index % 28) + 1).padStart(2, '0')}T12:00:00Z`,
+          conclusion: 'success',
+        })),
+      },
+    })
+    .mockResolvedValueOnce({
+      data: {
+        total_count: 101,
+        workflow_runs: [
+          {
+            name: 'renamed-workflow',
+            path: CURRENT_WORKFLOW_PATH,
+            created_at: EXPECTED_LAST_CREATED_AT,
+            conclusion: 'success',
+          },
+        ],
+      },
+    });
+
+  const result = await getLatestSuccessfulRunISODate(mockGitHub, false);
+
+  expect(result).toBe(EXPECTED_LAST_CREATED_AT);
+  expect(mockListWorkflowRunsForRepo).toHaveBeenNthCalledWith(1, {
+    owner: 'test-owner',
+    repo: 'test-repo',
+    status: 'completed',
+    per_page: 100,
+    page: 1,
+  });
+  expect(mockListWorkflowRunsForRepo).toHaveBeenNthCalledWith(2, {
+    owner: 'test-owner',
+    repo: 'test-repo',
+    status: 'completed',
+    per_page: 100,
+    page: 2,
+  });
 });
 
 it('Should throw when first-run is hinted but tracked issues already exist', async () => {
@@ -112,24 +174,26 @@ it('Should throw when first-run is hinted but tracked issues already exist', asy
   ]);
 
   await expect(getLatestSuccessfulRunISODate(mockGitHub, true)).rejects.toThrow(
-    'GitHub API data inconsistency detected. This might indicate API instability.',
+    `Unable to determine a safe successful-run baseline for workflow path "${CURRENT_WORKFLOW_PATH}": no successful completed run matched the current workflow path. Tracked issues already exist.`,
   );
 });
 
-it('Should throw when completed runs exist but no successful yuki-no run exists', async () => {
+it('Should keep the conservative stop behavior when no matching successful workflow-path run exists', async () => {
   mockListWorkflowRunsForRepo.mockResolvedValue({
     data: {
       total_count: 2,
       workflow_runs: [
         {
-          name: WORKFLOW_NAME,
+          name: 'renamed-workflow',
+          path: CURRENT_WORKFLOW_PATH,
           created_at: '2023-01-05T12:00:00Z',
           conclusion: 'failure',
         },
         {
-          name: WORKFLOW_NAME,
+          name: 'yuki-no',
+          path: '.github/workflows/other.yml',
           created_at: '2023-01-04T12:00:00Z',
-          conclusion: 'cancelled',
+          conclusion: 'success',
         },
       ],
     },
@@ -138,7 +202,7 @@ it('Should throw when completed runs exist but no successful yuki-no run exists'
   await expect(
     getLatestSuccessfulRunISODate(mockGitHub, false),
   ).rejects.toThrow(
-    'GitHub API data inconsistency detected. This might indicate API instability.',
+    `Unable to determine a safe successful-run baseline for workflow path "${CURRENT_WORKFLOW_PATH}": no successful completed run matched the current workflow path.`,
   );
   expect(mockPaginate).not.toHaveBeenCalled();
 });

@@ -15,10 +15,12 @@ export const getCommits = (
   latestSuccessfulRun?: string,
 ): Commit[] => {
   const branchRef = `origin/${config.headRepoSpec.branch}`;
+  const revisionRange = config.trackFrom
+    ? `${config.trackFrom}..${branchRef}`
+    : branchRef;
   const command = [
     'log',
-    branchRef,
-    config.trackFrom ? `${config.trackFrom}..` : undefined,
+    revisionRange,
     latestSuccessfulRun ? `--since="${latestSuccessfulRun}"` : undefined,
     '--name-only',
     `--format="${COMMIT_SEP}%H${COMMIT_DATA_SEPARATOR}%s${COMMIT_DATA_SEPARATOR}%aI"`,

@@ -25,7 +25,7 @@ beforeEach(() => {
 });
 
 describe('getCommits - git log command creation', () => {
-  it('Should use the configured head branch in the git log command', () => {
+  it('Should use an explicit upper-bound branch ref when trackFrom is provided', () => {
     const config = {
       ...MOCK_CONFIG,
       headRepoSpec: {
@@ -46,8 +46,7 @@ describe('getCommits - git log command creation', () => {
 
     expect(mockGit.exec).toHaveBeenCalledWith(
       [
-        'log origin/release/next',
-        'start-commit-hash..',
+        'log start-commit-hash..origin/release/next',
         '--name-only',
         '--format=":COMMIT_START_SEP:%H:COMMIT_DATA_SEP:%s:COMMIT_DATA_SEP:%aI"',
         '--no-merges',

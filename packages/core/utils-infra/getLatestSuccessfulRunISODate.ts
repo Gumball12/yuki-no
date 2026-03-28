@@ -4,11 +4,13 @@ import { log } from '../utils/log';
 
 import type { Octokit } from '@octokit/rest';
 
-const WORKFLOW_NAME = 'yuki-no';
+const RUNS_PER_PAGE = 100;
 
 type WorkflowRun = Awaited<
   ReturnType<Octokit['actions']['listWorkflowRunsForRepo']>
->['data']['workflow_runs'][number];
+>['data']['workflow_runs'][number] & {
+  path?: string;
+};
 
 export const getLatestSuccessfulRunISODate = async (
   github: GitHub,
@@ -19,10 +21,21 @@ export const getLatestSuccessfulRunISODate = async (
     'getLatestSuccessfulRunISODate :: Extracting last successful GitHub Actions run time',
   );
 
-  const { run: latestSuccessfulRun, successfulCount } =
-    await getLatestSuccessfulRun(github);
+  const {
+    run: latestSuccessfulRun,
+    currentWorkflowPath,
+    pagesScanned,
+    scannedRunCount,
+    stopCause,
+  } = await getLatestSuccessfulRun(github);
+  const missingRunMessage = createMissingRunMessage({
+    currentWorkflowPath,
+    pagesScanned,
+    scannedRunCount,
+    stopCause,
+  });
   const shouldCheckFirstRun =
-    maybeFirstRun && successfulCount === 0 && latestSuccessfulRun === undefined;
+    maybeFirstRun && latestSuccessfulRun === undefined;
 
   if (shouldCheckFirstRun) {
     const trackedIssueExists = await hasAnyTrackedIssue(github);
@@ -30,20 +43,24 @@ export const getLatestSuccessfulRunISODate = async (
     if (!trackedIssueExists) {
       log(
         'I',
-        'getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found (first execution confirmed)',
+        `getLatestSuccessfulRunISODate :: No last successful GitHub Actions run time found (first execution confirmed). ${missingRunMessage}`,
       );
       return;
     }
   }
 
   if (!latestSuccessfulRun) {
-    log(
-      'W',
-      `getLatestSuccessfulRunISODate :: API inconsistency detected: totalCount=${successfulCount}, but no successful run found`,
-    );
-    throw new Error(
-      'GitHub API data inconsistency detected. This might indicate API instability.',
-    );
+    const failureMessage = shouldCheckFirstRun
+      ? createTrackedIssuesConflictMessage({
+          currentWorkflowPath,
+          pagesScanned,
+          scannedRunCount,
+          stopCause,
+        })
+      : missingRunMessage;
+
+    log('W', `getLatestSuccessfulRunISODate :: ${failureMessage}`);
+    throw new Error(failureMessage);
   }
 
   const latestSuccessfulRunDate = latestSuccessfulRun.created_at;
@@ -58,35 +75,141 @@ export const getLatestSuccessfulRunISODate = async (
 
 const getLatestSuccessfulRun = async (
   github: GitHub,
-): Promise<{ run: WorkflowRun | undefined; successfulCount: number }> => {
-  const { data } = await github.api.actions.listWorkflowRunsForRepo({
-    ...github.ownerAndRepo,
-    status: 'completed',
-    per_page: 100,
-  });
+): Promise<{
+  run: WorkflowRun | undefined;
+  currentWorkflowPath: string;
+  pagesScanned: number;
+  scannedRunCount: number;
+  stopCause: string;
+}> => {
+  const currentWorkflowPath = getCurrentWorkflowPath();
+  let page = 1;
+  let scannedRunCount = 0;
 
-  log(
-    'I',
-    `getLatestSuccessfulRunISODate :: Found ${data.total_count} completed / ${data.workflow_runs.length} runs on first page`,
-  );
+  while (true) {
+    const { data } = await github.api.actions.listWorkflowRunsForRepo({
+      ...github.ownerAndRepo,
+      status: 'completed',
+      per_page: RUNS_PER_PAGE,
+      page,
+    });
+    const workflowRuns = data.workflow_runs;
 
-  const successfulYukiNoRuns = data.workflow_runs.filter(
-    ({ conclusion, name }) =>
-      conclusion === 'success' && name === WORKFLOW_NAME,
-  );
-  const [latestSuccessfulRun] = successfulYukiNoRuns;
+    scannedRunCount += workflowRuns.length;
 
-  return {
-    run: latestSuccessfulRun,
-    successfulCount: successfulYukiNoRuns.length,
-  };
+    log(
+      'I',
+      `getLatestSuccessfulRunISODate :: Page ${page} returned ${workflowRuns.length} completed run(s) while searching for workflow path "${currentWorkflowPath}"`,
+    );
+
+    const successfulRuns = workflowRuns.filter(
+      ({ conclusion, path }) =>
+        conclusion === 'success' && path === currentWorkflowPath,
+    );
+    const [latestSuccessfulRun] = successfulRuns;
+
+    if (latestSuccessfulRun) {
+      return {
+        run: latestSuccessfulRun,
+        currentWorkflowPath,
+        pagesScanned: page,
+        scannedRunCount,
+        stopCause: 'matched successful run found.',
+      };
+    }
+
+    if (workflowRuns.length === 0 && scannedRunCount < data.total_count) {
+      return {
+        run: undefined,
+        currentWorkflowPath,
+        pagesScanned: page,
+        scannedRunCount,
+        stopCause:
+          'GitHub API returned an empty completed-run page before the reported history was exhausted.',
+      };
+    }
+
+    if (
+      workflowRuns.length < RUNS_PER_PAGE &&
+      scannedRunCount < data.total_count
+    ) {
+      return {
+        run: undefined,
+        currentWorkflowPath,
+        pagesScanned: page,
+        scannedRunCount,
+        stopCause:
+          'GitHub API returned a partial completed-run page before the reported history was exhausted.',
+      };
+    }
+
+    if (scannedRunCount >= data.total_count) {
+      return {
+        run: undefined,
+        currentWorkflowPath,
+        pagesScanned: page,
+        scannedRunCount,
+        stopCause:
+          'no successful completed run matched the current workflow path.',
+      };
+    }
+
+    page += 1;
+  }
 };
+
+const getCurrentWorkflowPath = (): string => {
+  const workflowRef = process.env.GITHUB_WORKFLOW_REF;
+
+  if (!workflowRef) {
+    throw new Error(
+      'GITHUB_WORKFLOW_REF is required to identify the current workflow path.',
+    );
+  }
+
+  const [workflowRefWithoutGitRef] = workflowRef.split('@');
+  const workflowPath = workflowRefWithoutGitRef.split('/').slice(2).join('/');
+
+  if (!workflowPath) {
+    throw new Error(
+      `Failed to parse workflow path from GITHUB_WORKFLOW_REF: ${workflowRef}`,
+    );
+  }
+
+  return workflowPath;
+};
+
+const createMissingRunMessage = ({
+  currentWorkflowPath,
+  pagesScanned,
+  scannedRunCount,
+  stopCause,
+}: {
+  currentWorkflowPath: string;
+  pagesScanned: number;
+  scannedRunCount: number;
+  stopCause: string;
+}): string =>
+  `Unable to determine a safe successful-run baseline for workflow path "${currentWorkflowPath}": ${stopCause} Scanned ${scannedRunCount} completed run(s) across ${pagesScanned} page(s). Conservative stop policy remains in effect.`;
+
+const createTrackedIssuesConflictMessage = ({
+  currentWorkflowPath,
+  pagesScanned,
+  scannedRunCount,
+  stopCause,
+}: {
+  currentWorkflowPath: string;
+  pagesScanned: number;
+  scannedRunCount: number;
+  stopCause: string;
+}): string =>
+  `Unable to determine a safe successful-run baseline for workflow path "${currentWorkflowPath}": ${stopCause} Tracked issues already exist. Scanned ${scannedRunCount} completed run(s) across ${pagesScanned} page(s). Conservative stop policy remains in effect.`;
 
 const hasAnyTrackedIssue = async (github: GitHub): Promise<boolean> => {
   const issues = await github.api.paginate(github.api.issues.listForRepo, {
     ...github.ownerAndRepo,
     state: 'all',
-    per_page: 100,
+    per_page: RUNS_PER_PAGE,
   });
 
   return issues.some(issue => {
