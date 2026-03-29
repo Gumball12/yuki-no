@@ -206,3 +206,107 @@ it('Should keep the conservative stop behavior when no matching successful workf
   );
   expect(mockPaginate).not.toHaveBeenCalled();
 });
+
+it('Should throw when GitHub returns an empty completed-run page before the reported history is exhausted', async () => {
+  mockListWorkflowRunsForRepo.mockResolvedValue({
+    data: {
+      total_count: 3,
+      workflow_runs: [],
+    },
+  });
+
+  await expect(
+    getLatestSuccessfulRunISODate(mockGitHub, false),
+  ).rejects.toThrow(
+    'GitHub API returned an empty completed-run page before the reported history was exhausted.',
+  );
+  expect(mockPaginate).not.toHaveBeenCalled();
+});
+
+it('Should throw when GitHub returns a partial completed-run page before the reported history is exhausted', async () => {
+  mockListWorkflowRunsForRepo.mockResolvedValue({
+    data: {
+      total_count: 150,
+      workflow_runs: Array.from({ length: 99 }, (_, index) => ({
+        name: `other-workflow-${index}`,
+        path: '.github/workflows/other.yml',
+        created_at: `2023-01-${String((index % 28) + 1).padStart(2, '0')}T12:00:00Z`,
+        conclusion: 'success',
+      })),
+    },
+  });
+
+  await expect(
+    getLatestSuccessfulRunISODate(mockGitHub, false),
+  ).rejects.toThrow(
+    'GitHub API returned a partial completed-run page before the reported history was exhausted.',
+  );
+  expect(mockPaginate).not.toHaveBeenCalled();
+});
+
+it('Should throw when GITHUB_WORKFLOW_REF is missing', async () => {
+  delete process.env.GITHUB_WORKFLOW_REF;
+
+  await expect(
+    getLatestSuccessfulRunISODate(mockGitHub, false),
+  ).rejects.toThrow(
+    'GITHUB_WORKFLOW_REF is required to identify the current workflow path.',
+  );
+  expect(mockListWorkflowRunsForRepo).not.toHaveBeenCalled();
+});
+
+it('Should throw when GITHUB_WORKFLOW_REF cannot be parsed into a workflow path', async () => {
+  process.env.GITHUB_WORKFLOW_REF = 'test-owner/test-repo@refs/heads/main';
+
+  await expect(
+    getLatestSuccessfulRunISODate(mockGitHub, false),
+  ).rejects.toThrow(
+    'Failed to parse workflow path from GITHUB_WORKFLOW_REF: test-owner/test-repo@refs/heads/main',
+  );
+  expect(mockListWorkflowRunsForRepo).not.toHaveBeenCalled();
+});
+
+it('Should ignore issues that do not satisfy tracked-issue matching rules', async () => {
+  mockListWorkflowRunsForRepo.mockResolvedValue({
+    data: {
+      total_count: 0,
+      workflow_runs: [],
+    },
+  });
+  mockPaginate.mockResolvedValue([
+    {
+      number: 1,
+      body: 'https://github.com/test-owner/test-repo/commit/abc1234',
+      created_at: '2023-01-01T12:00:00Z',
+      labels: ['different-label'],
+    },
+    {
+      number: 2,
+      body: 'https://github.com/test-owner/test-repo/commit/def5678',
+      created_at: '2023-01-02T12:00:00Z',
+      labels: [{}],
+    },
+    {
+      number: 3,
+      body: 'no commit url here',
+      created_at: '2023-01-03T12:00:00Z',
+      labels: ['test-label'],
+    },
+    {
+      number: 4,
+      body: undefined,
+      created_at: '2023-01-04T12:00:00Z',
+      labels: ['test-label'],
+    },
+  ]);
+
+  const result = await getLatestSuccessfulRunISODate(mockGitHub, true);
+
+  expect(result).toBeUndefined();
+  expect(mockPaginate).toHaveBeenCalledWith(mockListForRepo, {
+    owner: 'test-owner',
+    repo: 'test-repo',
+    state: 'all',
+    per_page: 100,
+  });
+});
